@@ -1,0 +1,10 @@
+pnpm-lock.yaml
+dist
+.next
+cdk.out
+coverage
+docs
+CLAUDE.md
+next-env.d.ts
+.turbo
+_workspace

@@ -1,0 +1,55 @@
+{
+  "name": "@aussie/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "pnpm build:packages && next build",
+    "start": "next start",
+    "build:packages": "pnpm -r --filter \"./packages/*\" run build",
+    "typecheck": "pnpm build:packages && tsc --noEmit",
+    "lint": "pnpm build:packages && eslint .",
+    "test": "pnpm build:packages && vitest run",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@aussie/shared-types": "workspace:^",
+    "@aussie/ui": "workspace:^",
+    "@aussie/validation": "workspace:^",
+    "@aws-sdk/client-cognito-identity-provider": "^3.1145.0",
+    "jose": "^6.2.12",
+    "lucide-react": "^1.49.0",
+    "next": "^16",
+    "qrcode": "^1.5.4",
+    "react": "^19",
+    "react-dom": "^19",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24",
+    "eslint": "^10.11.0",
+    "eslint-plugin-security": "^4.2.0",
+    "globals": "^17.13.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.9",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.0",
+    "vitest": "^5.0.3",
+    "@next/eslint-plugin-next": "^16.3.8",
+    "@tailwindcss/postcss": "^4",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=24"
+  }
+}
