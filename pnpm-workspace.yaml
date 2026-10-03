@@ -1,2 +1,6 @@
 packages:
   - packages/*
+# Supply-chain settings (read by pnpm 10.21+; ignored by older pnpm).
+blockExoticSubdeps: true
+minimumReleaseAge: 10080
+trustPolicy: no-downgrade
