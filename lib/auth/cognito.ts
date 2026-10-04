@@ -6,11 +6,13 @@ import {
   ConfirmForgotPasswordCommand,
   ConfirmSignUpCommand,
   ForgotPasswordCommand,
+  GetUserCommand,
   InitiateAuthCommand,
   type InitiateAuthCommandOutput,
   ResendConfirmationCodeCommand,
   RespondToAuthChallengeCommand,
   RevokeTokenCommand,
+  SetUserMFAPreferenceCommand,
   SignUpCommand,
   VerifySoftwareTokenCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
@@ -157,6 +159,41 @@ export async function finishTotpSetup(
   if (verified.Status !== 'SUCCESS' || !verified.Session) throw new Error('CodeMismatchException');
   return respond('admin', 'MFA_SETUP', verified.Session, username, {}, ctx);
 }
+
+// ── Authenticator app, managed by a signed-in admin (optional second step) ──────
+
+export async function totpEnabled(accessToken: string): Promise<boolean> {
+  const res = await cognito().send(new GetUserCommand({ AccessToken: accessToken }));
+  return res.UserMFASettingList?.includes('SOFTWARE_TOKEN_MFA') ?? false;
+}
+
+/** New shared secret for the QR code. It only takes effect once a code is confirmed. */
+export async function beginTotpEnrolment(accessToken: string): Promise<string> {
+  const res = await cognito().send(new AssociateSoftwareTokenCommand({ AccessToken: accessToken }));
+  if (!res.SecretCode) throw new Error('Cognito did not return a TOTP secret');
+  return res.SecretCode;
+}
+
+export async function confirmTotpEnrolment(accessToken: string, code: string): Promise<void> {
+  const verified = await cognito().send(
+    new VerifySoftwareTokenCommand({
+      AccessToken: accessToken,
+      UserCode: code,
+      FriendlyDeviceName: 'Authenticator app',
+    }),
+  );
+  if (verified.Status !== 'SUCCESS') throw new Error('CodeMismatchException');
+  await setTotpPreference(accessToken, true);
+}
+
+export const setTotpPreference = async (accessToken: string, enabled: boolean) => {
+  await cognito().send(
+    new SetUserMFAPreferenceCommand({
+      AccessToken: accessToken,
+      SoftwareTokenMfaSettings: { Enabled: enabled, PreferredMfa: enabled },
+    }),
+  );
+};
 
 export async function refreshTokens(a: Audience, refreshToken: string, username: string) {
   const res = await cognito().send(

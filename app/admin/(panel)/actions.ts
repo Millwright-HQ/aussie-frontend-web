@@ -65,6 +65,30 @@ export async function setAdminStatus(_prev: ActionState, form: FormData): Promis
   );
 }
 
+export async function resetAdminPassword(_prev: ActionState, form: FormData): Promise<ActionState> {
+  const sub = subSchema.safeParse(form.get('sub'));
+  if (!sub.success) return { error: 'Invalid request' };
+  return call(
+    () =>
+      api('admin', `/v1/identity/admin/admins/${sub.data}/reset-password`, {
+        method: 'POST',
+        body: { resetAuthenticator: form.get('resetAuthenticator') === 'on' },
+      }),
+    'Password reset. They were signed out and emailed a new temporary password.',
+    '/admin/admins',
+  );
+}
+
+export async function deleteAdmin(_prev: ActionState, form: FormData): Promise<ActionState> {
+  const sub = subSchema.safeParse(form.get('sub'));
+  if (!sub.success) return { error: 'Invalid request' };
+  return call(
+    () => api('admin', `/v1/identity/admin/admins/${sub.data}`, { method: 'DELETE' }),
+    'Admin deleted.',
+    '/admin/admins',
+  );
+}
+
 function parseRole(form: FormData) {
   return roleInputSchema.safeParse({
     name: form.get('name'),
