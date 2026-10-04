@@ -298,9 +298,39 @@ export async function changePassword(accessToken: string, previous: string, prop
   );
 }
 
+/**
+ * Writes the real reason a sign-in step failed to the server log (the user only sees a generic
+ * message). Never logs the email, password, codes or tokens: for Cognito errors only the error
+ * name, HTTP status and request id; for our own errors (e.g. a missing variable) the message,
+ * which names a variable and holds no user data.
+ */
+function logAuthError(
+  err: { message?: string; $metadata?: { httpStatusCode?: number; requestId?: string } },
+  name: string | undefined,
+) {
+  const fromCognito = err.$metadata !== undefined;
+  console.error(
+    JSON.stringify({
+      level: 'error',
+      event: 'auth.failed',
+      error: name ?? 'unknown',
+      status: err.$metadata?.httpStatusCode,
+      requestId: err.$metadata?.requestId,
+      ...(fromCognito ? {} : { message: err.message?.slice(0, 200) }),
+    }),
+  );
+}
+
 /** Maps Cognito errors to safe, user-facing messages (no account enumeration). */
 export function authErrorMessage(err: unknown): string {
-  const name = (err as { name?: string; message?: string }).name ?? (err as Error).message;
+  const raw = err as {
+    name?: string;
+    message?: string;
+    $metadata?: { httpStatusCode?: number; requestId?: string };
+  };
+  // Plain `Error`s from our own code carry the Cognito error name in their message.
+  const name = raw.name && raw.name !== 'Error' ? raw.name : raw.message;
+  logAuthError(raw, name);
   switch (name) {
     case 'NotAuthorizedException':
     case 'UserNotFoundException':
