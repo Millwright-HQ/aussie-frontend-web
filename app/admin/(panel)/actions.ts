@@ -10,7 +10,7 @@ export interface ActionState {
   error?: string;
 }
 
-const subSchema = z.string().uuid();
+const subSchema = z.guid(); // Cognito subs are not always RFC-4122 UUIDs, so z.uuid() rejects some
 
 async function call(fn: () => Promise<unknown>, ok: string, path: string): Promise<ActionState> {
   try {
