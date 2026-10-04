@@ -32,7 +32,17 @@ export function poolConfig(audience: Audience): PoolConfig {
 
 /** Local emulator endpoint; unset on AWS. */
 export const cognitoEndpoint = () => process.env.COGNITO_ENDPOINT || undefined;
-export const awsRegion = () => process.env.AWS_REGION ?? 'ap-south-1';
+/**
+ * Region of the Cognito pools. On AWS and Vercel `AWS_REGION` is set by the platform to wherever
+ * the function runs (Vercel's `iad1` is `us-east-1`), which is not where the pools are, so it is
+ * read from the pool id instead (`ap-south-1_AbC123`). Only the local emulator uses `AWS_REGION`.
+ */
+export function awsRegion(): string {
+  if (cognitoEndpoint()) return process.env.AWS_REGION ?? 'ap-south-1';
+  const poolId = process.env.ADMIN_POOL_ID || process.env.CUSTOMER_POOL_ID || '';
+  const prefix = poolId.split('_')[0] ?? '';
+  return /^[a-z0-9-]{6,25}$/.test(prefix) && prefix.includes('-') ? prefix : 'ap-south-1';
+}
 
 /** 32-byte key for sealing auth cookies (AES-256-GCM). */
 export function authSecret(): Uint8Array {
