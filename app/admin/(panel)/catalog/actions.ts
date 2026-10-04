@@ -1,5 +1,7 @@
 'use server';
 
+import { randomInt } from 'node:crypto';
+
 import type { ProductDetail } from '@aussie/shared-types';
 import {
   attributeDefCreateSchema,
@@ -375,7 +377,10 @@ export async function duplicateProductAction(
   if (!ulidSchema.safeParse(productId).success) return { error: 'Invalid product' };
   try {
     const source = await api<ProductDetail>('admin', `/v1/catalog/admin/products/${productId}`);
-    const suffix = `C${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
+    const suffix = `C${randomInt(36 ** 3)
+      .toString(36)
+      .padStart(3, '0')
+      .toUpperCase()}`;
     const parsed = productInputSchema.safeParse({
       name: `${source.name} (copy)`.slice(0, 150),
       brandId: source.brandId,

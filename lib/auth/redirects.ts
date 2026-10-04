@@ -11,6 +11,7 @@ export function safeNext(value: unknown, prefix: '/admin' | '/account', fallback
   const underPrefix =
     value === prefix || value.startsWith(`${prefix}/`) || value.startsWith(`${prefix}?`);
   if (!underPrefix) return fallback;
+  // nosemgrep: ajinabraham.njsscan.dos.regex_dos.regex_dos -- single character class, linear
   if (value.includes('\\') || value.includes('//') || CONTROL_CHARS.test(value)) return fallback;
   return value;
 }

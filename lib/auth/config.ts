@@ -36,6 +36,7 @@ export const awsRegion = () => process.env.AWS_REGION ?? 'ap-south-1';
 
 /** 32-byte key for sealing auth cookies (AES-256-GCM). */
 export function authSecret(): Uint8Array {
+  // nosemgrep: ajinabraham.njsscan.generic.hardcoded_secrets.node_secret -- read from env, not hardcoded
   const key = Buffer.from(env('AUTH_SECRET'), 'base64url');
   if (key.length !== 32) throw new Error('AUTH_SECRET must be 32 bytes (base64url)');
   return new Uint8Array(key);

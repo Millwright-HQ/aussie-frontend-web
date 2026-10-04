@@ -57,6 +57,7 @@ function Submit({
   );
 }
 
+// nosemgrep: ajinabraham.njsscan.generic.hardcoded_secrets.node_password -- UI hint text, not a credential
 const PASSWORD_HINT = 'At least 10 characters with upper and lower case, a number and a symbol.';
 
 // ── Auth ────────────────────────────────────────────────────────────────────

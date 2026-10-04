@@ -22,6 +22,7 @@ export async function estimateDeliveryAction(
 ): Promise<EstimateState> {
   const district = districtSchema.safeParse(form.get('district'));
   if (!district.success) return { error: 'Choose your district' };
+  // nosemgrep: ajinabraham.njsscan.dos.regex_dos.regex_dos -- bounded, linear pattern
   if (!/^[a-z0-9-]{1,120}$/.test(slug) || !ulidSchema.safeParse(variantId).success) {
     return { error: 'Could not find this product' };
   }
