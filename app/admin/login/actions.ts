@@ -30,11 +30,19 @@ export interface FormState {
 const EXPIRED = 'Your sign-in session expired. Please start again.';
 
 /** Moves the user to the next sign-in screen, or finishes sign-in. Always redirects. */
-async function advance(step: AuthStep, email: string, next: string): Promise<never> {
+async function advance(
+  step: AuthStep,
+  email: string,
+  next: string,
+  firstSignIn = false,
+): Promise<never> {
   switch (step.kind) {
     case 'tokens':
       await writeSession('admin', step.tokens, step.username);
-      return redirect(next);
+      // First sign-in: offer the authenticator app (optional), then continue to where they were going.
+      return redirect(
+        firstSignIn ? `/admin/security?welcome=1&next=${encodeURIComponent(next)}` : next,
+      );
     case 'new-password':
       await writeFlow('admin', {
         step: 'new-password',
@@ -104,7 +112,7 @@ export async function setNewPassword(_prev: FormState, form: FormData): Promise<
   } catch (err) {
     return { error: authErrorMessage(err) };
   }
-  return advance(step, flow.email ?? '', flow.next ?? '/admin');
+  return advance(step, flow.email ?? '', flow.next ?? '/admin', true);
 }
 
 export async function confirmAuthenticator(_prev: FormState, form: FormData): Promise<FormState> {

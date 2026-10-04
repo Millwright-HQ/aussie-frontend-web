@@ -95,3 +95,8 @@ export const createAdminSchema = z
   .strict();
 
 export const assignRoleSchema = z.object({ roleId: roleIdSchema }).strict();
+
+/** `resetAuthenticator`: also switch their authenticator app off (lost or replaced phone). */
+export const resetAdminPasswordSchema = z
+  .object({ resetAuthenticator: z.boolean().default(false) })
+  .strict();

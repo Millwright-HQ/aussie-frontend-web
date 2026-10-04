@@ -1,5 +1,6 @@
 import type { Permission } from '@aussie/shared-types';
 import { Button } from '@aussie/ui';
+import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { can, currentAdmin } from '@/lib/admin';
 import { readTheme } from '@/lib/theme';
@@ -50,6 +51,9 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           <span className="text-muted">
             {me.name} · <span className="font-medium text-text">{me.roleId}</span>
           </span>
+          <Link href="/admin/security" className="underline">
+            Security
+          </Link>
           <form action={signOut}>
             <Button type="submit" variant="ghost" size="sm">
               Sign out

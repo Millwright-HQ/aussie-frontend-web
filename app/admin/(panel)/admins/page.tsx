@@ -2,7 +2,13 @@ import { Card, Field, Input, Select } from '@aussie/ui';
 import { type AdminRow, formatDateTime, requirePermission, type RoleRow } from '@/lib/admin';
 import { api } from '@/lib/api';
 import { ActionForm } from '../action-form';
-import { changeRole, inviteAdmin, setAdminStatus } from '../actions';
+import {
+  changeRole,
+  deleteAdmin,
+  inviteAdmin,
+  resetAdminPassword,
+  setAdminStatus,
+} from '../actions';
 
 export const metadata = { title: 'Admins' };
 
@@ -19,8 +25,8 @@ export default async function AdminsPage() {
       <div>
         <h1 className="text-h1">Admins</h1>
         <p className="mt-1 text-muted">
-          New admins get a temporary password by email and must set up an authenticator app on first
-          sign-in.
+          New admins get a temporary password by email. On first sign-in they can set up an
+          authenticator app or skip it and do it later from the Security page.
         </p>
       </div>
 
@@ -129,6 +135,42 @@ export default async function AdminsPage() {
                               name="action"
                               value={a.status === 'ACTIVE' ? 'disable' : 'enable'}
                             />
+                          </ActionForm>
+                        </details>
+                        {a.status === 'ACTIVE' && (
+                          <details>
+                            <summary className="cursor-pointer text-xs text-muted">
+                              Reset password…
+                            </summary>
+                            <ActionForm
+                              action={resetAdminPassword}
+                              submitLabel={`Email ${a.name} a new temporary password`}
+                              variant="secondary"
+                              size="sm"
+                              className="mt-2"
+                            >
+                              <input type="hidden" name="sub" value={a.sub} />
+                              <label className="flex items-center gap-2 text-xs">
+                                <input type="checkbox" name="resetAuthenticator" />
+                                Also turn off their authenticator app (lost phone)
+                              </label>
+                            </ActionForm>
+                          </details>
+                        )}
+                        <details>
+                          <summary className="cursor-pointer text-xs text-danger">Delete…</summary>
+                          <ActionForm
+                            action={deleteAdmin}
+                            submitLabel={`Delete ${a.name} permanently`}
+                            variant="danger"
+                            size="sm"
+                            className="mt-2"
+                          >
+                            <input type="hidden" name="sub" value={a.sub} />
+                            <p className="text-xs text-muted">
+                              Removes their sign-in and profile. This cannot be undone. Their past
+                              actions stay in the audit log.
+                            </p>
                           </ActionForm>
                         </details>
                       </>
