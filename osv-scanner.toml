@@ -1,0 +1,10 @@
+# Reviewed exception for the vulnerability scanner (OSV). Anything else still fails the build.
+#
+# braces <= 3.0.3 (stack exhaustion on deeply nested glob patterns) has no patched release yet. It is
+# only a dependency of the lint tooling (eslint-config-next via fast-glob), which runs on CI and
+# developer machines against our own files. It is not bundled into the web app: `pnpm audit --prod`
+# is clean. Remove this entry when a fixed version exists, or on the date below, whichever is first.
+[[IgnoredVulns]]
+id = "GHSA-vfj7-8cjw-p6xm"
+ignoreUntil = 2026-12-31
+reason = "No fix available; build tooling only, not shipped in the web app."

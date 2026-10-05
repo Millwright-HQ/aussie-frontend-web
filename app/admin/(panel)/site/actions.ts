@@ -132,7 +132,7 @@ export async function createBannerAction(_prev: ActionState, form: FormData): Pr
   return save(
     () => api('admin', '/v1/content/admin/banners', { method: 'POST', body: parsed.data }),
     'Banner added.',
-    ['/admin/banners'],
+    ['/admin/site/banners'],
   );
 }
 
@@ -148,7 +148,7 @@ export async function updateBannerAction(
     () =>
       api('admin', `/v1/content/admin/banners/${bannerId}`, { method: 'PUT', body: parsed.data }),
     'Banner saved.',
-    ['/admin/banners'],
+    ['/admin/site/banners'],
   );
 }
 
@@ -161,7 +161,7 @@ export async function deleteBannerAction(
   return save(
     () => api('admin', `/v1/content/admin/banners/${bannerId}`, { method: 'DELETE' }),
     'Banner removed.',
-    ['/admin/banners'],
+    ['/admin/site/banners'],
   );
 }
 
@@ -184,6 +184,6 @@ export async function savePageAction(
     () =>
       api('admin', `/v1/content/admin/pages/${page.data}`, { method: 'PUT', body: parsed.data }),
     'Page saved.',
-    ['/admin/pages', `/admin/pages/${page.data}`],
+    ['/admin/site/pages', `/admin/site/pages/${page.data}`],
   );
 }

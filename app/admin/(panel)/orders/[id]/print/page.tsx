@@ -1,5 +1,5 @@
 import type { Order } from '@aussie/shared-types';
-import { formatLkr } from '@aussie/ui';
+import { formatLkr } from '@/app/admin/_ui';
 import { DISTRICTS, ulidSchema } from '@aussie/validation';
 import { notFound } from 'next/navigation';
 import { formatDateTime, requirePermission } from '@/lib/admin';

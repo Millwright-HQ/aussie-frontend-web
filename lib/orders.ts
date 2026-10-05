@@ -3,6 +3,7 @@ import type { BankDetails, OrderView, VariantSnapshot } from '@aussie/shared-typ
 import type { ProblemDetails } from '@aussie/shared-types';
 import { API_URL } from './api';
 import type { CartLine } from './cart';
+import { clientHeaders } from './client-headers';
 
 /** A public (no sign-in) call to the API. Never throws for HTTP errors: returns the message to show. */
 export type PublicResult<T> =
@@ -18,7 +19,7 @@ export async function publicPost<T>(
       method: 'POST',
       cache: 'no-store',
       signal: AbortSignal.timeout(28_000),
-      headers: { 'content-type': 'application/json', ...headers },
+      headers: { 'content-type': 'application/json', ...(await clientHeaders()), ...headers },
       body: JSON.stringify(body),
     });
     const text = await res.text();

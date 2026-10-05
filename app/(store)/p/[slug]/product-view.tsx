@@ -1,5 +1,6 @@
 'use client';
 
+import { Stars } from '../../_components/stars';
 import type { ProductImage, ProductOptionAxis, Variant } from '@aussie/shared-types';
 import { formatLkr, Swatch } from '@aussie/ui';
 import Image from 'next/image';
@@ -23,8 +24,11 @@ function imagesFor(images: ProductImage[], variantId: string) {
   return list.length ? list : images;
 }
 
-/** Per variant: sold out?, shopper text ("In stock", "Only 3 left", "Sold out"; empty = unknown). */
-export type StockView = Record<string, { out: boolean; low: boolean; label: string }>;
+/** Per variant: sold out?, shopper text ("5 in stock", "Sold out"; empty = unknown), units on hand. */
+export type StockView = Record<
+  string,
+  { out: boolean; low: boolean; label: string; max?: number | undefined }
+>;
 
 /** Diagonal strike over an unavailable option (CSS only; no inline styles under our CSP). */
 function Strike() {
@@ -46,6 +50,7 @@ export function ProductView({
   stock,
   slug,
   districts,
+  rating,
 }: {
   productId: string;
   name: string;
@@ -56,6 +61,7 @@ export function ProductView({
   stock: StockView;
   slug: string;
   districts: DistrictChoice[];
+  rating?: { average: number; count: number } | undefined;
 }) {
   const isOut = (v: Variant) => Boolean(stock[v.id]?.out);
   const initial = initialVariant(variants, isOut);
@@ -126,6 +132,21 @@ export function ProductView({
       <div>
         {brandName && <p className="text-sm tracking-wide text-muted uppercase">{brandName}</p>}
         <h1 className="mt-1 text-h1">{name}</h1>
+        <a
+          href="#reviews"
+          className="mt-1 inline-flex items-center gap-2 text-sm text-muted hover:text-primary"
+        >
+          {rating && rating.count > 0 ? (
+            <>
+              <Stars value={rating.average} />
+              <span className="tabular">
+                {rating.average.toFixed(1)} · {rating.count} review{rating.count === 1 ? '' : 's'}
+              </span>
+            </>
+          ) : (
+            <span>No reviews yet · be the first</span>
+          )}
+        </a>
         <p className="mt-4 text-h2 tabular" aria-live="polite">
           {formatLkr(selected.priceCents)}{' '}
           {onSale && (
@@ -207,6 +228,7 @@ export function ProductView({
           productId={productId}
           variantId={selected.id}
           soldOut={Boolean(selectedStock?.out)}
+          maxQty={selectedStock?.max}
           className={selectedStock?.label ? 'mt-3' : 'mt-8'}
         />
         <DeliveryBox key={selected.id} slug={slug} variantId={selected.id} districts={districts} />

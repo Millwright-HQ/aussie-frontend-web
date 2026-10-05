@@ -1,7 +1,6 @@
 /** Catalog shapes returned by the catalog API (docs/MASTER_PLAN.md §4). Money in cents, weight in grams. */
 
-/** Categories nest up to this many levels (owner decision, 2026-10-02: "whatever it takes"). */
-export const MAX_CATEGORY_DEPTH = 5;
+/* Categories nest to any depth (owner decision, 2026-10-05: no limit); cycles are refused instead. */
 /** A product combines at most this many variant options (e.g. Colour × Size × Storage). */
 export const MAX_VARIANT_OPTIONS = 3;
 

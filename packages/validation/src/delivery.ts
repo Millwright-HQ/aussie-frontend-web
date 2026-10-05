@@ -55,6 +55,7 @@ export type ZoneInput = z.infer<typeof zoneInputSchema>;
 
 export const deliverySettingsSchema = z
   .object({
+    mode: z.enum(['FIXED', 'WEIGHT']),
     codFeeCents: cents('Enter the COD fee'),
     freeDeliveryThresholdCents: cents('Enter the free-delivery amount (0 = off)'),
     maxWeightG: z.number({ message: 'Enter the maximum weight' }).int().min(1).max(500_000),
@@ -86,6 +87,29 @@ export const districtAssignmentsSchema = z
     },
   );
 export type DistrictAssignments = z.infer<typeof districtAssignmentsSchema>;
+
+/** Per district: on/off and the fixed price (Rs, in cents) used in FIXED mode. */
+export const districtFeesSchema = z
+  .object({
+    districts: z
+      .array(
+        z
+          .object({
+            code: districtSchema,
+            enabled: z.boolean(),
+            fixedFeeCents: cents('Enter the price'),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(25),
+  })
+  .strict()
+  .refine(
+    ({ districts }) => new Set(districts.map((d) => d.code)).size === districts.length,
+    { message: 'A district can only be listed once', path: ['districts'] },
+  );
+export type DistrictFees = z.infer<typeof districtFeesSchema>;
 
 const dimension = z.number().int().min(1).max(300);
 

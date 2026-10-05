@@ -1,11 +1,11 @@
 import { FESTIVALS, type Banner, type InfoPage, type SiteSettings } from '@aussie/shared-types';
-import { Card, Field, Input, Select } from '@aussie/ui';
-import Link from 'next/link';
+import { Card, Field, Input, PageHeader, Select } from '@/app/admin/_ui';
 import { formatDateTime, requirePermission } from '@/lib/admin';
 import { api } from '@/lib/api';
 import { ActionForm } from '../action-form';
 import { saveSettingsAction } from './actions';
 import { ImageUploader } from './image-uploader';
+import { SiteTabs } from './tabs';
 
 export const metadata = { title: 'Site settings' };
 
@@ -26,7 +26,7 @@ const Check = ({
   checked: boolean;
   hint?: string;
 }) => (
-  <label className="flex min-h-11 items-start gap-3 text-sm">
+  <label className="flex min-h-10 items-start gap-3 text-sm">
     <input
       type="checkbox"
       name={name}
@@ -41,33 +41,22 @@ const Check = ({
 );
 
 export default async function SiteSettingsPage() {
-  await requirePermission('content:write');
+  const me = await requirePermission('content:write');
   const { settings: s } = await api<AdminSite>('admin', '/v1/content/admin/site');
   const cdn = process.env.NEXT_PUBLIC_CDN_URL ?? '';
   const festival = s.theme.festival;
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-h1">Site settings</h1>
-        <p className="mt-1 text-sm text-muted">
-          Everything customers see around your products: your store name and logo, contact details,
-          the announcement bar, festival colours and what appears on the home page. Changes show on
-          the shop within a minute. Banners and pages have their own screens:{' '}
-          <Link href="/admin/banners" className="text-primary hover:underline">
-            Banners
-          </Link>{' '}
-          and{' '}
-          <Link href="/admin/pages" className="text-primary hover:underline">
-            Pages
-          </Link>
-          .
-        </p>
-      </div>
+    <div className="max-w-4xl">
+      <PageHeader
+        title="Site settings"
+        description="Everything customers see around your products: your store name and logo, contact details, the announcement bar, festival colours and what appears on the home page. Changes show on the shop within a minute."
+      />
+      <SiteTabs me={me} current="/admin/site" />
 
       <ActionForm action={saveSettingsAction} submitLabel="Save settings" className="space-y-6">
         <Card>
-          <h2 className="text-h3">Store details</h2>
+          <h2 className="text-[15px] font-semibold">Store details</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Field id="storeName" label="Store name" className="sm:col-span-2">
               <Input
@@ -127,7 +116,7 @@ export default async function SiteSettingsPage() {
         </Card>
 
         <Card>
-          <h2 className="text-h3">Social links</h2>
+          <h2 className="text-[15px] font-semibold">Social links</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {(
               [
@@ -145,7 +134,7 @@ export default async function SiteSettingsPage() {
         </Card>
 
         <Card>
-          <h2 className="text-h3">Announcement bar</h2>
+          <h2 className="text-[15px] font-semibold">Announcement bar</h2>
           <p className="mt-1 text-sm text-muted">The thin bar at the very top of every page.</p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
@@ -181,7 +170,7 @@ export default async function SiteSettingsPage() {
         </Card>
 
         <Card>
-          <h2 className="text-h3">Appearance</h2>
+          <h2 className="text-[15px] font-semibold">Appearance</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Field
               id="defaultMode"
@@ -196,7 +185,7 @@ export default async function SiteSettingsPage() {
             </Field>
             <div className="sm:col-span-2">
               <span className="block text-sm font-medium">Brand colour</span>
-              <label className="mt-1 flex min-h-11 items-center gap-3 text-sm">
+              <label className="mt-1 flex min-h-10 items-center gap-3 text-sm">
                 <input
                   type="checkbox"
                   name="useBrandColor"
@@ -211,7 +200,7 @@ export default async function SiteSettingsPage() {
                   name="brandColor"
                   aria-label="Brand colour"
                   defaultValue={s.theme.brandColor ?? '#111111'}
-                  className="h-11 w-16 cursor-pointer rounded-sm border border-border bg-surface p-1"
+                  className="h-11 w-16 cursor-pointer rounded-[10px] border border-border bg-surface p-1"
                 />
                 <p className="text-xs text-muted">
                   Pick the colour of your logo. If it is too light to read, we darken it a little
@@ -266,7 +255,7 @@ export default async function SiteSettingsPage() {
         </Card>
 
         <Card>
-          <h2 className="text-h3">Home page sections</h2>
+          <h2 className="text-[15px] font-semibold">Home page sections</h2>
           <div className="mt-2 space-y-1">
             <Check name="showCategories" label="Shop by category" checked={s.home.showCategories} />
             <Check name="showNewIn" label="New in (latest products)" checked={s.home.showNewIn} />

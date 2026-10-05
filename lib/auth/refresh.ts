@@ -42,7 +42,11 @@ export async function refreshIfNeeded(
         name: names.access,
         value: await seal(
           names.access,
-          { token: t.accessToken, exp } satisfies AccessCookie,
+          {
+            token: t.accessToken,
+            exp,
+            ...(refresh.mfa ? { mfa: refresh.mfa } : {}),
+          } satisfies AccessCookie,
           t.expiresIn,
         ),
         options: cookieOptions(a, t.expiresIn),

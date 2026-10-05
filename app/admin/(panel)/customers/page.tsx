@@ -1,7 +1,22 @@
-import { formatLkPhone } from '@aussie/ui';
+import { Users } from 'lucide-react';
 import Link from 'next/link';
 import { formatDateTime, requirePermission } from '@/lib/admin';
 import { api } from '@/lib/api';
+import {
+  Avatar,
+  Badge,
+  EmptyState,
+  formatLkPhone,
+  PageHeader,
+  Pager,
+  Table,
+  TableShell,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from '@/app/admin/_ui';
 
 export const metadata = { title: 'Customers' };
 
@@ -28,54 +43,52 @@ export default async function CustomersPage({
   );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-h1">Customers</h1>
-        <p className="mt-1 text-muted">Newest first. Open a customer to see their orders.</p>
-      </div>
-      <div className="overflow-x-auto rounded-md border border-border">
-        <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="bg-surface text-xs tracking-wide text-muted uppercase">
-            <tr>
-              <th className="px-4 py-3 font-medium">Name</th>
-              <th className="px-4 py-3 font-medium">Email</th>
-              <th className="px-4 py-3 font-medium">Mobile</th>
-              <th className="px-4 py-3 font-medium">Offers</th>
-              <th className="px-4 py-3 font-medium">Joined</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {page.items.length === 0 && (
+    <div>
+      <PageHeader title="Customers" description="Newest first. Open a customer to see their orders." />
+      <TableShell>
+        {page.items.length === 0 ? (
+          <EmptyState icon={<Users size={20} />} title="No customers yet">
+            Customers who create an account appear here.
+          </EmptyState>
+        ) : (
+          <Table>
+            <Thead>
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-muted">
-                  No customers yet.
-                </td>
+                <Th>Customer</Th>
+                <Th>Mobile</Th>
+                <Th>Offers</Th>
+                <Th>Joined</Th>
               </tr>
-            )}
-            {page.items.map((c) => (
-              <tr key={c.sub}>
-                <td className="px-4 py-3 font-medium">
-                  <Link href={`/admin/customers/${c.sub}`} className="text-primary hover:underline">
-                    {c.name}
-                  </Link>
-                </td>
-                <td className="px-4 py-3">{c.email}</td>
-                <td className="px-4 py-3 tabular">{c.phone ? formatLkPhone(c.phone) : '—'}</td>
-                <td className="px-4 py-3">{c.marketingOptIn ? 'Yes' : 'No'}</td>
-                <td className="px-4 py-3 text-muted">{formatDateTime(c.createdAt)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="flex gap-4 text-sm">
-        {cursor && <Link href="/admin/customers">← First page</Link>}
-        {page.nextCursor && (
-          <Link href={`/admin/customers?cursor=${encodeURIComponent(page.nextCursor)}`}>
-            Next page →
-          </Link>
+            </Thead>
+            <Tbody>
+              {page.items.map((c) => (
+                <Tr key={c.sub}>
+                  <Td>
+                    <Link href={`/admin/customers/${c.sub}`} className="flex items-center gap-3">
+                      <Avatar name={c.name} />
+                      <span className="min-w-0">
+                        <span className="block truncate font-medium hover:underline">{c.name}</span>
+                        <span className="block truncate text-[13px] text-muted">{c.email}</span>
+                      </span>
+                    </Link>
+                  </Td>
+                  <Td className="tabular">{c.phone ? formatLkPhone(c.phone) : '—'}</Td>
+                  <Td>
+                    <Badge tone={c.marketingOptIn ? 'success' : 'neutral'}>
+                      {c.marketingOptIn ? 'Subscribed' : 'Not subscribed'}
+                    </Badge>
+                  </Td>
+                  <Td className="whitespace-nowrap text-muted">{formatDateTime(c.createdAt)}</Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
         )}
-      </div>
+      </TableShell>
+      <Pager
+        prev={cursor ? '/admin/customers' : undefined}
+        next={page.nextCursor ? `/admin/customers?cursor=${encodeURIComponent(page.nextCursor)}` : undefined}
+      />
     </div>
   );
 }

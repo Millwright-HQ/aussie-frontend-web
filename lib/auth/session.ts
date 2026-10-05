@@ -20,6 +20,8 @@ export interface Session {
   sub: string;
   accessToken: string;
   claims: JWTPayload & { permissions?: string; role?: string; client_id?: string };
+  /** Signed in with the password but the authenticator code has not been entered yet. */
+  mfaPending?: boolean;
 }
 
 /**
@@ -43,19 +45,30 @@ export async function verifyAccessToken(a: Audience, token: string): Promise<Ses
   }
 }
 
-export async function getSession(a: Audience): Promise<Session | null> {
+/**
+ * The signed-in user, or null. A session still waiting for the authenticator code is NOT a
+ * session unless the caller (the code page and its actions) says `allowPending`.
+ */
+export async function getSession(
+  a: Audience,
+  options: { allowPending?: boolean } = {},
+): Promise<Session | null> {
   const jar = await cookies();
   const access = await unseal<AccessCookie>(
     cookieNames(a).access,
     jar.get(cookieNames(a).access)?.value,
   );
-  return access ? verifyAccessToken(a, access.token) : null;
+  if (!access) return null;
+  if (access.mfa === 'pending' && !options.allowPending) return null;
+  const session = await verifyAccessToken(a, access.token);
+  return session && access.mfa === 'pending' ? { ...session, mfaPending: true } : session;
 }
 
-/** For admin pages: a verified session or a redirect to sign-in. */
+/** For admin pages: a verified session, the code page, or sign-in. */
 export async function requireAdminSession(): Promise<Session> {
-  const session = await getSession('admin');
+  const session = await getSession('admin', { allowPending: true });
   if (!session) redirect('/admin/login');
+  if (session.mfaPending) redirect('/admin/login/verify');
   return session;
 }
 
@@ -70,13 +83,19 @@ export async function writeSession(
   a: Audience,
   tokens: { AccessToken: string; ExpiresIn: number; RefreshToken?: string },
   username: string,
+  options: { mfaPending?: boolean } = {},
 ) {
+  const mfa = options.mfaPending ? ({ mfa: 'pending' } as const) : {};
   const jar = await cookies();
   const names = cookieNames(a);
   const exp = Math.floor(Date.now() / 1000) + tokens.ExpiresIn;
   jar.set(
     names.access,
-    await seal(names.access, { token: tokens.AccessToken, exp }, tokens.ExpiresIn),
+    await seal(
+      names.access,
+      { token: tokens.AccessToken, exp, ...mfa } satisfies AccessCookie,
+      tokens.ExpiresIn,
+    ),
     cookieOptions(a, tokens.ExpiresIn),
   );
   if (tokens.RefreshToken) {
@@ -85,13 +104,40 @@ export async function writeSession(
       names.refresh,
       await seal(
         names.refresh,
-        { refreshToken: tokens.RefreshToken, username } satisfies RefreshCookie,
+        { refreshToken: tokens.RefreshToken, username, ...mfa } satisfies RefreshCookie,
         maxAge,
       ),
       cookieOptions(a, maxAge),
     );
   }
   jar.delete({ name: names.flow, path: cookieOptions(a, 0).path });
+}
+
+/** The authenticator code was accepted: re-seal both cookies without the pending mark. */
+export async function markMfaVerified(a: Audience) {
+  const jar = await cookies();
+  const names = cookieNames(a);
+  const access = await unseal<AccessCookie>(names.access, jar.get(names.access)?.value);
+  const refresh = await unseal<RefreshCookie>(names.refresh, jar.get(names.refresh)?.value);
+  if (!access) return;
+  const left = Math.max(60, access.exp - Math.floor(Date.now() / 1000));
+  jar.set(
+    names.access,
+    await seal(names.access, { token: access.token, exp: access.exp } satisfies AccessCookie, left),
+    cookieOptions(a, left),
+  );
+  if (refresh) {
+    const maxAge = a === 'admin' ? REFRESH_MAX_AGE.admin : REFRESH_MAX_AGE.customer;
+    jar.set(
+      names.refresh,
+      await seal(
+        names.refresh,
+        { refreshToken: refresh.refreshToken, username: refresh.username } satisfies RefreshCookie,
+        maxAge,
+      ),
+      cookieOptions(a, maxAge),
+    );
+  }
 }
 
 export async function readRefresh(a: Audience): Promise<RefreshCookie | null> {

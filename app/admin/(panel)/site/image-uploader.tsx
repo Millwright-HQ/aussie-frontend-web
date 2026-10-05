@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert } from '@aussie/ui';
+import { Alert } from '@/app/admin/_ui';
 import { MAX_SITE_IMAGE_BYTES, SITE_IMAGE_TYPES } from '@aussie/validation';
 import Image from 'next/image';
 import { useState } from 'react';
@@ -73,7 +73,7 @@ export function ImageUploader({
         </button>
       )}
       {path && (
-        <div className="relative h-32 w-full max-w-md overflow-hidden rounded-md border border-border bg-surface-muted">
+        <div className="relative h-32 w-full max-w-md overflow-hidden rounded-xl border border-border bg-surface-muted">
           <Image
             unoptimized
             src={`${previewUrlBase}/${path}`}
@@ -89,7 +89,7 @@ export function ImageUploader({
         accept={SITE_IMAGE_TYPES.join(',')}
         disabled={busy}
         aria-label={`${label}: choose a picture`}
-        className="block w-full text-sm file:mr-3 file:min-h-11 file:rounded-sm file:border file:border-border file:bg-surface file:px-4"
+        className="block w-full text-sm file:mr-3 file:min-h-10 file:rounded-[10px] file:border file:border-border file:bg-surface file:px-4"
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) void upload(file);

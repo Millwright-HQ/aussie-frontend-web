@@ -1,3 +1,4 @@
+import { LocalMailHint } from '@/components/local-mail-hint';
 import { BackendStatus } from '../backend-status';
 import { signIn } from './actions';
 import { AuthCard } from './auth-card';
@@ -14,8 +15,13 @@ export default async function AdminLoginPage({
   return (
     <AuthCard
       title="Sign in"
-      subtitle="Password, then a code from your authenticator app."
-      footer={<BackendStatus />}
+      subtitle="Sign in with your email and password. If your authenticator app is on, you will be asked for a code next."
+      footer={
+        <>
+          <BackendStatus />
+          <LocalMailHint />
+        </>
+      }
     >
       <AuthForm
         action={signIn}

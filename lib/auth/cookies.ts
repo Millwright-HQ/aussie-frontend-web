@@ -36,10 +36,18 @@ export interface AccessCookie {
   token: string;
   /** Access token expiry, epoch seconds. */
   exp: number;
+  /**
+   * Admins with the authenticator app on: set until the code is entered. Sealed inside the cookie,
+   * so it cannot be removed from the browser; a session in this state is not a session
+   * (`getSession` refuses it) and only the code page may use it.
+   */
+  mfa?: 'pending';
 }
 
 export interface RefreshCookie {
   refreshToken: string;
   /** Cognito username (UUID) needed for SECRET_HASH on refresh. */
   username: string;
+  /** Carried to every refreshed access cookie (see AccessCookie.mfa). */
+  mfa?: 'pending';
 }

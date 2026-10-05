@@ -11,13 +11,16 @@ export const INVENTORY_TAG = 'inventory';
  */
 export async function getAvailability(
   productId: string,
+  options: { fresh?: boolean } = {},
 ): Promise<Record<string, VariantAvailability> | null> {
   if (!API_URL) return null;
   try {
     const res = await fetch(
       `${API_URL}/v1/inventory/availability?productId=${encodeURIComponent(productId)}`,
       {
-        next: { revalidate: 30, tags: [INVENTORY_TAG] },
+        ...(options.fresh
+          ? { cache: 'no-store' as const }
+          : { next: { revalidate: 30, tags: [INVENTORY_TAG] } }),
         signal: AbortSignal.timeout(5_000),
       },
     );
@@ -28,10 +31,4 @@ export async function getAvailability(
   }
 }
 
-/** Shopper-facing text for an availability status. */
-export function availabilityLabel(a: VariantAvailability | undefined): string {
-  if (!a) return '';
-  if (a.status === 'out') return 'Sold out';
-  if (a.status === 'low') return a.count === 1 ? 'Only 1 left' : `Only ${a.count ?? 'a few'} left`;
-  return 'In stock';
-}
+export { availabilityLabel, availableUnits } from './stock-label';

@@ -1,17 +1,25 @@
 import type { Brand, CategoryNode, ProductDetail } from '@aussie/shared-types';
-import { Alert } from '@aussie/ui';
+import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { can, requirePermission } from '@/lib/admin';
 import { api, ApiError } from '@/lib/api';
 import { getBrands, getCategoryTree } from '@/lib/catalog';
 import { getDefinitions } from '@/lib/definitions';
-import { MediaManager } from '../media-manager';
-import { ProductEditor } from '../product-editor';
+import { Alert, Badge, buttonVariants, PageHeader, Panel } from '@/app/admin/_ui';
 import { DeleteProduct } from '../delete-product';
 import { DuplicateProduct } from '../duplicate-product';
+import { MediaManager } from '../media-manager';
+import { ProductEditor } from '../product-editor';
+import { StockPanel } from './stock-panel';
 
 export const metadata = { title: 'Edit product' };
+
+const STATUS = {
+  ACTIVE: { tone: 'success', label: 'Active' },
+  DRAFT: { tone: 'warning', label: 'Draft' },
+  ARCHIVED: { tone: 'neutral', label: 'Archived' },
+} as const;
 
 export default async function EditProductPage({
   params,
@@ -37,39 +45,45 @@ export default async function EditProductPage({
     Awaited<ReturnType<typeof getDefinitions>>,
   ] = await Promise.all([getBrands(), getCategoryTree(), getDefinitions()]);
   const editable = can(me, 'product:write');
+  const showStock = can(me, 'inventory:read');
+  const status = STATUS[product.status];
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <Link href="/admin/products" className="text-sm text-muted hover:text-text">
-            ← Products
-          </Link>
-          <h1 className="text-h1">{product.name}</h1>
-        </div>
-        {product.status === 'ACTIVE' && (
-          <Link
-            href={`/p/${product.slug}`}
-            target="_blank"
-            className="text-sm text-primary underline-offset-4 hover:underline"
-          >
-            View on store ↗
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        back={{ href: '/admin/products', label: 'Products' }}
+        title={
+          <span className="flex flex-wrap items-center gap-3">
+            {product.name}
+            <Badge tone={status.tone}>{status.label}</Badge>
+          </span>
+        }
+        description={`${product.variants.length} variant${product.variants.length === 1 ? '' : 's'} · ${brands.find((b) => b.id === product.brandId)?.name ?? 'No brand'}`}
+        actions={
+          <>
+            {editable && <DuplicateProduct productId={product.id} />}
+            {product.status === 'ACTIVE' && (
+              <Link href={`/p/${product.slug}`} target="_blank" className={buttonVariants({ variant: 'outline' })}>
+                View on store <ExternalLink aria-hidden size={14} />
+              </Link>
+            )}
+          </>
+        }
+      />
+
       {created && (
         <Alert tone="success">
-          Product created as a draft. Add images, then set it to Active to publish.
+          Product created as a draft. Set its opening stock below, add images, then set it to Active
+          to publish.
         </Alert>
       )}
       {!editable && <Alert tone="info">You can view products but not change them.</Alert>}
+
+      {showStock && <StockPanel product={product} canAdjust={can(me, 'inventory:adjust')} />}
+
       {editable ? (
         <>
-          <MediaManager
-            productId={product.id}
-            images={product.images}
-            variants={product.variants}
-          />
+          <MediaManager productId={product.id} images={product.images} variants={product.variants} />
           <ProductEditor
             product={product}
             brands={brands}
@@ -77,26 +91,32 @@ export default async function EditProductPage({
             attributeDefs={definitions.attributes}
             optionDefs={definitions.options}
           />
-          <DuplicateProduct productId={product.id} />
           {product.status !== 'ACTIVE' && (
-            <DeleteProduct productId={product.id} name={product.name} />
+            <Panel
+              title="Danger zone"
+              description="A product on the store cannot be deleted: archive it instead."
+            >
+              <DeleteProduct productId={product.id} name={product.name} />
+            </Panel>
           )}
         </>
       ) : (
-        <dl className="grid gap-x-6 gap-y-2 rounded-md border border-border bg-surface p-6 text-sm sm:grid-cols-[160px_1fr]">
-          <dt className="text-muted">Status</dt>
-          <dd>{product.status}</dd>
-          <dt className="text-muted">Brand</dt>
-          <dd>{brands.find((b) => b.id === product.brandId)?.name ?? '—'}</dd>
-          <dt className="text-muted">Variants</dt>
-          <dd>
-            {product.variants
-              .map((v) => [v.sku, ...v.options.map((o) => o.value)].join(' · '))
-              .join(', ')}
-          </dd>
-          <dt className="text-muted">Images</dt>
-          <dd>{product.images.length}</dd>
-        </dl>
+        <Panel title="Details">
+          <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[160px_1fr]">
+            <dt className="text-muted">Status</dt>
+            <dd>{product.status}</dd>
+            <dt className="text-muted">Brand</dt>
+            <dd>{brands.find((b) => b.id === product.brandId)?.name ?? '—'}</dd>
+            <dt className="text-muted">Variants</dt>
+            <dd>
+              {product.variants
+                .map((v) => [v.sku, ...v.options.map((o) => o.value)].join(' · '))
+                .join(', ')}
+            </dd>
+            <dt className="text-muted">Images</dt>
+            <dd>{product.images.length}</dd>
+          </dl>
+        </Panel>
       )}
     </div>
   );

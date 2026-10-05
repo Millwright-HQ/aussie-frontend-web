@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { LocalMailHint } from '@/components/local-mail-hint';
 import { readFlow } from '@/lib/auth/session';
 import { VerifyEmailForm } from '../forms';
 import { AuthShell } from '../shell';
@@ -20,6 +21,7 @@ export default async function VerifyPage() {
       subtitle={`We sent a 6-digit code to ${mask(flow.email)}. It expires in 24 hours.`}
     >
       <VerifyEmailForm />
+      <LocalMailHint to={flow.email} />
     </AuthShell>
   );
 }

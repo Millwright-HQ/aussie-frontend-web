@@ -4,8 +4,9 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { deepestTrail, getCategoryTree, getProduct } from '@/lib/catalog';
 import { getDistricts } from '@/lib/delivery';
-import { availabilityLabel, getAvailability } from '@/lib/inventory';
+import { availabilityLabel, availableUnits, getAvailability } from '@/lib/inventory';
 import { ProductView } from './product-view';
+import { getProductReviews } from '@/lib/reviews';
 import { ReviewsSection } from './reviews-section';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -51,7 +52,12 @@ export default async function ProductPage({ params }: Props) {
       const a = availability ? (availability[v.id] ?? { status: 'out' as const }) : undefined;
       return [
         v.id,
-        { out: a?.status === 'out', label: availabilityLabel(a), low: a?.status === 'low' },
+        {
+          out: a?.status === 'out',
+          label: availabilityLabel(a),
+          low: a?.status === 'low',
+          max: availableUnits(a),
+        },
       ];
     }),
   );
@@ -95,6 +101,7 @@ export default async function ProductPage({ params }: Props) {
         optionAxes={product.optionAxes}
         stock={stock}
         slug={slug}
+        rating={(await getProductReviews(product.id))?.summary}
         districts={districts.map(({ code, name }) => ({ code, name }))}
       />
 

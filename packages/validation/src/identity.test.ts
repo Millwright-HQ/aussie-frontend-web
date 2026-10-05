@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   addressSchema,
   adminPasswordSchema,
+  auditQuerySchema,
+  adminProfileUpdateSchema,
   customerPasswordSchema,
+  passwordChecks,
   profileUpdateSchema,
   roleInputSchema,
   signUpSchema,
@@ -91,5 +94,42 @@ describe('roleInputSchema', () => {
       roleInputSchema.safeParse({ name: 'Bad', permissions: ['order:delete-all'] }).success,
     ).toBe(false);
     expect(roleInputSchema.safeParse({ name: 'Empty', permissions: [] }).success).toBe(false);
+  });
+});
+
+describe('passwordChecks', () => {
+  it('reports each rule and agrees with the schema', () => {
+    const weak = passwordChecks('abc', 12);
+    expect(weak.map((c) => [c.id, c.ok])).toEqual([
+      ['length', false],
+      ['lower', true],
+      ['upper', false],
+      ['digit', false],
+      ['symbol', false],
+    ]);
+    for (const pw of ['Abcdef12!xyz', 'Abcdef12!xy', 'abcdefghijkl1!', 'ABCDEFGHIJKL1!']) {
+      const allOk = passwordChecks(pw, 12).every((c) => c.ok);
+      expect(allOk, pw).toBe(adminPasswordSchema.safeParse(pw).success);
+    }
+  });
+});
+
+describe('admin profile + audit query', () => {
+  it('needs something to change and only accepts small pictures', () => {
+    expect(adminProfileUpdateSchema.safeParse({}).success).toBe(false);
+    expect(adminProfileUpdateSchema.safeParse({ name: 'New Name' }).success).toBe(true);
+    expect(adminProfileUpdateSchema.safeParse({ avatar: null }).success).toBe(true);
+    expect(adminProfileUpdateSchema.safeParse({ avatar: 'data:image/png;base64,AAAA' }).success).toBe(
+      true,
+    );
+    expect(adminProfileUpdateSchema.safeParse({ avatar: 'https://x.test/a.png' }).success).toBe(
+      false,
+    );
+  });
+
+  it('parses audit filters', () => {
+    const ok = auditQuerySchema.safeParse({ service: 'orders', outcome: 'failed', limit: '25' });
+    expect(ok.success).toBe(true);
+    expect(auditQuerySchema.safeParse({ outcome: 'weird' }).success).toBe(false);
   });
 });

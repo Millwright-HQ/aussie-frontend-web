@@ -35,7 +35,7 @@ export const categoryInputSchema = z
   .object({
     name: z.string().trim().min(2).max(60),
     slug: optionalSlug,
-    /** null/absent = top-level. Categories nest up to MAX_CATEGORY_DEPTH levels. */
+    /** null/absent = top-level. Categories nest to any depth. */
     parentId: z.preprocess((v) => (v === '' ? null : v), ulidSchema.nullable().optional()),
     description: optionalText(500),
     imagePath: z.preprocess(

@@ -8,7 +8,7 @@ import type {
   ProductDetail,
 } from '@aussie/shared-types';
 import { MAX_VARIANT_OPTIONS } from '@aussie/shared-types';
-import { Alert, Button, Card, Checkbox, Field, Input, Select, Textarea } from '@aussie/ui';
+import { Alert, Button, Card, Checkbox, Field, Input, Select, Textarea } from '@/app/admin/_ui';
 import { productInputSchema } from '@aussie/validation';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useTransition } from 'react';
@@ -24,10 +24,11 @@ import {
   type VariantRow,
 } from '@/lib/editor-model';
 import { saveProductAction } from '../catalog/actions';
+import { applyOpeningStockAction } from './stock/actions';
 import { AttributeFieldsEditor } from './attribute-fields';
 
-/** Indentation by category depth (fixed class names so Tailwind can see them). */
-const INDENT = ['pl-0', 'pl-5', 'pl-10', 'pl-14', 'pl-20'];
+/** Pixels of indent per category level (categories nest to any depth). */
+const INDENT_PX = 20;
 
 export function ProductEditor({
   product,
@@ -35,12 +36,15 @@ export function ProductEditor({
   categories,
   attributeDefs,
   optionDefs,
+  canSetStock = false,
 }: {
   product?: ProductDetail;
   brands: Brand[];
   categories: CategoryNode[];
   attributeDefs: AttributeDef[];
   optionDefs: OptionDef[];
+  /** On a new product: offer opening stock at the bottom (needs stock permission). */
+  canSetStock?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -60,6 +64,14 @@ export function ProductEditor({
   const [variants, setVariants] = useState<VariantRow[]>(
     product?.variants.length ? product.variants.map(rowFromVariant) : [newRow(true)],
   );
+
+  // Opening stock and alert level per variant row, for a product being created.
+  const [opening, setOpening] = useState<Record<string, { units: string; alertAt: string }>>({});
+  const setOpeningFor = (rowKey: string, patch: Partial<{ units: string; alertAt: string }>) =>
+    setOpening((o) => ({
+      ...o,
+      [rowKey]: { units: '', alertAt: '', ...Object.entries(o).find(([k]) => k === rowKey)?.[1], ...patch },
+    }));
 
   const flat = useMemo(() => flattenTree(categories), [categories]);
   const flatCategories = useMemo(() => flat.map((f) => f.node), [flat]);
@@ -140,6 +152,20 @@ export function ProductEditor({
         return;
       }
       if (!product) {
+        const entries = variants
+          .map((v) => {
+            const o = Object.entries(opening).find(([k]) => k === v.key)?.[1];
+            return {
+              sku: v.sku.trim(),
+              units: Math.max(0, Math.trunc(Number(o?.units || 0)) || 0),
+              alertAt: o?.alertAt?.trim() ? Math.max(0, Math.trunc(Number(o.alertAt)) || 0) : null,
+            };
+          })
+          .filter((e) => e.units > 0 || e.alertAt !== null);
+        if (canSetStock && entries.length > 0) {
+          // Not fatal: the product exists either way, and the product page shows what is missing.
+          await applyOpeningStockAction(result.product.id, entries);
+        }
         router.push(`/admin/products/${result.product.id}?created=1`);
         return;
       }
@@ -164,7 +190,7 @@ export function ProductEditor({
         {banner && <Alert tone={banner.tone}>{banner.text}</Alert>}
 
         <Card>
-          <h2 className="text-h3">Basics</h2>
+          <h2 className="text-[15px] font-semibold">Basics</h2>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <Field id="name" label="Product name" error={err('name')} className="md:col-span-2">
               <Input
@@ -209,15 +235,15 @@ export function ProductEditor({
         </Card>
 
         <Card>
-          <h2 className="text-h3">Categories</h2>
+          <h2 className="text-[15px] font-semibold">Categories</h2>
           <p className="mt-1 text-sm text-muted">
             Pick where the product belongs. The categories decide which details and variant options
             are offered below.
           </p>
           {err('categoryIds') && <p className="mt-2 text-sm text-danger">{err('categoryIds')}</p>}
-          <div className="mt-4 max-h-80 space-y-2 overflow-y-auto rounded-sm border border-border p-3">
+          <div className="mt-4 max-h-80 space-y-2 overflow-y-auto rounded-[10px] border border-border p-3">
             {flat.map(({ node, depth }) => (
-              <div key={node.id} className={INDENT[Math.min(depth, INDENT.length) - 1]}>
+              <div key={node.id} style={{ paddingLeft: (depth - 1) * INDENT_PX }}>
                 <Checkbox
                   id={`cat-${node.id}`}
                   label={
@@ -233,7 +259,7 @@ export function ProductEditor({
         </Card>
 
         <Card>
-          <h2 className="text-h3">Description</h2>
+          <h2 className="text-[15px] font-semibold">Description</h2>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <Field
               id="description"
@@ -275,7 +301,7 @@ export function ProductEditor({
         </Card>
 
         <Card>
-          <h2 className="text-h3">Product details</h2>
+          <h2 className="text-[15px] font-semibold">Product details</h2>
           {categoryIds.length === 0 ? (
             <p className="mt-3 text-sm text-muted">
               Pick a category to see the details it asks for.
@@ -292,7 +318,7 @@ export function ProductEditor({
 
         <Card>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-h3">Variants & pricing</h2>
+            <h2 className="text-[15px] font-semibold">Variants & pricing</h2>
             <p className="text-xs text-muted">
               Prices in rupees. Sale = regular (compare-at) price shown crossed out.
             </p>
@@ -335,7 +361,7 @@ export function ProductEditor({
             {variants.map((v, i) => {
               const e = (f: string) => err(`variants.${i}.${f}`);
               return (
-                <fieldset key={v.key} className="rounded-sm border border-border p-4">
+                <fieldset key={v.key} className="rounded-xl border border-border bg-surface-muted/30 p-4">
                   <legend className="px-1 text-sm font-medium">Variant {i + 1}</legend>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <Field id={`sku-${v.key}`} label="SKU" error={e('sku')}>
@@ -370,7 +396,7 @@ export function ProductEditor({
                                   onChange={(ev) =>
                                     setOpt(v.key, key, { hex: ev.target.value.toUpperCase() })
                                   }
-                                  className="h-11 w-12 shrink-0 cursor-pointer rounded-sm border border-border bg-surface"
+                                  className="h-10 w-12 shrink-0 cursor-pointer rounded-[10px] border border-border bg-surface"
                                 />
                               )}
                               <Input
@@ -483,7 +509,7 @@ export function ProductEditor({
                       </div>
                     </fieldset>
                     <div className="flex items-end justify-between gap-2">
-                      <label className="flex min-h-11 items-center gap-2 text-sm">
+                      <label className="flex h-10 items-center gap-2 text-sm">
                         <input
                           type="radio"
                           name="defaultVariant"
@@ -528,9 +554,54 @@ export function ProductEditor({
             )}
           </div>
         </Card>
+
+        {!product && canSetStock && (
+          <Card>
+            <h2 className="text-[15px] font-semibold">Inventory</h2>
+            <p className="mt-1 text-sm text-muted">
+              Opening stock for each variant. Leave at 0 to add stock later from the product page;
+              a product with no stock shows as sold out. The alert level flags a variant as low
+              (empty = store default).
+            </p>
+            <div className="mt-4 divide-y divide-border rounded-[10px] border border-border">
+              {variants.map((v, i) => {
+                const o = Object.entries(opening).find(([k]) => k === v.key)?.[1];
+                return (
+                  <div
+                    key={v.key}
+                    className="grid items-end gap-3 p-3 sm:grid-cols-[1fr_140px_140px]"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium">Variant {i + 1}</p>
+                      <p className="truncate font-mono text-xs text-muted">{v.sku || 'SKU not set yet'}</p>
+                    </div>
+                    <Field id={`open-${v.key}`} label="Opening stock">
+                      <Input
+                        id={`open-${v.key}`}
+                        inputMode="numeric"
+                        placeholder="0"
+                        value={o?.units ?? ''}
+                        onChange={(ev) => setOpeningFor(v.key, { units: ev.target.value.replace(/\D/g, '') })}
+                      />
+                    </Field>
+                    <Field id={`alert-${v.key}`} label="Alert at" optional>
+                      <Input
+                        id={`alert-${v.key}`}
+                        inputMode="numeric"
+                        placeholder="5"
+                        value={o?.alertAt ?? ''}
+                        onChange={(ev) => setOpeningFor(v.key, { alertAt: ev.target.value.replace(/\D/g, '') })}
+                      />
+                    </Field>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        )}
       </div>
 
-      <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
+      <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
         <Card>
           <Field id="status" label="Status">
             <Select

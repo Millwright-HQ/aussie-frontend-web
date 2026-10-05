@@ -1,11 +1,13 @@
 import { buttonVariants, Button, formatLkr } from '@aussie/ui';
-import { DISTRICTS, MAX_QTY_PER_LINE } from '@aussie/validation';
+import { DISTRICTS } from '@aussie/validation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getCart } from '@/lib/cart';
-import { describeQuote, getQuote } from '@/lib/delivery';
+import { describeQuote, getDistricts, getQuote } from '@/lib/delivery';
+import { availableUnits, getAvailability } from '@/lib/inventory';
 import { imageUrl } from '@/lib/media';
 import { bagHasUnavailable, bagSubtotal, loadBag } from '@/lib/orders';
+import { QuantityInput } from '../_components/quantity-input';
 import { removeFromBagAction, setQuantityAction } from './actions';
 
 export const metadata = { title: 'Your bag' };
@@ -21,7 +23,17 @@ export default async function CartPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const district = districtCode((await searchParams).district);
-  const bag = await loadBag(await getCart());
+  const [bag, districts] = await Promise.all([loadBag(await getCart()), getDistricts()]);
+  // Units in stock per variant, so quantities can never go past what exists.
+  const stockByProduct = new Map(
+    await Promise.all(
+      [...new Set(bag.map((l) => l.productId))].map(
+        async (id) => [id, await getAvailability(id, { fresh: true })] as const,
+      ),
+    ),
+  );
+  const unitsOf = (l: { productId: string; variantId: string }) =>
+    availableUnits(stockByProduct.get(l.productId)?.[l.variantId]);
   const subtotal = bagSubtotal(bag);
   const blocked = bagHasUnavailable(bag);
 
@@ -91,25 +103,21 @@ export default async function CartPage({
                       This item is no longer available. Please remove it to continue.
                     </p>
                   )}
+                  {s.available && unitsOf(l) !== undefined && l.qty > (unitsOf(l) ?? 0) && (
+                    <p className="mt-1 text-sm text-danger">
+                      Only {unitsOf(l)} in stock. Please lower the quantity to continue.
+                    </p>
+                  )}
                   <div className="mt-3 flex flex-wrap items-center gap-3">
                     {s.available && (
                       <form action={setQuantityAction} className="flex items-center gap-2">
                         <input type="hidden" name="variantId" value={l.variantId} />
-                        <label htmlFor={`qty-${l.variantId}`} className="sr-only">
-                          Quantity
-                        </label>
-                        <select
+                        <QuantityInput
                           id={`qty-${l.variantId}`}
-                          name="qty"
                           defaultValue={l.qty}
-                          className="min-h-9 rounded-sm border border-border bg-surface px-2"
-                        >
-                          {Array.from({ length: MAX_QTY_PER_LINE }, (_, i) => i + 1).map((n) => (
-                            <option key={n} value={n}>
-                              {n}
-                            </option>
-                          ))}
-                        </select>
+                          max={unitsOf(l)}
+                          compact
+                        />
                         <Button type="submit" variant="outline" size="sm">
                           Update
                         </Button>
@@ -155,7 +163,7 @@ export default async function CartPage({
                   <option value="" disabled>
                     Choose…
                   </option>
-                  {DISTRICTS.map((d) => (
+                  {districts.map((d) => (
                     <option key={d.code} value={d.code}>
                       {d.name}
                     </option>
@@ -185,7 +193,7 @@ export default async function CartPage({
               <p className="mt-4 text-sm text-danger">Remove unavailable items to check out.</p>
             ) : (
               <Link
-                href={district ? `/checkout?district=${district}` : '/checkout'}
+                href={district ? `/checkout/start?district=${district}` : '/checkout/start'}
                 className={`${buttonVariants({ size: 'lg' })} mt-4 w-full`}
               >
                 Check out

@@ -45,6 +45,8 @@ function secretHash(a: Audience, username: string): string {
 export interface ClientContext {
   ip: string;
   userAgent: string;
+  /** "1": a "confirm your password" check, not a sign-in (no login alert, logged as such). */
+  reauth?: '1';
 }
 
 export type AuthStep =
@@ -103,6 +105,26 @@ export async function signInWithPassword(
     }),
   );
   return toStep(res, email);
+}
+
+/**
+ * Is this the account's current password? Used before sensitive changes (new email). Signs in
+ * once with the same details as the current session and throws the tokens away.
+ */
+export async function passwordIsCorrect(
+  a: Audience,
+  email: string,
+  password: string,
+  ctx: ClientContext,
+): Promise<boolean> {
+  try {
+    await signInWithPassword(a, email, password, { ...ctx, reauth: '1' });
+    return true;
+  } catch (err) {
+    const name = (err as { name?: string }).name;
+    if (name === 'NotAuthorizedException' || name === 'UserNotFoundException') return false;
+    throw err;
+  }
 }
 
 async function respond(

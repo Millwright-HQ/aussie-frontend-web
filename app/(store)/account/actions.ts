@@ -144,6 +144,8 @@ async function needsWelcome(): Promise<boolean> {
 }
 
 export async function signOutAction(): Promise<never> {
+  // Recorded first, while the session still works; a failure here must never block signing out.
+  await api('customer', '/v1/identity/me/signout', { method: 'POST' }).catch(() => undefined);
   const refresh = await readRefresh('customer');
   if (refresh) await revoke('customer', refresh.refreshToken).catch(() => undefined);
   await clearSession('customer');

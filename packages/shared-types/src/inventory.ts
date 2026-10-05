@@ -5,7 +5,7 @@ export const DEFAULT_LOW_STOCK_THRESHOLD = 5;
 export const ADJUSTMENT_REASONS = ['RECEIVED', 'RETURNED', 'DAMAGED', 'CORRECTION'] as const;
 export type AdjustmentReason = (typeof ADJUSTMENT_REASONS)[number];
 /** Reasons written by the system (order flow), never chosen by staff. */
-export type SystemReason = 'SALE' | 'ORDER_CANCELLED';
+export type SystemReason = 'SALE' | 'ORDER_CANCELLED' | 'HOLD_RELEASED';
 
 export type StockStatus = 'in' | 'low' | 'out';
 
@@ -40,7 +40,7 @@ export interface LedgerEntry {
   actorName?: string;
 }
 
-/** Public availability for a product page. Counts are only revealed when stock is low. */
+/** Public availability for a product page. The count is shown whenever something is in stock. */
 export interface VariantAvailability {
   status: StockStatus;
   count?: number;
@@ -85,5 +85,6 @@ export const EVENTS = {
   orderPlaced: 'orders.OrderPlaced',
   orderStatusChanged: 'orders.OrderStatusChanged',
   orderPaymentReminder: 'orders.PaymentReminder',
+  orderPaymentRejected: 'orders.PaymentRejected',
   ratingChanged: 'reviews.RatingChanged',
 } as const;

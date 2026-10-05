@@ -1,10 +1,25 @@
-import { Card, formatLkPhone, formatLkr } from '@aussie/ui';
+import type { OrderStatus } from '@aussie/shared-types';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { can, formatDateTime, requirePermission } from '@/lib/admin';
 import { api, ApiError } from '@/lib/api';
-import { formatOrderDate, statusLabel, statusTone } from '@/lib/order-format';
-import type { OrderStatus } from '@aussie/shared-types';
+import { formatOrderDate } from '@/lib/order-format';
+import {
+  Avatar,
+  EmptyState,
+  formatLkPhone,
+  formatLkr,
+  PageHeader,
+  Panel,
+  Stat,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from '@/app/admin/_ui';
+import { OrderStatusBadge } from '@/app/admin/_ui/order-badge';
 
 export const metadata = { title: 'Customer' };
 
@@ -43,82 +58,88 @@ export default async function CustomerPage({ params }: { params: Promise<{ sub: 
   const orders = can(me, 'order:read')
     ? (await api<{ items: OrderRow[] }>('admin', `/v1/orders/admin/customers/${sub}/orders`)).items
     : null;
-  const spent = orders
-    ?.filter((o) => o.status !== 'CANCELLED' && o.status !== 'RETURNED')
-    .reduce((n, o) => n + o.totalCents, 0);
+  const kept = orders?.filter((o) => o.status !== 'CANCELLED' && o.status !== 'RETURNED');
+  const spent = kept?.reduce((n, o) => n + o.totalCents, 0);
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <div>
-        <Link href="/admin/customers" className="text-sm text-muted hover:text-text">
-          ← Customers
-        </Link>
-        <h1 className="mt-2 text-h1">{customer.name}</h1>
-      </div>
-      <Card>
-        <dl className="grid gap-3 text-sm sm:grid-cols-2">
-          <div>
-            <dt className="text-muted">Email</dt>
-            <dd>{customer.email}</dd>
-          </div>
-          <div>
-            <dt className="text-muted">Mobile</dt>
-            <dd className="tabular">{customer.phone ? formatLkPhone(customer.phone) : '—'}</dd>
-          </div>
-          <div>
-            <dt className="text-muted">Joined</dt>
-            <dd>{formatDateTime(customer.createdAt)}</dd>
-          </div>
-          <div>
-            <dt className="text-muted">Offers by email</dt>
-            <dd>{customer.marketingOptIn ? 'Yes' : 'No'}</dd>
-          </div>
-        </dl>
-      </Card>
+    <div className="space-y-6">
+      <PageHeader
+        back={{ href: '/admin/customers', label: 'Customers' }}
+        title={
+          <span className="flex items-center gap-3">
+            <Avatar name={customer.name} size={40} />
+            {customer.name}
+          </span>
+        }
+        description={`Customer since ${formatDateTime(customer.createdAt)}`}
+      />
 
-      {orders && (
-        <Card>
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-h3">Orders</h2>
-            {spent !== undefined && orders.length > 0 && (
-              <p className="text-sm text-muted">
-                {orders.length} order{orders.length === 1 ? '' : 's'} · {formatLkr(spent)} excluding
-                cancelled and returned
-              </p>
-            )}
-          </div>
-          {orders.length === 0 ? (
-            <p className="mt-3 text-sm text-muted">No orders yet.</p>
-          ) : (
-            <ul className="mt-3 divide-y divide-border text-sm">
-              {orders.map((o) => (
-                <li key={o.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
-                  <div>
-                    <Link
-                      href={`/admin/orders/${o.id}`}
-                      className="font-medium text-primary hover:underline"
-                    >
-                      {o.orderNumber}
-                    </Link>
-                    <span className="block text-xs text-muted">
-                      {formatOrderDate(o.createdAt)} · {o.itemCount} item
-                      {o.itemCount === 1 ? '' : 's'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="tabular">{formatLkr(o.totalCents)}</span>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusTone(o.status)}`}
-                    >
-                      {statusLabel(o.status)}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Stat label="Orders" value={orders ? orders.length : '—'} />
+        <Stat label="Spent" value={spent !== undefined ? formatLkr(spent) : '—'} note="excl. cancelled & returned" />
+        <Stat label="Offers by email" value={customer.marketingOptIn ? 'Subscribed' : 'Not subscribed'} />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
+        <Panel title="Contact">
+          <dl className="space-y-3 text-sm">
+            <div>
+              <dt className="text-muted">Email</dt>
+              <dd className="break-all">{customer.email}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Mobile</dt>
+              <dd className="tabular">{customer.phone ? formatLkPhone(customer.phone) : '—'}</dd>
+            </div>
+          </dl>
+          {can(me, 'audit:read') && (
+            <Link
+              href={`/admin/audit?actorType=customer&actorSub=${customer.sub}`}
+              className="mt-4 inline-block text-[13px] font-medium text-primary hover:underline"
+            >
+              See this customer’s activity
+            </Link>
           )}
-        </Card>
-      )}
+        </Panel>
+
+        {orders && (
+          <Panel title="Orders" flush>
+            {orders.length === 0 ? (
+              <EmptyState title="No orders yet" />
+            ) : (
+              <Table>
+                <Thead>
+                  <tr>
+                    <Th>Order</Th>
+                    <Th>Placed</Th>
+                    <Th className="text-right">Total</Th>
+                    <Th>Status</Th>
+                  </tr>
+                </Thead>
+                <Tbody>
+                  {orders.map((o) => (
+                    <Tr key={o.id}>
+                      <Td>
+                        <Link href={`/admin/orders/${o.id}`} className="font-medium text-primary hover:underline">
+                          {o.orderNumber}
+                        </Link>
+                        <span className="block text-xs text-muted">
+                          {o.itemCount} item{o.itemCount === 1 ? '' : 's'}
+                        </span>
+                      </Td>
+                      <Td className="whitespace-nowrap text-muted">{formatOrderDate(o.createdAt)}</Td>
+                      <Td className="text-right tabular">{formatLkr(o.totalCents)}</Td>
+                      <Td>
+                        <OrderStatusBadge status={o.status} />
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            )}
+          </Panel>
+        )}
+      </div>
     </div>
   );
 }

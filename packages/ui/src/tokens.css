@@ -44,6 +44,48 @@
 }
 
 /*
+ * Admin look (the shop is untouched): cooler neutrals and an indigo accent. Set on the admin
+ * root only (data-theme-root="admin"). Contrast: indigo-700 on white 8.9:1 (light primary),
+ * indigo-400 on #0b0c10 6.7:1 and dark text on indigo-400 6.7:1 (dark primary).
+ */
+[data-theme-root='admin'] {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-muted: #eff1f4;
+  --border: #e2e5ea;
+  --text: #15171c;
+  --text-muted: #5a6170;
+  --primary: #4338ca;
+  --primary-fg: #ffffff;
+  --secondary: #0f766e;
+  --secondary-text: #0f766e;
+  --accent: #b45309;
+  --accent-text: #92400e;
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #c81e1e;
+  --focus: #4f46e5;
+}
+[data-theme-root='admin'][data-theme='dark'] {
+  --bg: #0b0c10;
+  --surface: #12141a;
+  --surface-muted: #1a1d26;
+  --border: #272b37;
+  --text: #eceef3;
+  --text-muted: #9ba2b2;
+  --primary: #818cf8;
+  --primary-fg: #0b0c10;
+  --secondary: #5eead4;
+  --secondary-text: #5eead4;
+  --accent: #fbbf24;
+  --accent-text: #fcd34d;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --focus: #a5b4fc;
+}
+
+/*
  * The owner's brand colour (admin: Site settings > Appearance). The shop sets --brand-* on its
  * root only when one is chosen; the fallbacks are the defaults above. A festival look (below)
  * wins over the brand colour while it is on.
@@ -260,6 +302,10 @@
   html:has(body [data-theme='dark']),
   body:has([data-theme='dark']) {
     background: #0e0e0e;
+  }
+  html:has(body [data-theme-root='admin'][data-theme='dark']),
+  body:has([data-theme-root='admin'][data-theme='dark']) {
+    background: #0b0c10;
   }
   h1,
   h2,

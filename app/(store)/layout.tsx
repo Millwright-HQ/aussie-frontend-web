@@ -77,7 +77,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
           </div>
         </div>
       )}
-      <header className="border-b border-border bg-surface">
+      <header className="relative border-b border-border bg-surface">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6 lg:px-8">
           <div className="flex items-center gap-2">
             {categories.length > 0 && (
@@ -176,19 +176,37 @@ export default async function StoreLayout({ children }: { children: React.ReactN
               <li>
                 <Link
                   href="/shop"
-                  className="inline-flex min-h-11 items-center px-3 text-sm font-medium hover:underline"
+                  className="inline-flex min-h-11 items-center px-3 text-sm font-medium text-text/75 transition-colors hover:text-text"
                 >
                   Shop all
                 </Link>
               </li>
+              {/*
+                Hover opens a full-width panel and leaving closes it. A click does nothing, so
+                the panel never stays open. Keyboard users get it with Tab (focus-visible only).
+                A category with nothing below it is a plain link.
+              */}
               {categories.map((c) => (
-                <li key={c.id}>
-                  <details className="relative">
-                    <summary className="inline-flex min-h-11 cursor-pointer list-none items-center px-3 text-sm font-medium hover:underline">
+                <li key={c.id} className="group">
+                  {c.children.length > 0 ? (
+                    <>
+                      <button
+                        type="button"
+                        aria-haspopup="true"
+                        className="inline-flex min-h-11 cursor-default items-center px-3 text-sm font-medium text-text/75 transition-colors group-hover:text-text group-has-[:focus-visible]:text-text"
+                      >
+                        {c.name}
+                      </button>
+                      <DesktopMenu node={c} />
+                    </>
+                  ) : (
+                    <Link
+                      href={`/c/${c.slug}`}
+                      className="inline-flex min-h-11 items-center px-3 text-sm font-medium text-text/75 transition-colors hover:text-text"
+                    >
                       {c.name}
-                    </summary>
-                    <DesktopMenu node={c} />
-                  </details>
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -318,36 +336,38 @@ function MobileNode({ node, depth = 0 }: { node: CategoryNode; depth?: number })
   );
 }
 
-/** Dropdown: the second level as headings, with a few third-level links under each. */
+/**
+ * Mega menu: spans the whole header width and opens while the pointer (or focus) is on the
+ * category, closing as soon as it leaves. The second level are headings with third-level links.
+ */
 function DesktopMenu({ node }: { node: CategoryNode }) {
   return (
-    <div className="absolute top-11 left-0 z-40 max-h-[70dvh] w-[34rem] overflow-y-auto rounded-md border border-border bg-surface p-3 shadow-md">
-      <Link
-        href={`/c/${node.slug}`}
-        className="block rounded-sm px-3 py-2 text-sm font-medium hover:bg-surface-muted"
-      >
-        All {node.name}
-      </Link>
-      <div className="grid grid-cols-2 gap-x-4">
-        {node.children.map((s) => (
-          <div key={s.id} className="py-1">
-            <Link
-              href={`/c/${s.slug}`}
-              className="block rounded-sm px-3 py-1.5 text-sm font-medium hover:bg-surface-muted"
-            >
-              {s.name}
-            </Link>
-            {s.children.slice(0, 5).map((t) => (
-              <Link
-                key={t.id}
-                href={`/c/${t.slug}`}
-                className="block rounded-sm px-3 py-1 text-sm text-muted hover:bg-surface-muted hover:text-text"
-              >
-                {t.name}
+    <div className="invisible absolute inset-x-0 top-full z-40 border-y border-border bg-surface opacity-0 shadow-md transition-opacity duration-150 group-has-[:focus-visible]:visible group-has-[:focus-visible]:opacity-100 group-hover:visible group-hover:opacity-100">
+      <div className="mx-auto max-h-[70dvh] max-w-7xl overflow-y-auto px-4 py-6 md:px-6 lg:px-8">
+        <Link
+          href={`/c/${node.slug}`}
+          className="mb-4 inline-block text-sm font-semibold hover:text-primary"
+        >
+          All {node.name}
+        </Link>
+        <div className="grid grid-cols-3 gap-x-8 gap-y-6 xl:grid-cols-5">
+          {node.children.map((s) => (
+            <div key={s.id}>
+              <Link href={`/c/${s.slug}`} className="block py-1 text-sm font-medium hover:text-primary">
+                {s.name}
               </Link>
-            ))}
-          </div>
-        ))}
+              {s.children.slice(0, 6).map((t) => (
+                <Link
+                  key={t.id}
+                  href={`/c/${t.slug}`}
+                  className="block py-1 text-sm text-muted hover:text-text"
+                >
+                  {t.name}
+                </Link>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { Card, formatLkPhone } from '@aussie/ui';
 import { DISTRICTS } from '@aussie/validation';
 import { api } from '@/lib/api';
+import { getDistricts } from '@/lib/delivery';
 import { requireCustomerSession } from '@/lib/auth/session';
 import { AccountLayout } from '../account-nav';
 import { AddressActions, AddressForm, type AddressView } from '../forms';
@@ -11,7 +12,18 @@ const districtName = (code: string) => DISTRICTS.find((d) => d.code === code)?.n
 
 export default async function AddressesPage() {
   await requireCustomerSession('/account/addresses');
-  const { items } = await api<{ items: AddressView[] }>('customer', '/v1/identity/me/addresses');
+  const [{ items }, open] = await Promise.all([
+    api<{ items: AddressView[] }>('customer', '/v1/identity/me/addresses'),
+    getDistricts(),
+  ]);
+  // Districts we deliver to; an old address in a district now switched off keeps its own choice.
+  const choicesFor = (current?: string) =>
+    open.length === 0
+      ? undefined
+      : [
+          ...open,
+          ...DISTRICTS.filter((d) => d.code === current && !open.some((o) => o.code === d.code)).map((d) => ({ ...d })),
+        ];
 
   return (
     <AccountLayout current="/account/addresses">
@@ -44,7 +56,7 @@ export default async function AddressesPage() {
                   <details>
                     <summary className="cursor-pointer text-sm">Edit</summary>
                     <div className="mt-4">
-                      <AddressForm address={a} />
+                      <AddressForm address={a} districts={choicesFor(a.district)} />
                     </div>
                   </details>
                 </div>
@@ -56,7 +68,7 @@ export default async function AddressesPage() {
           <Card>
             <h3 className="text-h3">Add an address</h3>
             <div className="mt-4">
-              <AddressForm />
+              <AddressForm districts={choicesFor()} />
             </div>
           </Card>
         )}

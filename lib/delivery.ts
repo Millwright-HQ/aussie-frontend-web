@@ -9,6 +9,8 @@ export interface DistrictOption {
   code: string;
   name: string;
   province: string;
+  /** Fixed price (cents), when delivery is priced per district. */
+  feeCents?: number;
 }
 
 /** District list for the delivery-fee checker (cached; changes only with the seed). */

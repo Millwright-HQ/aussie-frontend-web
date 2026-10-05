@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert, Button } from '@aussie/ui';
+import { Alert, Button } from '@/app/admin/_ui';
 import { type ReactNode, useActionState, useEffect, useState } from 'react';
 import type { ActionState } from './actions';
 

@@ -2,6 +2,7 @@ import 'server-only';
 import type { ProblemDetails } from '@aussie/shared-types';
 import type { Audience } from './auth/config';
 import { getSession } from './auth/session';
+import { clientHeaders } from './client-headers';
 
 /** Base URL of the API Gateway (Floci locally, AWS in dev/prod). Set via NEXT_PUBLIC_API_URL. */
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
@@ -55,15 +56,18 @@ export async function api<T>(
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
     body?: unknown;
     headers?: Record<string, string>;
+    /** Only the authenticator-code step may call the API before the code has been entered. */
+    allowPendingMfa?: boolean;
   } = {},
 ): Promise<T> {
-  const session = await getSession(audience);
+  const session = await getSession(audience, { allowPending: init.allowPendingMfa === true });
   if (!session) throw new ApiError(401, { title: 'Unauthorized' });
   const res = await fetch(`${API_URL}${path}`, {
     method: init.method ?? 'GET',
     cache: 'no-store',
     signal: AbortSignal.timeout(10_000),
     headers: {
+      ...(await clientHeaders()),
       ...init.headers,
       authorization: `Bearer ${session.accessToken}`,
       ...(init.body !== undefined ? { 'content-type': 'application/json' } : {}),

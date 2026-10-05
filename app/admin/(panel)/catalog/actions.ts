@@ -212,7 +212,7 @@ export async function saveCategoryAction(_prev: ActionState, form: FormData): Pr
         body: parsed.data,
       }),
     id ? 'Category saved.' : `Category "${parsed.data.name}" added.`,
-    '/admin/categories',
+    '/admin/products/categories',
   );
 }
 
@@ -233,7 +233,7 @@ export async function saveBrandAction(_prev: ActionState, form: FormData): Promi
         body: parsed.data,
       }),
     id ? 'Brand saved.' : `Brand "${parsed.data.name}" added.`,
-    '/admin/brands',
+    '/admin/products/brands',
   );
 }
 
@@ -249,7 +249,7 @@ export async function deleteTaxonomyAction(
   return taxonomyCall(
     () => api('admin', `/v1/catalog/admin/${path}/${id}`, { method: 'DELETE' }),
     'Deleted.',
-    kind === 'category' ? '/admin/categories' : '/admin/brands',
+    kind === 'category' ? '/admin/products/categories' : '/admin/products/brands',
   );
 }
 
@@ -290,7 +290,7 @@ export async function saveAttributeAction(
           body: parsed.data,
         }),
       'Saved.',
-      `/admin/categories/${categoryId}`,
+      `/admin/products/categories/${categoryId}`,
     );
   }
   const parsed = attributeDefCreateSchema.safeParse({ ...fields, type: text(form, 'type') });
@@ -302,7 +302,7 @@ export async function saveAttributeAction(
         body: parsed.data,
       }),
     `"${parsed.data.label}" added.`,
-    `/admin/categories/${categoryId}`,
+    `/admin/products/categories/${categoryId}`,
   );
 }
 
@@ -329,7 +329,7 @@ export async function saveOptionAction(
           body: parsed.data,
         }),
       'Saved.',
-      `/admin/categories/${categoryId}`,
+      `/admin/products/categories/${categoryId}`,
     );
   }
   const parsed = optionDefCreateSchema.safeParse({ ...fields, kind: text(form, 'kind') });
@@ -341,7 +341,7 @@ export async function saveOptionAction(
         body: parsed.data,
       }),
     `"${parsed.data.label}" added.`,
-    `/admin/categories/${categoryId}`,
+    `/admin/products/categories/${categoryId}`,
   );
 }
 
@@ -363,7 +363,7 @@ export async function deleteDefinitionAction(
         method: 'DELETE',
       }),
     'Deleted.',
-    `/admin/categories/${categoryId}`,
+    `/admin/products/categories/${categoryId}`,
   );
 }
 

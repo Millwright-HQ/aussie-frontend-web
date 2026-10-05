@@ -30,13 +30,13 @@ export default async function SetupAuthenticatorPage() {
           alt="QR code for your authenticator app"
           width={200}
           height={200}
-          className="rounded-sm bg-white p-2"
+          className="rounded-[10px] bg-white p-2"
         />
         <details className="w-full text-sm">
           <summary className="cursor-pointer text-muted">
             Can't scan? Enter this key instead
           </summary>
-          <code className="mt-2 block rounded-sm bg-bg px-3 py-2 font-mono text-xs break-all tabular">
+          <code className="mt-2 block rounded-[10px] bg-bg px-3 py-2 font-mono text-xs break-all tabular">
             {grouped}
           </code>
         </details>

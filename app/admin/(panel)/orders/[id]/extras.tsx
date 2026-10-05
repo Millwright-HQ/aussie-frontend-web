@@ -1,5 +1,5 @@
 import type { Order } from '@aussie/shared-types';
-import { buttonVariants, Field, Input, Textarea } from '@aussie/ui';
+import { buttonVariants, Field, Input, Textarea } from '@/app/admin/_ui';
 import { ActionForm } from '../../action-form';
 import { addNoteAction, editShippingAction, refundAction } from '../actions';
 

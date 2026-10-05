@@ -66,6 +66,7 @@ describe('deliverySettingsSchema', () => {
     volumetricDivisor: 5000,
     showCodFeeSeparately: true,
     isVerified: false,
+    mode: 'WEIGHT',
   };
   it('accepts a valid settings object and rejects unknown or out-of-range fields', () => {
     expect(deliverySettingsSchema.safeParse(ok).success).toBe(true);

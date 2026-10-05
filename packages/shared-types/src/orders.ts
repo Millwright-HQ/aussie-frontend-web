@@ -218,3 +218,73 @@ export interface OrdersSummary {
   /** Shipped COD orders: cash the courier still has to bring back. */
   awaitingCash: { count: number; valueCents: number };
 }
+
+/** Sales analytics for a window of days ending now (Sri Lanka calendar days). */
+export interface OrdersAnalytics {
+  days: number;
+  /** First and last calendar day of the window, YYYY-MM-DD. */
+  from: string;
+  to: string;
+  /** One entry per day, oldest first, including days with no orders. */
+  series: { date: string; orders: number; revenueCents: number }[];
+  totals: {
+    orders: number;
+    /** Value of orders that were not cancelled or returned. */
+    revenueCents: number;
+    averageOrderCents: number;
+    delivered: number;
+    cancelled: number;
+    returned: number;
+    /** Share of orders cancelled or returned, 0..1. */
+    lossRate: number;
+    /** Average days from placing to delivery (delivered orders only; null when none). */
+    avgDeliveryDays: number | null;
+  };
+  /** The window of the same length just before, to show change. */
+  previous: { orders: number; revenueCents: number };
+  byStatus: Record<OrderStatus, number>;
+  byPayment: Record<PaymentMethod, { orders: number; revenueCents: number }>;
+  topProducts: { productId: string; name: string; units: number; revenueCents: number }[];
+  topDistricts: { district: string; orders: number; revenueCents: number }[];
+  customers: { signedIn: number; guests: number };
+  /** Work waiting for a person right now (not limited to the window). */
+  attention: {
+    awaitingConfirmation: number;
+    transferProofsToReview: number;
+    refundsDue: number;
+    toShip: number;
+  };
+}
+
+/** A bank-transfer slip was turned down: the customer is told why and can upload another. */
+export interface OrderPaymentRejectedDetail {
+  orderId: string;
+  orderNumber: string;
+  name: string;
+  phone: string;
+  email?: string;
+  totalCents: number;
+  reason: string;
+}
+
+/** Hold on the stock while a customer is in the checkout (owner decision 2026-10-05). */
+export const CHECKOUT_HOLD_MINUTES = 30;
+
+export interface CheckoutHold {
+  /** Becomes the order's id when the order is completed. */
+  holdId: string;
+  /** When the held stock goes back on sale if the order is not completed. */
+  expiresAt: string;
+  lines: { variantId: string; qty: number }[];
+}
+
+export interface CheckoutShortage {
+  variantId: string;
+  requested: number;
+  available: number;
+}
+
+/** Answer to "hold this bag": held, or what is short (the previous hold, if any, is kept). */
+export type CheckoutHoldResult =
+  | ({ ok: true } & CheckoutHold)
+  | { ok: false; shortages: CheckoutShortage[]; hold?: CheckoutHold; message?: string };

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@aussie/ui';
+import { Button } from '@/app/admin/_ui';
 
 export function PrintButton() {
   return (

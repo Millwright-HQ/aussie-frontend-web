@@ -1,6 +1,7 @@
 export * from './permissions.js';
 export * from './http.js';
 export * from './events.js';
+export * from './audit.js';
 
 /** Money is always integer cents (LKR × 100). */
 export type Cents = number;

@@ -1,3 +1,4 @@
+import { ADMIN_PASSWORD_MIN } from '@aussie/validation';
 import { redirect } from 'next/navigation';
 import { readFlow } from '@/lib/auth/session';
 import { setNewPassword } from '../actions';
@@ -10,25 +11,16 @@ export default async function NewPasswordPage() {
   const flow = await readFlow('admin');
   if (flow?.step !== 'new-password') redirect('/admin/login');
   return (
-    <AuthCard title="Set your password" subtitle="Replace the temporary password you were emailed.">
+    <AuthCard
+      wide
+      title="Set your password"
+      subtitle="Replace the temporary password you were emailed. Each requirement ticks off as you type."
+    >
       <AuthForm
         action={setNewPassword}
         submitLabel="Save password"
-        fields={[
-          {
-            id: 'password',
-            label: 'New password',
-            type: 'password',
-            autoComplete: 'new-password',
-            hint: 'At least 12 characters with upper and lower case, a number and a symbol.',
-          },
-          {
-            id: 'confirm',
-            label: 'Confirm password',
-            type: 'password',
-            autoComplete: 'new-password',
-          },
-        ]}
+        fields={[]}
+        passwordPair={{ minLength: ADMIN_PASSWORD_MIN }}
       />
     </AuthCard>
   );

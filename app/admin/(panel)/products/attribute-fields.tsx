@@ -1,7 +1,7 @@
 'use client';
 
 import type { AttributeDef } from '@aussie/shared-types';
-import { Checkbox, Field, Input, Select, Textarea } from '@aussie/ui';
+import { Checkbox, Field, Input, Select, Textarea } from '@/app/admin/_ui';
 import type { AttributeField, AttributeFields } from '@/lib/editor-model';
 
 /** One input per attribute the product's categories ask for, chosen by the attribute's type. */

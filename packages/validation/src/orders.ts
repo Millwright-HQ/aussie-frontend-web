@@ -36,8 +36,17 @@ export const checkoutSchema = z
     email: optionalEmail,
     items: itemsSchema,
     paymentMethod: z.enum(PAYMENT_METHODS).default('COD'),
+    /** The stock hold made when the checkout opened; the order takes over that hold. */
+    holdId: ulidSchema.optional(),
+    /** Bank transfer through a hold: the slip uploaded for that hold (from `checkout/proof-upload`). */
+    proofUploadId: ulidSchema.optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((c, ctx) => {
+    if (c.proofUploadId && !c.holdId) {
+      ctx.addIssue({ code: 'custom', path: ['proofUploadId'], message: 'Upload the slip again' });
+    }
+  });
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
 export type CheckoutRequest = z.input<typeof checkoutSchema>;
 
@@ -240,3 +249,24 @@ export const lookupSchema = z
   })
   .strict();
 export type LookupInput = z.infer<typeof lookupSchema>;
+
+// ── Checkout hold ────────────────────────────────────────────────────────────
+
+export const holdRequestSchema = z
+  .object({
+    items: itemsSchema,
+    /** The hold from an earlier call (to change its quantities); absent for the first one. */
+    holdId: ulidSchema.optional(),
+  })
+  .strict();
+export type HoldRequest = z.infer<typeof holdRequestSchema>;
+
+export const holdReleaseSchema = z.object({ holdId: ulidSchema }).strict();
+
+export const holdProofRequestSchema = z
+  .object({
+    holdId: ulidSchema,
+    contentType: z.enum(PROOF_CONTENT_TYPES, { message: 'Upload a JPG, PNG, WebP or PDF' }),
+  })
+  .strict();
+export type HoldProofRequest = z.infer<typeof holdProofRequestSchema>;

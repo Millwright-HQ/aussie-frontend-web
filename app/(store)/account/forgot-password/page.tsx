@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { LocalMailHint } from '@/components/local-mail-hint';
 import { readFlow } from '@/lib/auth/session';
 import { ForgotPasswordForm, ResetPasswordForm } from '../forms';
 import { AuthShell } from '../shell';
@@ -28,6 +29,7 @@ export default async function ForgotPasswordPage({
       }
     >
       {awaitingCode ? <ResetPasswordForm /> : <ForgotPasswordForm />}
+      {awaitingCode && <LocalMailHint to={flow?.email} />}
     </AuthShell>
   );
 }

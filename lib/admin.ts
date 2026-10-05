@@ -11,6 +11,10 @@ export interface AdminMe {
   roleId: string;
   status: 'ACTIVE' | 'DISABLED';
   permissions: Permission[];
+  /** Small profile picture (data URL). */
+  avatar?: string;
+  /** The authenticator-app second step is on. */
+  totpEnabled?: boolean;
 }
 
 export interface AdminRow {
@@ -21,6 +25,8 @@ export interface AdminRow {
   status: 'ACTIVE' | 'DISABLED';
   createdAt: string;
   lastLoginAt?: string;
+  avatar?: string;
+  totpEnabled?: boolean;
 }
 
 export interface RoleRow {

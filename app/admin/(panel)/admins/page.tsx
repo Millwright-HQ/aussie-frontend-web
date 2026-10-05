@@ -1,4 +1,4 @@
-import { Card, Field, Input, Select } from '@aussie/ui';
+import { KeyRound, ShieldCheck, ShieldOff, Trash2, UserCheck, UserX } from 'lucide-react';
 import { type AdminRow, formatDateTime, requirePermission, type RoleRow } from '@/lib/admin';
 import { api } from '@/lib/api';
 import { ActionForm } from '../action-form';
@@ -9,6 +9,25 @@ import {
   resetAdminPassword,
   setAdminStatus,
 } from '../actions';
+import {
+  Avatar,
+  Badge,
+  Checkbox,
+  ConfirmAction,
+  Field,
+  Input,
+  PageHeader,
+  Panel,
+  RowActions,
+  Select,
+  Table,
+  TableShell,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from '@/app/admin/_ui';
 
 export const metadata = { title: 'Admins' };
 
@@ -21,19 +40,147 @@ export default async function AdminsPage() {
   const roleName = (id: string) => roles.find((r) => r.id === id)?.name ?? id;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-h1">Admins</h1>
-        <p className="mt-1 text-muted">
-          New admins get a temporary password by email. On first sign-in they can set up an
-          authenticator app or skip it and do it later from the Security page.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Admins"
+        description="New admins get a temporary password by email. On first sign-in they can turn on the authenticator app from their profile, or do it later."
+      />
 
-      <Card>
-        <h2 className="text-h3">Invite an admin</h2>
-        <ActionForm action={inviteAdmin} submitLabel="Send invitation" className="mt-4">
-          <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
+        <TableShell className="self-start">
+          <Table>
+            <Thead>
+              <tr>
+                <Th>Admin</Th>
+                <Th>Role</Th>
+                <Th>Status</Th>
+                <Th>Last sign-in</Th>
+                <Th>
+                  <span className="sr-only">Actions</span>
+                </Th>
+              </tr>
+            </Thead>
+            <Tbody>
+              {admins.map((a) => {
+                const self = a.sub === me.sub;
+                return (
+                  <Tr key={a.sub} className="align-top">
+                    <Td>
+                      <div className="flex items-center gap-3">
+                        <Avatar name={a.name} {...(a.avatar ? { src: a.avatar } : {})} size={40} />
+                        <div className="min-w-0">
+                          <p className="truncate font-medium">
+                            {a.name} {self && <span className="text-xs font-normal text-muted">(you)</span>}
+                          </p>
+                          <p className="truncate text-[13px] text-muted">{a.email}</p>
+                          <p className="mt-0.5 flex items-center gap-1 text-xs text-muted">
+                            {a.totpEnabled ? (
+                              <>
+                                <ShieldCheck aria-hidden size={12} className="text-success" /> Authenticator on
+                              </>
+                            ) : (
+                              <>
+                                <ShieldOff aria-hidden size={12} /> Authenticator off
+                              </>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </Td>
+                    <Td>
+                      {self ? (
+                        <span>{roleName(a.roleId)}</span>
+                      ) : (
+                        <ActionForm action={changeRole} submitLabel="Save" size="sm" variant="outline" inline>
+                          <input type="hidden" name="sub" value={a.sub} />
+                          <label className="sr-only" htmlFor={`role-${a.sub}`}>
+                            Role for {a.name}
+                          </label>
+                          <Select id={`role-${a.sub}`} name="roleId" defaultValue={a.roleId} className="h-9 w-44">
+                            {roles.map((r) => (
+                              <option key={r.id} value={r.id}>
+                                {r.name}
+                              </option>
+                            ))}
+                          </Select>
+                        </ActionForm>
+                      )}
+                    </Td>
+                    <Td>
+                      <Badge tone={a.status === 'ACTIVE' ? 'success' : 'danger'}>
+                        {a.status === 'ACTIVE' ? 'Active' : 'Disabled'}
+                      </Badge>
+                    </Td>
+                    <Td className="whitespace-nowrap text-muted">{formatDateTime(a.lastLoginAt)}</Td>
+                    <Td>
+                      {self ? (
+                        <p className="text-right text-xs text-muted">Another admin manages your account.</p>
+                      ) : (
+                        <RowActions>
+                          <ConfirmAction
+                            iconOnly
+                            tone="primary"
+                            action={setAdminStatus}
+                            fields={{ sub: a.sub, action: a.status === 'ACTIVE' ? 'disable' : 'enable' }}
+                            label={a.status === 'ACTIVE' ? `Disable ${a.name}` : `Enable ${a.name}`}
+                            title={a.status === 'ACTIVE' ? `Disable ${a.name}?` : `Enable ${a.name}?`}
+                            description={
+                              a.status === 'ACTIVE'
+                                ? 'They are signed out everywhere and cannot sign in until you enable them again.'
+                                : 'They can sign in again with their existing password.'
+                            }
+                            confirmLabel={a.status === 'ACTIVE' ? 'Disable' : 'Enable'}
+                          >
+                            {a.status === 'ACTIVE' ? (
+                              <UserX aria-hidden size={16} />
+                            ) : (
+                              <UserCheck aria-hidden size={16} />
+                            )}
+                          </ConfirmAction>
+                          {a.status === 'ACTIVE' && (
+                            <ConfirmAction
+                              iconOnly
+                              tone="primary"
+                              action={resetAdminPassword}
+                              fields={{ sub: a.sub }}
+                              label={`Reset password for ${a.name}`}
+                              title={`Reset ${a.name}'s password?`}
+                              description="They are signed out and emailed a new temporary password."
+                              confirmLabel="Reset password"
+                              extra={
+                                <Checkbox
+                                  id={`reset-auth-${a.sub}`}
+                                  name="resetAuthenticator"
+                                  label="Also turn off their authenticator app (lost phone)"
+                                />
+                              }
+                            >
+                              <KeyRound aria-hidden size={16} />
+                            </ConfirmAction>
+                          )}
+                          <ConfirmAction
+                            iconOnly
+                            action={deleteAdmin}
+                            fields={{ sub: a.sub }}
+                            label={`Delete ${a.name}`}
+                            title={`Delete ${a.name} permanently?`}
+                            description="Removes their sign-in and profile. This cannot be undone. Their past actions stay in the audit log."
+                            confirmLabel="Delete admin"
+                          >
+                            <Trash2 aria-hidden size={16} />
+                          </ConfirmAction>
+                        </RowActions>
+                      )}
+                    </Td>
+                  </Tr>
+                );
+              })}
+            </Tbody>
+          </Table>
+        </TableShell>
+
+        <Panel title="Invite an admin" className="self-start">
+          <ActionForm action={inviteAdmin} submitLabel="Send invitation">
             <Field id="invite-name" label="Full name">
               <Input id="invite-name" name="name" required autoComplete="off" />
             </Field>
@@ -52,135 +199,8 @@ export default async function AdminsPage() {
                 ))}
               </Select>
             </Field>
-          </div>
-        </ActionForm>
-      </Card>
-
-      <div className="overflow-x-auto rounded-md border border-border">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="bg-surface text-xs tracking-wide text-muted uppercase">
-            <tr>
-              <th className="px-4 py-3 font-medium">Admin</th>
-              <th className="px-4 py-3 font-medium">Role</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Last sign-in</th>
-              <th className="px-4 py-3 font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {admins.map((a) => {
-              const self = a.sub === me.sub;
-              return (
-                <tr key={a.sub} className="align-top">
-                  <td className="px-4 py-3">
-                    <p className="font-medium">
-                      {a.name} {self && <span className="text-xs text-muted">(you)</span>}
-                    </p>
-                    <p className="text-muted">{a.email}</p>
-                  </td>
-                  <td className="px-4 py-3">{roleName(a.roleId)}</td>
-                  <td className="px-4 py-3">
-                    <span className={a.status === 'ACTIVE' ? 'text-success' : 'text-danger'}>
-                      {a.status === 'ACTIVE' ? 'Active' : 'Disabled'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-muted">{formatDateTime(a.lastLoginAt)}</td>
-                  <td className="space-y-2 px-4 py-3">
-                    {self ? (
-                      <p className="text-xs text-muted">
-                        Another admin must change your role or status.
-                      </p>
-                    ) : (
-                      <>
-                        <ActionForm
-                          action={changeRole}
-                          submitLabel="Change"
-                          size="sm"
-                          variant="outline"
-                          inline
-                        >
-                          <input type="hidden" name="sub" value={a.sub} />
-                          <label className="sr-only" htmlFor={`role-${a.sub}`}>
-                            Role for {a.name}
-                          </label>
-                          <Select
-                            id={`role-${a.sub}`}
-                            name="roleId"
-                            defaultValue={a.roleId}
-                            className="min-h-9 w-44"
-                          >
-                            {roles.map((r) => (
-                              <option key={r.id} value={r.id}>
-                                {r.name}
-                              </option>
-                            ))}
-                          </Select>
-                        </ActionForm>
-                        <details>
-                          <summary className="cursor-pointer text-xs text-muted">
-                            {a.status === 'ACTIVE' ? 'Disable…' : 'Enable…'}
-                          </summary>
-                          <ActionForm
-                            action={setAdminStatus}
-                            submitLabel={
-                              a.status === 'ACTIVE' ? `Disable ${a.name}` : `Enable ${a.name}`
-                            }
-                            variant={a.status === 'ACTIVE' ? 'danger' : 'secondary'}
-                            size="sm"
-                            className="mt-2"
-                          >
-                            <input type="hidden" name="sub" value={a.sub} />
-                            <input
-                              type="hidden"
-                              name="action"
-                              value={a.status === 'ACTIVE' ? 'disable' : 'enable'}
-                            />
-                          </ActionForm>
-                        </details>
-                        {a.status === 'ACTIVE' && (
-                          <details>
-                            <summary className="cursor-pointer text-xs text-muted">
-                              Reset password…
-                            </summary>
-                            <ActionForm
-                              action={resetAdminPassword}
-                              submitLabel={`Email ${a.name} a new temporary password`}
-                              variant="secondary"
-                              size="sm"
-                              className="mt-2"
-                            >
-                              <input type="hidden" name="sub" value={a.sub} />
-                              <label className="flex items-center gap-2 text-xs">
-                                <input type="checkbox" name="resetAuthenticator" />
-                                Also turn off their authenticator app (lost phone)
-                              </label>
-                            </ActionForm>
-                          </details>
-                        )}
-                        <details>
-                          <summary className="cursor-pointer text-xs text-danger">Delete…</summary>
-                          <ActionForm
-                            action={deleteAdmin}
-                            submitLabel={`Delete ${a.name} permanently`}
-                            variant="danger"
-                            size="sm"
-                            className="mt-2"
-                          >
-                            <input type="hidden" name="sub" value={a.sub} />
-                            <p className="text-xs text-muted">
-                              Removes their sign-in and profile. This cannot be undone. Their past
-                              actions stay in the audit log.
-                            </p>
-                          </ActionForm>
-                        </details>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+          </ActionForm>
+        </Panel>
       </div>
     </div>
   );

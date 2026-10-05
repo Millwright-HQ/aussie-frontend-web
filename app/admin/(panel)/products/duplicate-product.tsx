@@ -1,8 +1,9 @@
 'use client';
 
-import { Button } from '@aussie/ui';
+import { Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
+import { Button } from '@/app/admin/_ui';
 import { duplicateProductAction } from '../catalog/actions';
 
 /** Starts a new draft from this product, handy for items that differ only slightly. */
@@ -15,8 +16,8 @@ export function DuplicateProduct({ productId }: { productId: string }) {
       <Button
         type="button"
         variant="outline"
-        size="sm"
         disabled={pending}
+        title="Copies the details and variants. Pictures are not copied."
         onClick={() =>
           startTransition(async () => {
             const r = await duplicateProductAction(productId);
@@ -25,11 +26,9 @@ export function DuplicateProduct({ productId }: { productId: string }) {
           })
         }
       >
-        {pending ? 'Copying…' : 'Duplicate as a new draft'}
+        <Copy aria-hidden size={15} />
+        {pending ? 'Copying…' : 'Duplicate as draft'}
       </Button>
-      <span className="text-xs text-muted">
-        Copies the details and variants. Pictures are not copied.
-      </span>
       {error && <p className="w-full text-sm text-danger">{error}</p>}
     </div>
   );

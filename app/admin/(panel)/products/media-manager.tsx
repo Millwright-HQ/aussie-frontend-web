@@ -1,7 +1,8 @@
 'use client';
 
 import type { ProductImage, Variant } from '@aussie/shared-types';
-import { Alert, Button, Card, Input, Select } from '@aussie/ui';
+import { ChevronLeft, ChevronRight, ImagePlus, Trash2 } from 'lucide-react';
+import { Alert, Button, Card, ConfirmButton, IconButton, Input, Select } from '@/app/admin/_ui';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useTransition } from 'react';
@@ -96,7 +97,7 @@ export function MediaManager({
   return (
     <Card>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-h3">Images</h2>
+        <h2 className="text-[15px] font-semibold">Images</h2>
         <p className="text-xs text-muted">
           JPEG, PNG, WebP or AVIF up to 10 MB · at least 200 × 200 px · first product image is the
           cover
@@ -114,7 +115,7 @@ export function MediaManager({
           setDragOver(false);
           void uploadFiles([...e.dataTransfer.files]);
         }}
-        className={`mt-4 flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed p-6 text-sm ${dragOver ? 'border-primary bg-surface-muted' : 'border-border'}`}
+        className={`mt-4 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 text-sm transition-colors ${dragOver ? 'border-primary bg-primary/5' : 'border-border'}`}
       >
         <p className="text-muted">Drag images here, or</p>
         <Button
@@ -124,6 +125,7 @@ export function MediaManager({
           onClick={() => fileInput.current?.click()}
           disabled={uploading.length > 0}
         >
+          <ImagePlus aria-hidden size={14} />
           {uploading.length ? `Uploading ${uploading.length}…` : 'Choose files'}
         </Button>
         <input
@@ -149,8 +151,8 @@ export function MediaManager({
       {images.length > 0 && (
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {images.map((img, i) => (
-            <li key={img.id} className="rounded-sm border border-border p-3">
-              <div className="relative aspect-square overflow-hidden rounded-sm bg-surface-muted">
+            <li key={img.id} className="rounded-xl border border-border bg-surface p-3">
+              <div className="relative aspect-square overflow-hidden rounded-[10px] bg-surface-muted">
                 {img.status === 'READY' ? (
                   <Image
                     src={imageUrl(img.base)}
@@ -181,39 +183,33 @@ export function MediaManager({
                 disabled={pending}
               />
               <div className="mt-2 flex flex-wrap items-center gap-1">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
+                <IconButton
+                  label="Move earlier"
                   disabled={pending || i === 0}
                   onClick={() => move(i, -1)}
-                  aria-label="Move earlier"
                 >
-                  ←
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
+                  <ChevronLeft aria-hidden size={16} />
+                </IconButton>
+                <IconButton
+                  label="Move later"
                   disabled={pending || i === images.length - 1}
                   onClick={() => move(i, 1)}
-                  aria-label="Move later"
                 >
-                  →
-                </Button>
-                <details className="ml-auto">
-                  <summary className="cursor-pointer text-sm text-danger">Delete…</summary>
-                  <Button
-                    type="button"
-                    variant="danger"
-                    size="sm"
-                    className="mt-2"
+                  <ChevronRight aria-hidden size={16} />
+                </IconButton>
+                <span className="ml-auto">
+                  <ConfirmButton
+                    iconOnly
+                    label="Delete image"
+                    title="Delete this image?"
+                    description="It is removed from the product and from the store. This cannot be undone."
+                    confirmLabel="Delete image"
                     disabled={pending}
-                    onClick={() => run(() => deleteImageAction(productId, img.id))}
+                    onConfirm={() => run(() => deleteImageAction(productId, img.id))}
                   >
-                    Delete image
-                  </Button>
-                </details>
+                    <Trash2 aria-hidden size={16} />
+                  </ConfirmButton>
+                </span>
               </div>
             </li>
           ))}
@@ -250,7 +246,7 @@ function ImageDetails({
         id={`alt-${image.id}`}
         value={alt}
         onChange={(e) => setAlt(e.target.value)}
-        className="min-h-9 text-sm"
+        className="h-9 text-sm"
       />
       {variants.length > 1 && (
         <>
@@ -261,7 +257,7 @@ function ImageDetails({
             id={`var-${image.id}`}
             value={variantId}
             onChange={(e) => setVariantId(e.target.value)}
-            className="min-h-9 text-sm"
+            className="h-9 text-sm"
           >
             <option value="">All variants</option>
             {variants.map((v) => (

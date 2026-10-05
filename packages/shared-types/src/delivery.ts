@@ -1,6 +1,15 @@
 /** Delivery shapes (docs/DELIVERY_RATES.md). Money in cents, weight in grams, size in cm. */
 
+/**
+ * How delivery is priced (owner decision 2026-10-05):
+ * - FIXED: every enabled district has its own price. No weights or sizes are looked at.
+ * - WEIGHT: the parcel's weight (or size) and the district's zone decide the price (weight bands).
+ */
+export type DeliveryMode = 'FIXED' | 'WEIGHT';
+
 export interface DeliverySettings {
+  /** Which pricing is in use right now. The other one is kept so it can be switched back on. */
+  mode: DeliveryMode;
   /** Flat cash-on-delivery handling fee added to every order. */
   codFeeCents: number;
   /** Orders at or above this subtotal get free delivery; 0 = off. */
@@ -39,6 +48,10 @@ export interface DeliveryDistrict {
   name: string;
   province: string;
   zoneId: string;
+  /** Off = not offered at checkout and not in any district list. */
+  enabled: boolean;
+  /** The price in FIXED mode (cents). Kept while the mode is WEIGHT. */
+  fixedFeeCents: number;
 }
 
 export interface DeliveryConfig {
@@ -54,7 +67,9 @@ export interface DeliveryQuote {
   totalFeeCents: number;
   /** True when the free-delivery threshold removed the delivery fee. */
   freeDelivery: boolean;
+  /** 0 in FIXED mode (weight is not used). */
   chargeableWeightG: number;
+  mode: DeliveryMode;
   zone: { id: string; name: string };
   estimatedDays?: { min: number; max: number };
   showCodFeeSeparately: boolean;
@@ -69,6 +84,7 @@ export interface DeliveryChange {
 }
 
 export const DEFAULT_DELIVERY_SETTINGS: DeliverySettings = {
+  mode: 'WEIGHT',
   codFeeCents: 0,
   freeDeliveryThresholdCents: 0,
   maxWeightG: 20_000,

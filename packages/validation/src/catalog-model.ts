@@ -2,7 +2,6 @@ import {
   type AttributeDef,
   type AttributeValue,
   type Category,
-  MAX_CATEGORY_DEPTH,
   type ProductSpec,
 } from '@aussie/shared-types';
 
@@ -25,7 +24,7 @@ export function ancestorChain(categories: Category[], id: string): Category[] {
   const chain: Category[] = [];
   const seen = new Set<string>();
   let current = byId.get(id);
-  while (current && !seen.has(current.id) && chain.length < MAX_CATEGORY_DEPTH + 1) {
+  while (current && !seen.has(current.id)) {
     chain.push(current);
     seen.add(current.id);
     current = current.parentId ? byId.get(current.parentId) : undefined;

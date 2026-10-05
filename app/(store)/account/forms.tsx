@@ -1,9 +1,10 @@
 'use client';
 
 import { Alert, Button, Checkbox, Field, Input, Select, Textarea, formatLkPhone } from '@aussie/ui';
-import { DISTRICTS } from '@aussie/validation';
+import { CUSTOMER_PASSWORD_MIN, DISTRICTS } from '@aussie/validation';
 import Link from 'next/link';
 import { useActionState } from 'react';
+import { NewPasswordPair } from '@/components/password-field';
 import {
   changePasswordAction,
   deleteAddressAction,
@@ -56,9 +57,6 @@ function Submit({
     </Button>
   );
 }
-
-// nosemgrep: ajinabraham.njsscan.generic.hardcoded_secrets.node_password -- UI hint text, not a credential
-const PASSWORD_HINT = 'At least 10 characters with upper and lower case, a number and a symbol.';
 
 // ── Auth ────────────────────────────────────────────────────────────────────
 
@@ -119,16 +117,13 @@ export function SignUpForm() {
           invalid={!!err('email')}
         />
       </Field>
-      <Field id="password" label="Password" hint={PASSWORD_HINT} error={err('password')}>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="new-password"
-          required
-          invalid={!!err('password')}
-          hasHint
-        />
-      </Field>
+      <NewPasswordPair
+        single
+        idPrefix="signup"
+        minLength={CUSTOMER_PASSWORD_MIN}
+        passwordLabel="Password"
+        errors={state.fieldErrors}
+      />
       <Checkbox id="marketingOptIn" label="Send me offers and new arrivals (optional)" />
       <div>
         <Checkbox
@@ -225,16 +220,12 @@ export function ResetPasswordForm() {
           autoFocus
         />
       </Field>
-      <Field id="password" label="New password" hint={PASSWORD_HINT} error={err('password')}>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="new-password"
-          required
-          invalid={!!err('password')}
-          hasHint
-        />
-      </Field>
+      <NewPasswordPair
+        single
+        idPrefix="reset"
+        minLength={CUSTOMER_PASSWORD_MIN}
+        errors={state.fieldErrors}
+      />
       <Submit pending={pending}>Set new password</Submit>
     </form>
   );
@@ -319,17 +310,26 @@ export interface AddressView {
   isDefault: boolean;
 }
 
-const PROVINCES = [...new Set(DISTRICTS.map((d) => d.province))];
+interface DistrictChoice {
+  code: string;
+  name: string;
+  province: string;
+}
 
 function AddressFields({
   a,
   err,
   prefix,
+  districts,
 }: {
   a?: Partial<AddressView>;
   err: (k: string) => string | undefined;
   prefix: string;
+  /** Districts we deliver to (switched on). Defaults to all, for forms that do not know. */
+  districts?: DistrictChoice[] | undefined;
 }) {
+  const choices: DistrictChoice[] = districts ?? DISTRICTS.map((d) => ({ ...d }));
+  const provinces = [...new Set(choices.map((d) => d.province))];
   const id = (k: string) => `${prefix}-${k}`;
   return (
     <div className="grid gap-5 sm:grid-cols-2">
@@ -396,9 +396,9 @@ function AddressFields({
           <option value="" disabled>
             Choose a district
           </option>
-          {PROVINCES.map((p) => (
+          {provinces.map((p) => (
             <optgroup key={p} label={`${p} Province`}>
-              {DISTRICTS.filter((d) => d.province === p).map((d) => (
+              {choices.filter((d) => d.province === p).map((d) => (
                 <option key={d.code} value={d.code}>
                   {d.name}
                 </option>
@@ -441,16 +441,18 @@ function AddressFields({
 export function AddressForm({
   address,
   onSavedLabel,
+  districts,
 }: {
   address?: AddressView;
   onSavedLabel?: string;
+  districts?: DistrictChoice[];
 }) {
   const { state, formAction, pending, err } = useForm(saveAddressAction);
   return (
     <form action={formAction} className="space-y-5" noValidate>
       <Messages state={state} />
       {address && <input type="hidden" name="id" value={address.id} />}
-      <AddressFields a={address} err={err} prefix={address?.id ?? 'new'} />
+      <AddressFields a={address} err={err} prefix={address?.id ?? 'new'} districts={districts} />
       <Submit pending={pending} className="w-full sm:w-auto">
         {onSavedLabel ?? (address ? 'Save address' : 'Add address')}
       </Submit>
@@ -458,13 +460,21 @@ export function AddressForm({
   );
 }
 
-export function WelcomeForm({ next, name }: { next: string; name: string }) {
+export function WelcomeForm({
+  next,
+  name,
+  districts,
+}: {
+  next: string;
+  name: string;
+  districts?: DistrictChoice[];
+}) {
   const { state, formAction, pending, err } = useForm(welcomeAction);
   return (
     <form action={formAction} className="space-y-5" noValidate>
       <Messages state={state} />
       <input type="hidden" name="next" value={next} />
-      <AddressFields a={{ fullName: name }} err={err} prefix="welcome" />
+      <AddressFields a={{ fullName: name }} err={err} prefix="welcome" districts={districts} />
       <Submit pending={pending}>Save delivery details</Submit>
     </form>
   );
@@ -499,32 +509,19 @@ export function AddressActions({ id, isDefault }: { id: string; isDefault: boole
 }
 
 export function ChangePasswordForm() {
-  const { state, formAction, pending, err } = useForm(changePasswordAction);
+  const { state, formAction, pending } = useForm(changePasswordAction);
   return (
     <form action={formAction} className="space-y-5" noValidate>
       <Messages state={state} />
       <Field id="current" label="Current password">
         <Input id="current" type="password" autoComplete="current-password" required />
       </Field>
-      <Field id="password" label="New password" hint={PASSWORD_HINT} error={err('password')}>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="new-password"
-          required
-          invalid={!!err('password')}
-          hasHint
-        />
-      </Field>
-      <Field id="confirm" label="Confirm new password" error={err('confirm')}>
-        <Input
-          id="confirm"
-          type="password"
-          autoComplete="new-password"
-          required
-          invalid={!!err('confirm')}
-        />
-      </Field>
+      <NewPasswordPair
+        idPrefix="change"
+        minLength={CUSTOMER_PASSWORD_MIN}
+        confirmLabel="Confirm new password"
+        errors={state.fieldErrors}
+      />
       <Submit pending={pending} className="w-full sm:w-auto">
         Change password
       </Submit>

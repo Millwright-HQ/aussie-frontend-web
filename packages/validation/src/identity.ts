@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { PERMISSIONS } from '@aussie/shared-types';
-import { lkMobileSchema, optionalText } from './schemas.js';
+import { lkMobileSchema, optionalText, paginationSchema } from './schemas.js';
 
 /** Must match the Cognito pool password policies in infra/lib/identity-stack.ts. */
 const passwordSchema = (minLength: number) =>
@@ -15,6 +15,30 @@ const passwordSchema = (minLength: number) =>
 
 export const customerPasswordSchema = passwordSchema(10);
 export const adminPasswordSchema = passwordSchema(12);
+
+export const CUSTOMER_PASSWORD_MIN = 10;
+export const ADMIN_PASSWORD_MIN = 12;
+
+export interface PasswordCheck {
+  id: 'length' | 'lower' | 'upper' | 'digit' | 'symbol';
+  label: string;
+  ok: boolean;
+}
+
+/**
+ * Each password rule with whether the typed password meets it, for a live checklist next to the
+ * field. Same rules as the schemas above (and as the Cognito pools), so the list and the server
+ * can never disagree.
+ */
+export function passwordChecks(password: string, minLength: number): PasswordCheck[] {
+  return [
+    { id: 'length', label: `At least ${minLength} characters`, ok: password.length >= minLength },
+    { id: 'lower', label: 'One lowercase letter (a-z)', ok: /[a-z]/.test(password) },
+    { id: 'upper', label: 'One uppercase letter (A-Z)', ok: /[A-Z]/.test(password) },
+    { id: 'digit', label: 'One number (0-9)', ok: /d/.test(password) },
+    { id: 'symbol', label: 'One symbol (for example ! ? # @)', ok: /[^A-Za-z0-9]/.test(password) },
+  ];
+}
 
 export const emailSchema = z.string().trim().toLowerCase().email('Enter a valid email').max(254);
 export const nameSchema = z.string().trim().min(2, 'Enter your full name').max(100);
@@ -100,3 +124,45 @@ export const assignRoleSchema = z.object({ roleId: roleIdSchema }).strict();
 export const resetAdminPasswordSchema = z
   .object({ resetAuthenticator: z.boolean().default(false) })
   .strict();
+
+// ── Admin self-service (profile, authenticator) ──────────────────────────────
+
+/** A small square picture kept on the admin's profile as a data URL (about 128 px, under 40 KB). */
+export const avatarSchema = z
+  .string()
+  .max(40_000, 'Picture is too large')
+  .regex(/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/, 'Use a PNG, JPEG or WebP picture');
+
+/** `avatar: null` removes the picture. */
+export const adminProfileUpdateSchema = z
+  .object({
+    name: nameSchema.optional(),
+    email: emailSchema.optional(),
+    avatar: z.union([avatarSchema, z.null()]).optional(),
+  })
+  .strict()
+  .refine((v) => Object.keys(v).length > 0, 'Nothing to change');
+
+export type AdminProfileUpdate = z.infer<typeof adminProfileUpdateSchema>;
+
+export const authenticatorCodeSchema = z.object({ code: sixDigitCodeSchema }).strict();
+
+// ── Audit log query ──────────────────────────────────────────────────────────
+
+const isoTime = z.string().datetime({ offset: true });
+
+export const auditQuerySchema = paginationSchema
+  .extend({
+    actorType: z.enum(['admin', 'customer', 'guest', 'system']).optional(),
+    actorSub: z.string().trim().min(1).max(80).optional(),
+    service: z.string().trim().min(1).max(30).optional(),
+    action: z.string().trim().min(1).max(120).optional(),
+    outcome: z.enum(['success', 'failed', 'denied']).optional(),
+    kind: z.enum(['change', 'view']).optional(),
+    q: z.string().trim().min(1).max(100).optional(),
+    from: isoTime.optional(),
+    to: isoTime.optional(),
+  })
+  .strict();
+
+export type AuditQuery = z.infer<typeof auditQuerySchema>;

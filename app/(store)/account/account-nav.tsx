@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { signOutAction } from './actions';
+import { SignOutButton } from './sign-out-button';
 
 const LINKS = [
   { href: '/account', label: 'Profile' },
@@ -35,12 +36,7 @@ export function AccountLayout({
             </Link>
           ))}
           <form action={signOutAction}>
-            <button
-              type="submit"
-              className="w-full rounded-sm px-3 py-2 text-left text-sm whitespace-nowrap text-muted hover:bg-surface-muted"
-            >
-              Sign out
-            </button>
+            <SignOutButton />
           </form>
         </nav>
         <div className="min-w-0 flex-1">{children}</div>
