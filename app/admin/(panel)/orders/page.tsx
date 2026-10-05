@@ -83,7 +83,11 @@ export default async function OrdersBoardPage({
             <label htmlFor="q" className="sr-only">
               Search by order number or phone
             </label>
-            <Search aria-hidden size={15} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted" />
+            <Search
+              aria-hidden
+              size={15}
+              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
+            />
             <input
               id="q"
               name="q"
@@ -110,8 +114,13 @@ export default async function OrdersBoardPage({
       {error && <p className="mb-3 text-sm text-danger">{error}</p>}
       <TableShell>
         {page.items.length === 0 ? (
-          <EmptyState icon={<Inbox size={20} />} title={q ? 'No orders match that search' : 'No orders in this status'}>
-            {q ? 'Check the order number or phone and try again.' : 'New orders show up here as customers place them.'}
+          <EmptyState
+            icon={<Inbox size={20} />}
+            title={q ? 'No orders match that search' : 'No orders in this status'}
+          >
+            {q
+              ? 'Check the order number or phone and try again.'
+              : 'New orders show up here as customers place them.'}
           </EmptyState>
         ) : (
           <Table>
@@ -133,7 +142,10 @@ export default async function OrdersBoardPage({
               {page.items.map((o) => (
                 <Tr key={o.id}>
                   <Td>
-                    <Link href={`/admin/orders/${o.id}`} className="font-medium text-primary hover:underline">
+                    <Link
+                      href={`/admin/orders/${o.id}`}
+                      className="font-medium text-primary hover:underline"
+                    >
                       {o.orderNumber}
                     </Link>
                   </Td>
@@ -182,14 +194,28 @@ export default async function OrdersBoardPage({
         <summary className="flex cursor-pointer list-none items-center gap-2 font-medium">
           <Download aria-hidden size={15} /> Download orders as a spreadsheet (CSV)
         </summary>
-        <form method="get" action="/admin/orders/export" className="mt-3 flex flex-wrap items-end gap-3">
+        <form
+          method="get"
+          action="/admin/orders/export"
+          className="mt-3 flex flex-wrap items-end gap-3"
+        >
           <label className="block">
             <span className="mb-1 block text-xs text-muted">From</span>
-            <input type="date" name="from" required className="h-10 rounded-[10px] border border-border bg-surface px-3 shadow-sm" />
+            <input
+              type="date"
+              name="from"
+              required
+              className="h-10 rounded-[10px] border border-border bg-surface px-3 shadow-sm"
+            />
           </label>
           <label className="block">
             <span className="mb-1 block text-xs text-muted">To</span>
-            <input type="date" name="to" required className="h-10 rounded-[10px] border border-border bg-surface px-3 shadow-sm" />
+            <input
+              type="date"
+              name="to"
+              required
+              className="h-10 rounded-[10px] border border-border bg-surface px-3 shadow-sm"
+            />
           </label>
           <Button type="submit" variant="outline">
             Download

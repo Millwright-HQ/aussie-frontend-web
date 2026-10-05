@@ -22,8 +22,8 @@ export default async function LocalMailPage({
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Local mail</h1>
             <p className="mt-1 text-sm text-muted">
-              Sign-up codes, password resets, admin invitations and order emails from this
-              computer. Newest first; the list refreshes by itself. Only exists locally.
+              Sign-up codes, password resets, admin invitations and order emails from this computer.
+              Newest first; the list refreshes by itself. Only exists locally.
             </p>
           </div>
           <AutoRefresh />
@@ -39,7 +39,10 @@ export default async function LocalMailPage({
             placeholder="Only mail to… (an email address)"
             className="h-10 flex-1 rounded-[10px] border border-border bg-surface px-3 text-sm"
           />
-          <button type="submit" className="h-10 rounded-[10px] bg-primary px-4 text-sm font-medium text-primary-fg">
+          <button
+            type="submit"
+            className="h-10 rounded-[10px] bg-primary px-4 text-sm font-medium text-primary-fg"
+          >
             Filter
           </button>
         </form>
@@ -63,13 +66,18 @@ export default async function LocalMailPage({
               {m.highlights.length > 0 && (
                 <p className="mt-2 flex flex-wrap gap-2">
                   {m.highlights.map((h) => (
-                    <code key={h} className="rounded-[8px] bg-primary/15 px-2 py-1 font-mono text-sm font-semibold text-primary select-all">
+                    <code
+                      key={h}
+                      className="rounded-[8px] bg-primary/15 px-2 py-1 font-mono text-sm font-semibold text-primary select-all"
+                    >
                       {h}
                     </code>
                   ))}
                 </p>
               )}
-              <p className="mt-2 text-sm break-words whitespace-pre-line text-muted">{m.text.slice(0, 700)}</p>
+              <p className="mt-2 text-sm break-words whitespace-pre-line text-muted">
+                {m.text.slice(0, 700)}
+              </p>
             </li>
           ))}
         </ul>

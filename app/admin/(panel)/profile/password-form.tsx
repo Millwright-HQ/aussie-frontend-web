@@ -26,7 +26,11 @@ export function PasswordForm({
     >
       {state.error && <Alert>{state.error}</Alert>}
       {state.ok && <Alert tone="success">{state.ok}</Alert>}
-      <Field id="currentPassword" label="Current password" error={state.fieldErrors?.currentPassword}>
+      <Field
+        id="currentPassword"
+        label="Current password"
+        error={state.fieldErrors?.currentPassword}
+      >
         <Input
           id="currentPassword"
           name="currentPassword"

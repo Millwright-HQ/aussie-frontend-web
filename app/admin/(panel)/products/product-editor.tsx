@@ -70,7 +70,12 @@ export function ProductEditor({
   const setOpeningFor = (rowKey: string, patch: Partial<{ units: string; alertAt: string }>) =>
     setOpening((o) => ({
       ...o,
-      [rowKey]: { units: '', alertAt: '', ...Object.entries(o).find(([k]) => k === rowKey)?.[1], ...patch },
+      [rowKey]: {
+        units: '',
+        alertAt: '',
+        ...Object.entries(o).find(([k]) => k === rowKey)?.[1],
+        ...patch,
+      },
     }));
 
   const flat = useMemo(() => flattenTree(categories), [categories]);
@@ -361,7 +366,10 @@ export function ProductEditor({
             {variants.map((v, i) => {
               const e = (f: string) => err(`variants.${i}.${f}`);
               return (
-                <fieldset key={v.key} className="rounded-xl border border-border bg-surface-muted/30 p-4">
+                <fieldset
+                  key={v.key}
+                  className="rounded-xl border border-border bg-surface-muted/30 p-4"
+                >
                   <legend className="px-1 text-sm font-medium">Variant {i + 1}</legend>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <Field id={`sku-${v.key}`} label="SKU" error={e('sku')}>
@@ -559,9 +567,9 @@ export function ProductEditor({
           <Card>
             <h2 className="text-[15px] font-semibold">Inventory</h2>
             <p className="mt-1 text-sm text-muted">
-              Opening stock for each variant. Leave at 0 to add stock later from the product page;
-              a product with no stock shows as sold out. The alert level flags a variant as low
-              (empty = store default).
+              Opening stock for each variant. Leave at 0 to add stock later from the product page; a
+              product with no stock shows as sold out. The alert level flags a variant as low (empty
+              = store default).
             </p>
             <div className="mt-4 divide-y divide-border rounded-[10px] border border-border">
               {variants.map((v, i) => {
@@ -573,7 +581,9 @@ export function ProductEditor({
                   >
                     <div className="min-w-0">
                       <p className="text-sm font-medium">Variant {i + 1}</p>
-                      <p className="truncate font-mono text-xs text-muted">{v.sku || 'SKU not set yet'}</p>
+                      <p className="truncate font-mono text-xs text-muted">
+                        {v.sku || 'SKU not set yet'}
+                      </p>
                     </div>
                     <Field id={`open-${v.key}`} label="Opening stock">
                       <Input
@@ -581,7 +591,9 @@ export function ProductEditor({
                         inputMode="numeric"
                         placeholder="0"
                         value={o?.units ?? ''}
-                        onChange={(ev) => setOpeningFor(v.key, { units: ev.target.value.replace(/\D/g, '') })}
+                        onChange={(ev) =>
+                          setOpeningFor(v.key, { units: ev.target.value.replace(/\D/g, '') })
+                        }
                       />
                     </Field>
                     <Field id={`alert-${v.key}`} label="Alert at" optional>
@@ -590,7 +602,9 @@ export function ProductEditor({
                         inputMode="numeric"
                         placeholder="5"
                         value={o?.alertAt ?? ''}
-                        onChange={(ev) => setOpeningFor(v.key, { alertAt: ev.target.value.replace(/\D/g, '') })}
+                        onChange={(ev) =>
+                          setOpeningFor(v.key, { alertAt: ev.target.value.replace(/\D/g, '') })
+                        }
                       />
                     </Field>
                   </div>

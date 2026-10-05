@@ -37,27 +37,31 @@ export async function readLocalMail(to?: string): Promise<LocalMail[] | null> {
         Body?: { text_part?: string; html_part?: string };
       }[];
     };
-    return messages
-      .map((m): LocalMail => {
-        const html = m.Body?.html_part ?? '';
-        const text = (m.Body?.text_part ?? html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')).trim();
-        const password = TEMP_PASSWORD.exec(text)?.[1];
-        const highlights = [
-          ...new Set([...(text.match(/\b\d{6}\b/g) ?? []), ...(password ? [password] : [])]),
-        ];
-        return {
-          id: m.Id ?? `${m.Timestamp}-${m.Subject}`,
-          at: m.Timestamp ?? '',
-          to: m.Destination?.ToAddresses ?? [],
-          subject: m.Subject ?? '(no subject)',
-          text,
-          highlights,
-        };
-      })
-      // The emulator's list is not in send order: newest first by time.
-      .sort((a, b) => b.at.localeCompare(a.at))
-      .filter((m) => !to || m.to.some((t) => t.toLowerCase().includes(to.toLowerCase())))
-      .slice(0, 60);
+    return (
+      messages
+        .map((m): LocalMail => {
+          const html = m.Body?.html_part ?? '';
+          const text = (
+            m.Body?.text_part ?? html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')
+          ).trim();
+          const password = TEMP_PASSWORD.exec(text)?.[1];
+          const highlights = [
+            ...new Set([...(text.match(/\b\d{6}\b/g) ?? []), ...(password ? [password] : [])]),
+          ];
+          return {
+            id: m.Id ?? `${m.Timestamp}-${m.Subject}`,
+            at: m.Timestamp ?? '',
+            to: m.Destination?.ToAddresses ?? [],
+            subject: m.Subject ?? '(no subject)',
+            text,
+            highlights,
+          };
+        })
+        // The emulator's list is not in send order: newest first by time.
+        .sort((a, b) => b.at.localeCompare(a.at))
+        .filter((m) => !to || m.to.some((t) => t.toLowerCase().includes(to.toLowerCase())))
+        .slice(0, 60)
+    );
   } catch {
     return null;
   }

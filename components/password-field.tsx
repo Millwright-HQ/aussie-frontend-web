@@ -36,7 +36,10 @@ export function PasswordChecklist({
       </p>
       <ul className="mt-2 grid gap-x-4 gap-y-1 text-[13px] sm:grid-cols-2">
         {checks.map((c) => (
-          <li key={c.id} className={`flex items-center gap-1.5 ${c.ok ? 'text-success' : 'text-muted'}`}>
+          <li
+            key={c.id}
+            className={`flex items-center gap-1.5 ${c.ok ? 'text-success' : 'text-muted'}`}
+          >
             {c.ok ? (
               <Check aria-hidden size={14} strokeWidth={2.5} className="shrink-0" />
             ) : (
@@ -127,11 +130,7 @@ export function NewPasswordPair({
           </button>
         </div>
         {pwError && <p className="text-sm text-danger">{pwError}</p>}
-        <PasswordChecklist
-          password={password}
-          minLength={minLength}
-          className="pt-1"
-        />
+        <PasswordChecklist password={password} minLength={minLength} className="pt-1" />
         <span id={`${pid}-rules`} className="sr-only">
           Password requirements are listed below the field.
         </span>

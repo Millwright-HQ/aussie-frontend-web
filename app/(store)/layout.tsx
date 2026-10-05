@@ -353,7 +353,10 @@ function DesktopMenu({ node }: { node: CategoryNode }) {
         <div className="grid grid-cols-3 gap-x-8 gap-y-6 xl:grid-cols-5">
           {node.children.map((s) => (
             <div key={s.id}>
-              <Link href={`/c/${s.slug}`} className="block py-1 text-sm font-medium hover:text-primary">
+              <Link
+                href={`/c/${s.slug}`}
+                className="block py-1 text-sm font-medium hover:text-primary"
+              >
                 {s.name}
               </Link>
               {s.children.slice(0, 6).map((t) => (

@@ -69,9 +69,20 @@ function SettingsCard({ view, canVerify }: { view: View; canVerify: boolean }) {
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <Field id="codFee" label="COD fee (Rs)" hint="Added to every cash-on-delivery order">
-            <Input id="codFee" name="codFee" inputMode="decimal" defaultValue={rupees(s.codFeeCents)} required hasHint />
+            <Input
+              id="codFee"
+              name="codFee"
+              inputMode="decimal"
+              defaultValue={rupees(s.codFeeCents)}
+              required
+              hasHint
+            />
           </Field>
-          <Field id="freeFrom" label="Free delivery from (Rs)" hint="0 = never free. Works in both methods">
+          <Field
+            id="freeFrom"
+            label="Free delivery from (Rs)"
+            hint="0 = never free. Works in both methods"
+          >
             <Input
               id="freeFrom"
               name="freeFrom"
@@ -90,8 +101,19 @@ function SettingsCard({ view, canVerify }: { view: View; canVerify: boolean }) {
             </span>
           </summary>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <Field id="maxWeightG" label="Heaviest order (g)" hint="Above this, checkout says “contact us”">
-              <Input id="maxWeightG" name="maxWeightG" inputMode="numeric" defaultValue={s.maxWeightG} required hasHint />
+            <Field
+              id="maxWeightG"
+              label="Heaviest order (g)"
+              hint="Above this, checkout says “contact us”"
+            >
+              <Input
+                id="maxWeightG"
+                name="maxWeightG"
+                inputMode="numeric"
+                defaultValue={s.maxWeightG}
+                required
+                hasHint
+              />
             </Field>
             <Field id="packagingWeightG" label="Packaging weight (g)" hint="Added to every parcel">
               <Input
@@ -130,14 +152,20 @@ function SettingsCard({ view, canVerify }: { view: View; canVerify: boolean }) {
         </label>
         {canVerify ? (
           <label className="flex min-h-10 items-center gap-2 text-sm">
-            <input type="checkbox" name="isVerified" defaultChecked={s.isVerified} className="size-4 accent-primary" />
+            <input
+              type="checkbox"
+              name="isVerified"
+              defaultChecked={s.isVerified}
+              className="size-4 accent-primary"
+            />
             Mark these rates as verified against a courier contract
           </label>
         ) : (
           <>
             <input type="hidden" name="isVerified" value={s.isVerified ? 'on' : 'off'} />
             <p className="text-sm text-muted">
-              Rates are {s.isVerified ? 'marked verified' : 'unverified'}. Only a Super Admin can change this.
+              Rates are {s.isVerified ? 'marked verified' : 'unverified'}. Only a Super Admin can
+              change this.
             </p>
           </>
         )}
@@ -177,7 +205,10 @@ function DistrictsCard({ view, canWrite }: { view: View; canWrite: boolean }) {
                 {DISTRICTS.map((d) => {
                   const row = byCode.get(d.code);
                   return (
-                    <tr key={d.code} className={row?.enabled === false ? 'bg-surface-muted/40' : undefined}>
+                    <tr
+                      key={d.code}
+                      className={row?.enabled === false ? 'bg-surface-muted/40' : undefined}
+                    >
                       <td className="px-4 py-2">
                         <input
                           type="checkbox"
@@ -385,55 +416,66 @@ export default async function DeliveryPage() {
 
       <DistrictsCard view={view} canWrite={canWrite} />
 
-      <details open={view.settings.mode === 'WEIGHT'} className="group rounded-xl border border-border bg-surface p-5 shadow-sm">
+      <details
+        open={view.settings.mode === 'WEIGHT'}
+        className="group rounded-xl border border-border bg-surface p-5 shadow-sm"
+      >
         <summary className="cursor-pointer text-[15px] font-semibold">
           Weight bands and zones{' '}
           <span className="text-sm font-normal text-muted">
-            ({view.settings.mode === 'WEIGHT' ? 'in use' : 'kept for later, not used while the price is fixed'})
+            (
+            {view.settings.mode === 'WEIGHT'
+              ? 'in use'
+              : 'kept for later, not used while the price is fixed'}
+            )
           </span>
         </summary>
         <div className="mt-4 space-y-6">
           <section aria-labelledby="zones" className="space-y-4">
-        <h2 id="zones" className="text-lg font-semibold">
-          Zones and weight bands
-        </h2>
-        {view.zones.map((z) => (
-          <ZoneCard
-            key={z.id}
-            zone={z}
-            canWrite={canWrite}
-            districtCount={view.districts.filter((d) => d.zoneId === z.id).length}
-          />
-        ))}
-        {canWrite && (
-          <Card>
-            <h3 className="text-[15px] font-semibold">Add a zone</h3>
-            <ActionForm action={saveZoneAction} submitLabel="Add zone" size="sm" className="mt-4">
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <Field id="nz-name" label="Name">
-                  <Input id="nz-name" name="name" required maxLength={60} />
-                </Field>
-                <Field id="nz-extra" label="Per extra kg (Rs)">
-                  <Input
-                    id="nz-extra"
-                    name="perExtraKg"
-                    inputMode="decimal"
-                    defaultValue="0.00"
-                    required
-                  />
-                </Field>
-                <Field id="nz-min" label="Fastest (days)" optional>
-                  <Input id="nz-min" name="minDays" inputMode="numeric" />
-                </Field>
-                <Field id="nz-max" label="Slowest (days)" optional>
-                  <Input id="nz-max" name="maxDays" inputMode="numeric" />
-                </Field>
-              </div>
-            </ActionForm>
-          </Card>
-        )}
+            <h2 id="zones" className="text-lg font-semibold">
+              Zones and weight bands
+            </h2>
+            {view.zones.map((z) => (
+              <ZoneCard
+                key={z.id}
+                zone={z}
+                canWrite={canWrite}
+                districtCount={view.districts.filter((d) => d.zoneId === z.id).length}
+              />
+            ))}
+            {canWrite && (
+              <Card>
+                <h3 className="text-[15px] font-semibold">Add a zone</h3>
+                <ActionForm
+                  action={saveZoneAction}
+                  submitLabel="Add zone"
+                  size="sm"
+                  className="mt-4"
+                >
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <Field id="nz-name" label="Name">
+                      <Input id="nz-name" name="name" required maxLength={60} />
+                    </Field>
+                    <Field id="nz-extra" label="Per extra kg (Rs)">
+                      <Input
+                        id="nz-extra"
+                        name="perExtraKg"
+                        inputMode="decimal"
+                        defaultValue="0.00"
+                        required
+                      />
+                    </Field>
+                    <Field id="nz-min" label="Fastest (days)" optional>
+                      <Input id="nz-min" name="minDays" inputMode="numeric" />
+                    </Field>
+                    <Field id="nz-max" label="Slowest (days)" optional>
+                      <Input id="nz-max" name="maxDays" inputMode="numeric" />
+                    </Field>
+                  </div>
+                </ActionForm>
+              </Card>
+            )}
           </section>
-
         </div>
       </details>
 

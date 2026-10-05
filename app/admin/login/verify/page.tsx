@@ -30,7 +30,10 @@ export default async function VerifyPage({
         subtitle="Your authenticator app is on. Open it and enter the current 6-digit code for Aussie Admin."
         footer={
           <form action={cancelSignIn} className="text-center">
-            <button type="submit" className="text-[13px] text-muted underline-offset-4 hover:underline">
+            <button
+              type="submit"
+              className="text-[13px] text-muted underline-offset-4 hover:underline"
+            >
               Use a different account
             </button>
           </form>

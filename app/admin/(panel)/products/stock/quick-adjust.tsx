@@ -62,7 +62,13 @@ export function QuickAdjust({
             aria-hidden
             className="pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 text-muted"
           >
-            {sign > 0 ? <Plus size={13} /> : sign < 0 ? <Minus size={13} /> : <span className="text-xs">±</span>}
+            {sign > 0 ? (
+              <Plus size={13} />
+            ) : sign < 0 ? (
+              <Minus size={13} />
+            ) : (
+              <span className="text-xs">±</span>
+            )}
           </span>
           <input
             type="number"

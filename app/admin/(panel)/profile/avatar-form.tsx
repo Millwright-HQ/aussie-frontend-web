@@ -90,7 +90,9 @@ export function AvatarForm({
             </form>
           )}
         </div>
-        <p className="text-xs text-muted">PNG, JPEG or WebP. It is cropped to a square and shrunk.</p>
+        <p className="text-xs text-muted">
+          PNG, JPEG or WebP. It is cropped to a square and shrunk.
+        </p>
         {preview && (
           <form action={formAction} className="flex items-center gap-2">
             <input type="hidden" name="avatar" value={preview} />
@@ -104,7 +106,11 @@ export function AvatarForm({
         )}
         {problem && <Alert className="mt-2">{problem}</Alert>}
         {state.error && <Alert className="mt-2">{state.error}</Alert>}
-        {state.ok && <Alert tone="success" className="mt-2">{state.ok}</Alert>}
+        {state.ok && (
+          <Alert tone="success" className="mt-2">
+            {state.ok}
+          </Alert>
+        )}
       </div>
     </div>
   );

@@ -73,7 +73,10 @@ export default async function VariantStockPage({
         }
         actions={
           can(me, 'product:write') ? (
-            <Link href={`/admin/products/${product.id}`} className={buttonVariants({ variant: 'outline' })}>
+            <Link
+              href={`/admin/products/${product.id}`}
+              className={buttonVariants({ variant: 'outline' })}
+            >
               <Pencil aria-hidden size={14} /> Edit product details
             </Link>
           ) : undefined
@@ -90,7 +93,11 @@ export default async function VariantStockPage({
           <div className="min-w-0 flex-1">
             <p className="truncate font-semibold">{product.name}</p>
             <p className="text-[13px] text-muted">
-              {product.status === 'ACTIVE' ? 'On the store' : product.status === 'DRAFT' ? 'Draft' : 'Archived'}
+              {product.status === 'ACTIVE'
+                ? 'On the store'
+                : product.status === 'DRAFT'
+                  ? 'Draft'
+                  : 'Archived'}
               {variant && ` · ${formatLkr(variant.priceCents)}`}
               {` · ${product.variants.length} variant${product.variants.length === 1 ? '' : 's'}`}
             </p>
@@ -134,7 +141,15 @@ export default async function VariantStockPage({
             >
               <div className="grid gap-3 sm:grid-cols-[1fr_2fr]">
                 <Field id="delta" label="Change in units" hint="e.g. 24 or -2">
-                  <Input id="delta" name="delta" type="number" step={1} inputMode="numeric" required hasHint />
+                  <Input
+                    id="delta"
+                    name="delta"
+                    type="number"
+                    step={1}
+                    inputMode="numeric"
+                    required
+                    hasHint
+                  />
                 </Field>
                 <Field id="reason" label="Reason">
                   <Select id="reason" name="reason" required defaultValue="">
@@ -150,7 +165,12 @@ export default async function VariantStockPage({
                 </Field>
               </div>
               <Field id="note" label="Note" optional>
-                <Input id="note" name="note" maxLength={200} placeholder="Supplier invoice, count sheet…" />
+                <Input
+                  id="note"
+                  name="note"
+                  maxLength={200}
+                  placeholder="Supplier invoice, count sheet…"
+                />
               </Field>
             </ActionForm>
           </Panel>
@@ -159,7 +179,12 @@ export default async function VariantStockPage({
             description={`Flag as low at or below this many units. Leave empty for the store default (${DEFAULT_LOW_STOCK_THRESHOLD}).`}
             className="self-start"
           >
-            <ActionForm action={setThresholdAction.bind(null, variantId)} submitLabel="Save" size="sm" inline>
+            <ActionForm
+              action={setThresholdAction.bind(null, variantId)}
+              submitLabel="Save"
+              size="sm"
+              inline
+            >
               <Field id="lowStockThreshold" label="Units">
                 <Input
                   id="lowStockThreshold"

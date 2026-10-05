@@ -36,7 +36,12 @@ export async function writeHoldId(holdId: string | undefined) {
 
 export type HoldOutcome =
   | { ok: true; hold: CheckoutHold }
-  | { ok: false; message: string; shortages: { variantId: string; requested: number; available: number }[]; hold?: CheckoutHold };
+  | {
+      ok: false;
+      message: string;
+      shortages: { variantId: string; requested: number; available: number }[];
+      hold?: CheckoutHold;
+    };
 
 /** Holds the bag's stock (or changes the hold to match the bag). Never throws for a shortage. */
 export async function holdBag(bag: CartLine[], holdId?: string): Promise<HoldOutcome> {

@@ -121,7 +121,10 @@ export async function saveBandsAction(
  * Saves every district row at once: switched on/off, fixed price, and zone. The zone only moves
  * when it really changed (the service ignores unchanged ones).
  */
-export async function saveDistrictsAction(_prev: ActionState, form: FormData): Promise<ActionState> {
+export async function saveDistrictsAction(
+  _prev: ActionState,
+  form: FormData,
+): Promise<ActionState> {
   const fees = districtFeesSchema.safeParse({
     districts: DISTRICTS.map((d) => ({
       code: d.code,
@@ -132,7 +135,9 @@ export async function saveDistrictsAction(_prev: ActionState, form: FormData): P
   if (!fees.success) {
     const idx = fees.error.issues[0]?.path[1];
     const name = typeof idx === 'number' ? DISTRICTS.at(idx)?.name : undefined;
-    return { error: `${name ? `${name}: ` : ''}enter the price in rupees, for example 400 or 400.00` };
+    return {
+      error: `${name ? `${name}: ` : ''}enter the price in rupees, for example 400 or 400.00`,
+    };
   }
   const zones = districtAssignmentsSchema.safeParse({
     assignments: DISTRICTS.map((d) => ({ code: d.code, zoneId: form.get(`district-${d.code}`) })),

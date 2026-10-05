@@ -85,10 +85,18 @@ export function AuditDetail({
                 <Row label="Result">
                   <Badge
                     tone={
-                      record.outcome === 'success' ? 'success' : record.outcome === 'denied' ? 'warning' : 'danger'
+                      record.outcome === 'success'
+                        ? 'success'
+                        : record.outcome === 'denied'
+                          ? 'warning'
+                          : 'danger'
                     }
                   >
-                    {record.outcome === 'success' ? 'Worked' : record.outcome === 'denied' ? 'Not allowed' : 'Failed'}
+                    {record.outcome === 'success'
+                      ? 'Worked'
+                      : record.outcome === 'denied'
+                        ? 'Not allowed'
+                        : 'Failed'}
                   </Badge>
                   {record.status !== undefined && (
                     <span className="ml-2 text-muted">HTTP {record.status}</span>
@@ -101,7 +109,9 @@ export function AuditDetail({
                   <code className="font-mono text-xs">{record.action}</code>
                 </Row>
                 <Row label="Service">{record.service}</Row>
-                <Row label="Kind">{record.kind === 'view' ? 'Looked at something' : 'Changed something'}</Row>
+                <Row label="Kind">
+                  {record.kind === 'view' ? 'Looked at something' : 'Changed something'}
+                </Row>
                 <Row label="Request">
                   {record.method && record.path ? (
                     <code className="font-mono text-xs">
@@ -112,7 +122,9 @@ export function AuditDetail({
                 <Row label="Target">
                   {record.targetId ? (
                     <>
-                      {record.targetType && <span className="text-muted">{record.targetType}: </span>}
+                      {record.targetType && (
+                        <span className="text-muted">{record.targetType}: </span>
+                      )}
                       <code className="font-mono text-xs">{record.targetId}</code>
                     </>
                   ) : undefined}
@@ -131,7 +143,9 @@ export function AuditDetail({
                 </Row>
                 <Row label="Browser">{record.userAgent}</Row>
                 <Row label="Request id">
-                  {record.requestId ? <code className="font-mono text-xs">{record.requestId}</code> : undefined}
+                  {record.requestId ? (
+                    <code className="font-mono text-xs">{record.requestId}</code>
+                  ) : undefined}
                 </Row>
                 <Row label="Entry id">
                   <code className="font-mono text-xs">{record.id}</code>
@@ -139,7 +153,9 @@ export function AuditDetail({
               </dl>
               {record.query && Object.keys(record.query).length > 0 && (
                 <section className="mt-4">
-                  <h3 className="mb-1.5 text-[13px] font-medium text-muted">Search / filters used</h3>
+                  <h3 className="mb-1.5 text-[13px] font-medium text-muted">
+                    Search / filters used
+                  </h3>
                   <Json value={record.query} />
                 </section>
               )}

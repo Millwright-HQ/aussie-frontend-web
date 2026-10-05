@@ -85,14 +85,18 @@ export default async function ProductsPage({
   const showStock = can(me, 'inventory:read');
 
   const [{ items }, brands, tree, stock] = await Promise.all([
-    api<{ items: Row[] }>('admin', `/v1/catalog/admin/products${status ? `?status=${status}` : ''}`),
+    api<{ items: Row[] }>(
+      'admin',
+      `/v1/catalog/admin/products${status ? `?status=${status}` : ''}`,
+    ),
     getBrands(),
     can(me, 'category:write') ? getCategoryTree().catch(() => []) : Promise.resolve([]),
     showStock ? listStock('all').catch(() => null) : Promise.resolve(null),
   ]);
   const brandName = new Map(brands.map((b: Brand) => [b.id, b.name]));
   const byProduct = new Map<string, StockRow[]>();
-  for (const r of stock ?? []) byProduct.set(r.productId, [...(byProduct.get(r.productId) ?? []), r]);
+  for (const r of stock ?? [])
+    byProduct.set(r.productId, [...(byProduct.get(r.productId) ?? []), r]);
 
   const q = (sp.q ?? '').trim().toLowerCase().slice(0, 60);
   let rows = q
@@ -126,7 +130,10 @@ export default async function ProductsPage({
         actions={
           <>
             {showStock && (
-              <Link href="/admin/products/stock-history" className={buttonVariants({ variant: 'outline' })}>
+              <Link
+                href="/admin/products/stock-history"
+                className={buttonVariants({ variant: 'outline' })}
+              >
                 <History aria-hidden size={16} /> Stock history
               </Link>
             )}
@@ -147,7 +154,11 @@ export default async function ProductsPage({
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <Pills
           current={status ?? ''}
-          items={STATUSES.map((s) => ({ key: s.key, label: s.label, href: link({ status: s.key }) }))}
+          items={STATUSES.map((s) => ({
+            key: s.key,
+            label: s.label,
+            href: link({ status: s.key }),
+          }))}
         />
         {showStock && (
           <Pills
@@ -164,7 +175,11 @@ export default async function ProductsPage({
           <label htmlFor="q" className="sr-only">
             Search products
           </label>
-          <Search aria-hidden size={15} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted" />
+          <Search
+            aria-hidden
+            size={15}
+            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
+          />
           <input
             id="q"
             name="q"
@@ -204,7 +219,9 @@ export default async function ProductsPage({
                       ) : undefined
                     }
                   >
-                    {q || status || lowOnly ? 'Try a different search or filter.' : 'Products you add appear here.'}
+                    {q || status || lowOnly
+                      ? 'Try a different search or filter.'
+                      : 'Products you add appear here.'}
                   </EmptyState>
                 </td>
               </tr>
@@ -258,7 +275,11 @@ export default async function ProductsPage({
                   <Td>
                     <RowActions>
                       {r.status === 'ACTIVE' && (
-                        <IconLink label={`View ${r.name} on the store`} href={`/p/${r.slug}`} target="_blank">
+                        <IconLink
+                          label={`View ${r.name} on the store`}
+                          href={`/p/${r.slug}`}
+                          target="_blank"
+                        >
                           <ExternalLink aria-hidden size={16} />
                         </IconLink>
                       )}

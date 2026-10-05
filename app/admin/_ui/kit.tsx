@@ -67,7 +67,11 @@ export function IconButton({
       type={type}
       aria-label={label}
       title={label}
-      className={cn(iconBase, tone === 'danger' && 'hover:bg-danger/10 hover:text-danger', className)}
+      className={cn(
+        iconBase,
+        tone === 'danger' && 'hover:bg-danger/10 hover:text-danger',
+        className,
+      )}
       {...props}
     >
       {children}
@@ -92,7 +96,11 @@ export function IconLink({
       href={href}
       aria-label={label}
       title={label}
-      className={cn(iconBase, tone === 'danger' && 'hover:bg-danger/10 hover:text-danger', className)}
+      className={cn(
+        iconBase,
+        tone === 'danger' && 'hover:bg-danger/10 hover:text-danger',
+        className,
+      )}
       {...props}
     >
       {children}
@@ -411,9 +419,7 @@ export function Pills({
           className="rounded-full border border-border bg-surface px-3 py-1 text-[13px] text-muted hover:text-text aria-[current=page]:border-primary aria-[current=page]:bg-primary/10 aria-[current=page]:font-medium aria-[current=page]:text-text"
         >
           {p.label}
-          {p.count !== undefined && (
-            <span className="ml-1.5 tabular text-muted">{p.count}</span>
-          )}
+          {p.count !== undefined && <span className="ml-1.5 tabular text-muted">{p.count}</span>}
         </Link>
       ))}
     </div>
@@ -443,7 +449,10 @@ export function Stat({
       <div className="flex items-center justify-between gap-2">
         <p className="text-[13px] text-muted">{label}</p>
         {icon && (
-          <span aria-hidden className="flex size-8 items-center justify-center rounded-[10px] bg-primary/10 text-primary">
+          <span
+            aria-hidden
+            className="flex size-8 items-center justify-center rounded-[10px] bg-primary/10 text-primary"
+          >
             {icon}
           </span>
         )}
@@ -465,8 +474,7 @@ export function Stat({
       {attention && <p className="mt-2 text-xs font-medium text-warning">● Needs attention</p>}
     </>
   );
-  const cls =
-    'block rounded-xl border border-border bg-surface p-4 shadow-sm transition-colors';
+  const cls = 'block rounded-xl border border-border bg-surface p-4 shadow-sm transition-colors';
   return href ? (
     <Link href={href} className={cn(cls, 'hover:border-primary/50')}>
       {body}
@@ -490,7 +498,10 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center px-6 py-12 text-center">
       {icon && (
-        <span aria-hidden className="mb-3 flex size-11 items-center justify-center rounded-full bg-surface-muted text-muted">
+        <span
+          aria-hidden
+          className="mb-3 flex size-11 items-center justify-center rounded-full bg-surface-muted text-muted"
+        >
           {icon}
         </span>
       )}
@@ -506,7 +517,12 @@ export function EmptyState({
 /** Rounded, scrollable table container (put <Table> inside, or use it with `flush` Panel). */
 export function TableShell({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn('overflow-x-auto rounded-xl border border-border bg-surface shadow-sm', className)}>
+    <div
+      className={cn(
+        'overflow-x-auto rounded-xl border border-border bg-surface shadow-sm',
+        className,
+      )}
+    >
       {children}
     </div>
   );
@@ -533,7 +549,9 @@ export function Tbody({ children }: { children: ReactNode }) {
 }
 
 export function Tr({ children, className }: { children: ReactNode; className?: string }) {
-  return <tr className={cn('transition-colors hover:bg-surface-muted/50', className)}>{children}</tr>;
+  return (
+    <tr className={cn('transition-colors hover:bg-surface-muted/50', className)}>{children}</tr>
+  );
 }
 
 export function Td({

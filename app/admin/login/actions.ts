@@ -205,7 +205,9 @@ export async function cancelSignIn(): Promise<never> {
 
 export async function signOut(): Promise<never> {
   // Recorded first, while the session still works; a failure here must never block signing out.
-  await api('admin', '/v1/identity/admin/session/signout', { method: 'POST' }).catch(() => undefined);
+  await api('admin', '/v1/identity/admin/session/signout', { method: 'POST' }).catch(
+    () => undefined,
+  );
   const refresh = await readRefresh('admin');
   if (refresh) await revoke('admin', refresh.refreshToken).catch(() => undefined);
   await clearSession('admin');

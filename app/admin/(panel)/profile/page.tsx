@@ -93,13 +93,23 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
 
       {tab === 'profile' && (
         <div className="space-y-6">
-          <Panel title="Picture" description="Shown next to your name in the menu and the audit log.">
+          <Panel
+            title="Picture"
+            description="Shown next to your name in the menu and the audit log."
+          >
             <AvatarForm name={me.name} current={me.avatar} action={saveAvatarAction} />
           </Panel>
           <Panel title="Name">
             <ActionForm action={saveNameAction} submitLabel="Save name" className="max-w-md">
               <Field id="name" label="Full name">
-                <Input id="name" name="name" defaultValue={me.name} required minLength={2} maxLength={100} />
+                <Input
+                  id="name"
+                  name="name"
+                  defaultValue={me.name}
+                  required
+                  minLength={2}
+                  maxLength={100}
+                />
               </Field>
             </ActionForm>
           </Panel>
@@ -109,10 +119,23 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           >
             <ActionForm action={saveEmailAction} submitLabel="Change email" className="max-w-md">
               <Field id="email" label="Email">
-                <Input id="email" name="email" type="email" defaultValue={me.email} required autoComplete="off" />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  defaultValue={me.email}
+                  required
+                  autoComplete="off"
+                />
               </Field>
               <Field id="currentPassword" label="Current password">
-                <Input id="currentPassword" name="currentPassword" type="password" autoComplete="current-password" required />
+                <Input
+                  id="currentPassword"
+                  name="currentPassword"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                />
               </Field>
             </ActionForm>
           </Panel>
@@ -133,8 +156,8 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         <div className="space-y-6">
           {q.welcome === '1' && !enabled && !setup && (
             <Alert tone="info">
-              Welcome! You can add a second step to your sign-in with an authenticator app. It is your
-              choice: set it up now, or skip and do it later from this page.
+              Welcome! You can add a second step to your sign-in with an authenticator app. It is
+              your choice: set it up now, or skip and do it later from this page.
               <span className="mt-3 flex flex-wrap gap-4 font-medium">
                 <Link href={`/admin/profile?tab=security&setup=1&next=${encodeURIComponent(next)}`}>
                   Set up now
@@ -191,8 +214,8 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
             ) : !setup ? (
               <div className="space-y-3">
                 <p className="text-sm text-muted">
-                  Off. Turning it on protects your account if your password is ever stolen. Works with
-                  Google Authenticator, Microsoft Authenticator, Authy and 1Password.
+                  Off. Turning it on protects your account if your password is ever stolen. Works
+                  with Google Authenticator, Microsoft Authenticator, Authy and 1Password.
                 </p>
                 <Link
                   href="/admin/profile?tab=security&setup=1"
@@ -213,7 +236,9 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
                     className="rounded-xl bg-white p-2"
                   />
                   <details className="w-56 text-sm">
-                    <summary className="cursor-pointer text-muted">Can&apos;t scan? Enter this key</summary>
+                    <summary className="cursor-pointer text-muted">
+                      Can&apos;t scan? Enter this key
+                    </summary>
                     <code className="mt-2 block rounded-[10px] bg-surface-muted px-3 py-2 font-mono text-xs break-all tabular">
                       {grouped}
                     </code>
@@ -225,7 +250,11 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
                     <li>Scan the QR code (or type the key).</li>
                     <li>Enter the 6-digit code the app shows below.</li>
                   </ol>
-                  <ActionForm action={enableAuthenticator} submitLabel="Verify and turn on" className="max-w-sm">
+                  <ActionForm
+                    action={enableAuthenticator}
+                    submitLabel="Verify and turn on"
+                    className="max-w-sm"
+                  >
                     <input type="hidden" name="next" value={q.welcome === '1' ? next : ''} />
                     <Field id="totp-code" label="6-digit code from your app">
                       <Input

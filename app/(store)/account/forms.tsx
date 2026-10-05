@@ -398,11 +398,13 @@ function AddressFields({
           </option>
           {provinces.map((p) => (
             <optgroup key={p} label={`${p} Province`}>
-              {choices.filter((d) => d.province === p).map((d) => (
-                <option key={d.code} value={d.code}>
-                  {d.name}
-                </option>
-              ))}
+              {choices
+                .filter((d) => d.province === p)
+                .map((d) => (
+                  <option key={d.code} value={d.code}>
+                    {d.name}
+                  </option>
+                ))}
             </optgroup>
           ))}
         </Select>

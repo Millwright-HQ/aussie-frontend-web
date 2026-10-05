@@ -50,7 +50,8 @@ export async function quoteAction(district: string): Promise<QuoteView> {
   const code = districtSchema.safeParse(district);
   if (!code.success) return { ok: false, message: 'Choose your delivery district.' };
   const bag = await loadBag(await getCart());
-  if (bag.length === 0 || bagHasUnavailable(bag)) return { ok: false, message: 'Your bag changed.' };
+  if (bag.length === 0 || bagHasUnavailable(bag))
+    return { ok: false, message: 'Your bag changed.' };
   const result = await getQuote({
     district: code.data,
     subtotalCents: bagSubtotal(bag),
@@ -146,7 +147,10 @@ export async function fixShortageAction(): Promise<void> {
 export type HoldSlipTicket =
   { error: string } | { uploadId: string; upload: { url: string; fields: Record<string, string> } };
 
-export async function requestSlipAction(contentType: string, size: number): Promise<HoldSlipTicket> {
+export async function requestSlipAction(
+  contentType: string,
+  size: number,
+): Promise<HoldSlipTicket> {
   if (!Number.isFinite(size) || size < 1 || size > MAX_PROOF_BYTES) {
     return { error: 'The slip must be 5 MB or smaller.' };
   }

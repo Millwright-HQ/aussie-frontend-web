@@ -45,7 +45,13 @@ const mmss = (ms: number) => {
 };
 
 /** The held stock's countdown. At zero the page offers to start again (the stock was given back). */
-function HoldTimer({ expiresAt, onExpired }: { expiresAt: string; onExpired: (expired: boolean) => void }) {
+function HoldTimer({
+  expiresAt,
+  onExpired,
+}: {
+  expiresAt: string;
+  onExpired: (expired: boolean) => void;
+}) {
   const [left, setLeft] = useState(() => Date.parse(expiresAt) - Date.now());
   useEffect(() => {
     const tick = () => {
@@ -58,7 +64,11 @@ function HoldTimer({ expiresAt, onExpired }: { expiresAt: string; onExpired: (ex
     return () => clearInterval(t);
   }, [expiresAt, onExpired]);
   return left > 0 ? (
-    <p className="flex items-center gap-2 rounded-md bg-surface-muted px-3 py-2 text-sm" role="timer" aria-live="off">
+    <p
+      className="flex items-center gap-2 rounded-md bg-surface-muted px-3 py-2 text-sm"
+      role="timer"
+      aria-live="off"
+    >
       <Clock aria-hidden size={15} />
       <span>
         Your items are held for <span className="font-semibold tabular">{mmss(left)}</span>
@@ -218,8 +228,12 @@ export function CheckoutForm({
               ))}
             </Select>
           </div>
-          {district && quote && !quote.ok && <p className="mt-3 text-sm text-danger">{quote.message}</p>}
-          {!district && <p className="mt-2 text-sm text-muted">Choose your district to see the delivery fee.</p>}
+          {district && quote && !quote.ok && (
+            <p className="mt-3 text-sm text-danger">{quote.message}</p>
+          )}
+          {!district && (
+            <p className="mt-2 text-sm text-muted">Choose your district to see the delivery fee.</p>
+          )}
         </section>
 
         {bank && (
@@ -227,11 +241,20 @@ export function CheckoutForm({
             <h2 id="payment" className="text-h3">
               2. How would you like to pay?
             </h2>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2" role="radiogroup" aria-labelledby="payment">
+            <div
+              className="mt-3 grid gap-3 sm:grid-cols-2"
+              role="radiogroup"
+              aria-labelledby="payment"
+            >
               {(
                 [
                   ['COD', 'Cash on delivery', 'Pay in cash when the parcel arrives.', Wallet],
-                  ['BANK_TRANSFER', 'Bank transfer', 'Pay now, upload your slip here. No cash fee.', Banknote],
+                  [
+                    'BANK_TRANSFER',
+                    'Bank transfer',
+                    'Pay now, upload your slip here. No cash fee.',
+                    Banknote,
+                  ],
                 ] as const
               ).map(([value, label, hint, Icon]) => (
                 <label
@@ -270,13 +293,15 @@ export function CheckoutForm({
                     <dt className="text-muted">Account number</dt>
                     <dd className="font-medium tabular select-all">{bank.accountNumber}</dd>
                   </dl>
-                  {bank.instructions && <p className="mt-3 text-sm text-muted">{bank.instructions}</p>}
+                  {bank.instructions && (
+                    <p className="mt-3 text-sm text-muted">{bank.instructions}</p>
+                  )}
                 </div>
                 <div className="border-t border-border pt-4">
                   <p className="text-sm font-medium">Then upload your payment slip</p>
                   <p className="mt-1 text-xs text-muted">
-                    A photo or screenshot that shows the amount, JPG, PNG, WebP or PDF up to 5 MB. We
-                    check it before we start on your order.
+                    A photo or screenshot that shows the amount, JPG, PNG, WebP or PDF up to 5 MB.
+                    We check it before we start on your order.
                   </p>
                   <input
                     ref={file}
@@ -298,7 +323,11 @@ export function CheckoutForm({
                       onClick={() => file.current?.click()}
                     >
                       <Upload aria-hidden size={16} />
-                      {slipBusy ? 'Uploading…' : slip ? 'Choose a different slip' : 'Upload payment slip'}
+                      {slipBusy
+                        ? 'Uploading…'
+                        : slip
+                          ? 'Choose a different slip'
+                          : 'Upload payment slip'}
                     </Button>
                     {slip && (
                       <span className="flex items-center gap-1.5 text-sm text-success">
@@ -319,50 +348,138 @@ export function CheckoutForm({
           </h2>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             <Field id="fullName" label="Full name" error={err('fullName')}>
-              <Input id="fullName" name="fullName" autoComplete="name" defaultValue={defaults.fullName} invalid={!!err('fullName')} required />
+              <Input
+                id="fullName"
+                name="fullName"
+                autoComplete="name"
+                defaultValue={defaults.fullName}
+                invalid={!!err('fullName')}
+                required
+              />
             </Field>
-            <Field id="phone" label="Mobile number" hint="We call this number to confirm your order" error={err('phone')}>
-              <Input id="phone" name="phone" type="tel" autoComplete="tel" placeholder="077 123 4567" defaultValue={defaults.phone} invalid={!!err('phone')} hasHint required />
+            <Field
+              id="phone"
+              label="Mobile number"
+              hint="We call this number to confirm your order"
+              error={err('phone')}
+            >
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                autoComplete="tel"
+                placeholder="077 123 4567"
+                defaultValue={defaults.phone}
+                invalid={!!err('phone')}
+                hasHint
+                required
+              />
             </Field>
-            <Field id="email" label="Email" hint="For your order receipt" error={err('email')} optional className="sm:col-span-2">
-              <Input id="email" name="email" type="email" autoComplete="email" defaultValue={defaults.email} invalid={!!err('email')} hasHint />
+            <Field
+              id="email"
+              label="Email"
+              hint="For your order receipt"
+              error={err('email')}
+              optional
+              className="sm:col-span-2"
+            >
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                defaultValue={defaults.email}
+                invalid={!!err('email')}
+                hasHint
+              />
             </Field>
             <Field id="line1" label="Address" error={err('line1')} className="sm:col-span-2">
-              <Input id="line1" name="line1" autoComplete="address-line1" invalid={!!err('line1')} required />
+              <Input
+                id="line1"
+                name="line1"
+                autoComplete="address-line1"
+                invalid={!!err('line1')}
+                required
+              />
             </Field>
-            <Field id="line2" label="Address line 2" error={err('line2')} optional className="sm:col-span-2">
+            <Field
+              id="line2"
+              label="Address line 2"
+              error={err('line2')}
+              optional
+              className="sm:col-span-2"
+            >
               <Input id="line2" name="line2" autoComplete="address-line2" />
             </Field>
             <Field id="city" label="City / town" error={err('city')}>
-              <Input id="city" name="city" autoComplete="address-level2" invalid={!!err('city')} required />
+              <Input
+                id="city"
+                name="city"
+                autoComplete="address-level2"
+                invalid={!!err('city')}
+                required
+              />
             </Field>
             <Field id="postalCode" label="Postal code" error={err('postalCode')} optional>
-              <Input id="postalCode" name="postalCode" inputMode="numeric" autoComplete="postal-code" invalid={!!err('postalCode')} />
+              <Input
+                id="postalCode"
+                name="postalCode"
+                inputMode="numeric"
+                autoComplete="postal-code"
+                invalid={!!err('postalCode')}
+              />
             </Field>
             <p className="text-sm sm:col-span-2">
               District: <span className="font-medium">{districtName ?? 'not chosen yet'}</span>
             </p>
-            <Field id="notes" label="Delivery notes" hint="Landmarks, best time to call…" error={err('notes')} optional className="sm:col-span-2">
+            <Field
+              id="notes"
+              label="Delivery notes"
+              hint="Landmarks, best time to call…"
+              error={err('notes')}
+              optional
+              className="sm:col-span-2"
+            >
               <Textarea id="notes" name="notes" rows={2} />
             </Field>
           </div>
 
           <label className="mt-4 flex min-h-11 items-start gap-3 text-sm">
-            <input type="checkbox" name="acceptTerms" required className="mt-1 size-5 shrink-0 accent-primary" />
+            <input
+              type="checkbox"
+              name="acceptTerms"
+              required
+              className="mt-1 size-5 shrink-0 accent-primary"
+            />
             <span>
               I agree to the{' '}
-              <a href="/info/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-4">
+              <a
+                href="/info/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary underline underline-offset-4"
+              >
                 Terms and Conditions
               </a>{' '}
               and the{' '}
-              <a href="/info/privacy" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-4">
+              <a
+                href="/info/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary underline underline-offset-4"
+              >
                 Privacy Policy
               </a>
               .
             </span>
           </label>
 
-          <Button type="submit" size="lg" className="mt-4 w-full sm:w-auto" disabled={!canOrder || pending}>
+          <Button
+            type="submit"
+            size="lg"
+            className="mt-4 w-full sm:w-auto"
+            disabled={!canOrder || pending}
+          >
             {pending
               ? 'Completing your order…'
               : byTransfer
@@ -426,7 +543,9 @@ export function CheckoutForm({
                     <Trash2 aria-hidden size={14} />
                   </button>
                 </div>
-                {bagError?.id === l.variantId && <p className="mt-1 text-xs text-danger">{bagError.text}</p>}
+                {bagError?.id === l.variantId && (
+                  <p className="mt-1 text-xs text-danger">{bagError.text}</p>
+                )}
               </li>
             ))}
           </ul>
@@ -439,7 +558,9 @@ export function CheckoutForm({
               <>
                 <div className="flex justify-between">
                   <dt>Delivery</dt>
-                  <dd className="tabular">{quote.freeDelivery ? 'Free' : formatLkr(quote.deliveryCents)}</dd>
+                  <dd className="tabular">
+                    {quote.freeDelivery ? 'Free' : formatLkr(quote.deliveryCents)}
+                  </dd>
                 </div>
                 {!byTransfer && quote.codCents > 0 && (
                   <div className="flex justify-between">
@@ -454,9 +575,16 @@ export function CheckoutForm({
                 <p className="text-xs text-muted">{quote.note}</p>
               </>
             )}
-            {!quote?.ok && <p className="text-xs text-muted">Choose a district to see the delivery fee and total.</p>}
+            {!quote?.ok && (
+              <p className="text-xs text-muted">
+                Choose a district to see the delivery fee and total.
+              </p>
+            )}
           </dl>
-          <Link href="/cart" className="mt-4 inline-block text-sm text-primary underline-offset-4 hover:underline">
+          <Link
+            href="/cart"
+            className="mt-4 inline-block text-sm text-primary underline-offset-4 hover:underline"
+          >
             Back to bag
           </Link>
         </div>

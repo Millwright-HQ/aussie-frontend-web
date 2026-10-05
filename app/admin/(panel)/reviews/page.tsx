@@ -6,7 +6,16 @@ import { api } from '@/lib/api';
 import type { OwnReview } from '@/lib/reviews';
 import { Stars } from '../../../(store)/_components/stars';
 import { moderateReviewAction } from './actions';
-import { Badge, type BadgeTone, EmptyState, Input, PageHeader, Pager, Panel, Pills } from '@/app/admin/_ui';
+import {
+  Badge,
+  type BadgeTone,
+  EmptyState,
+  Input,
+  PageHeader,
+  Pager,
+  Panel,
+  Pills,
+} from '@/app/admin/_ui';
 
 export const metadata = { title: 'Reviews' };
 
@@ -23,7 +32,8 @@ const TONES: Record<ReviewStatus, BadgeTone> = {
   REJECTED: 'danger',
 };
 const label = (s: ReviewStatus) => Object.entries(LABELS).find(([k]) => k === s)?.[1] ?? s;
-const tone = (s: ReviewStatus): BadgeTone => Object.entries(TONES).find(([k]) => k === s)?.[1] ?? 'neutral';
+const tone = (s: ReviewStatus): BadgeTone =>
+  Object.entries(TONES).find(([k]) => k === s)?.[1] ?? 'neutral';
 
 export default async function ReviewsQueuePage({
   searchParams,
@@ -65,7 +75,9 @@ export default async function ReviewsQueuePage({
       {page.items.length === 0 ? (
         <Panel>
           <EmptyState icon={<MessageSquareText size={20} />} title="Nothing here">
-            {status === 'PENDING' ? 'No reviews are waiting for you.' : 'No reviews in this group yet.'}
+            {status === 'PENDING'
+              ? 'No reviews are waiting for you.'
+              : 'No reviews in this group yet.'}
           </EmptyState>
         </Panel>
       ) : (

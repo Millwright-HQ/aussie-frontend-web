@@ -49,7 +49,9 @@ export function LedgerTable({ items, showItem }: { items: LedgerEntry[]; showIte
                   </Link>
                 </Td>
               )}
-              <Td className={cn('font-medium tabular', e.delta < 0 ? 'text-danger' : 'text-success')}>
+              <Td
+                className={cn('font-medium tabular', e.delta < 0 ? 'text-danger' : 'text-success')}
+              >
                 {delta(e.delta)}
               </Td>
               <Td className="tabular">{e.onHandAfter}</Td>

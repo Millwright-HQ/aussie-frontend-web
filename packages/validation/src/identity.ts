@@ -31,12 +31,20 @@ export interface PasswordCheck {
  * can never disagree.
  */
 export function passwordChecks(password: string, minLength: number): PasswordCheck[] {
+  const has = (test: (code: number) => boolean) => [...password].some((c) => test(c.charCodeAt(0)));
+  const lower = (c: number) => c >= 97 && c <= 122;
+  const upper = (c: number) => c >= 65 && c <= 90;
+  const digit = (c: number) => c >= 48 && c <= 57;
   return [
     { id: 'length', label: `At least ${minLength} characters`, ok: password.length >= minLength },
-    { id: 'lower', label: 'One lowercase letter (a-z)', ok: /[a-z]/.test(password) },
-    { id: 'upper', label: 'One uppercase letter (A-Z)', ok: /[A-Z]/.test(password) },
-    { id: 'digit', label: 'One number (0-9)', ok: /d/.test(password) },
-    { id: 'symbol', label: 'One symbol (for example ! ? # @)', ok: /[^A-Za-z0-9]/.test(password) },
+    { id: 'lower', label: 'One lowercase letter (a-z)', ok: has(lower) },
+    { id: 'upper', label: 'One uppercase letter (A-Z)', ok: has(upper) },
+    { id: 'digit', label: 'One number (0-9)', ok: has(digit) },
+    {
+      id: 'symbol',
+      label: 'One symbol (for example ! ? # @)',
+      ok: has((c) => !lower(c) && !upper(c) && !digit(c)),
+    },
   ];
 }
 

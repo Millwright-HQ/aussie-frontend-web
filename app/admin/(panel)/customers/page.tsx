@@ -44,7 +44,10 @@ export default async function CustomersPage({
 
   return (
     <div>
-      <PageHeader title="Customers" description="Newest first. Open a customer to see their orders." />
+      <PageHeader
+        title="Customers"
+        description="Newest first. Open a customer to see their orders."
+      />
       <TableShell>
         {page.items.length === 0 ? (
           <EmptyState icon={<Users size={20} />} title="No customers yet">
@@ -87,7 +90,11 @@ export default async function CustomersPage({
       </TableShell>
       <Pager
         prev={cursor ? '/admin/customers' : undefined}
-        next={page.nextCursor ? `/admin/customers?cursor=${encodeURIComponent(page.nextCursor)}` : undefined}
+        next={
+          page.nextCursor
+            ? `/admin/customers?cursor=${encodeURIComponent(page.nextCursor)}`
+            : undefined
+        }
       />
     </div>
   );

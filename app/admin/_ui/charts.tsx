@@ -38,12 +38,18 @@ export function AreaChart({
   const H = height;
   const pad = { l: 8, r: 8, t: 12, b: 24 };
   const max = nice(Math.max(1, ...data.map((d) => d.value)));
-  const x = (i: number) => pad.l + (data.length <= 1 ? 0 : (i / (data.length - 1)) * (W - pad.l - pad.r));
+  const x = (i: number) =>
+    pad.l + (data.length <= 1 ? 0 : (i / (data.length - 1)) * (W - pad.l - pad.r));
   const y = (v: number) => pad.t + (1 - v / max) * (H - pad.t - pad.b);
-  const line = data.map((d, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(d.value).toFixed(1)}`).join(' ');
+  const line = data
+    .map((d, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(d.value).toFixed(1)}`)
+    .join(' ');
   const area = `${line} L${x(data.length - 1).toFixed(1)},${H - pad.b} L${x(0).toFixed(1)},${H - pad.b} Z`;
   const ticks = [0, 0.5, 1].map((f) => f * max);
-  const labelIdx = data.length > 2 ? [0, Math.floor((data.length - 1) / 2), data.length - 1] : data.map((_, i) => i);
+  const labelIdx =
+    data.length > 2
+      ? [0, Math.floor((data.length - 1) / 2), data.length - 1]
+      : data.map((_, i) => i);
   const gid = `area-${ariaLabel.replace(/\W+/g, '')}`;
   return (
     <figure className={cn('w-full', className)}>
@@ -62,16 +68,38 @@ export function AreaChart({
         </defs>
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} className="stroke-border" strokeDasharray={t === 0 ? undefined : '3 4'} />
+            <line
+              x1={pad.l}
+              x2={W - pad.r}
+              y1={y(t)}
+              y2={y(t)}
+              className="stroke-border"
+              strokeDasharray={t === 0 ? undefined : '3 4'}
+            />
             <text x={pad.l} y={y(t) - 4} className="fill-muted text-[10px]">
               {format(t)}
             </text>
           </g>
         ))}
         {data.length > 1 && <path d={area} fill={`url(#${gid})`} />}
-        <path d={line} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        <path
+          d={line}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+        />
         {data.map((d, i) => (
-          <circle key={i} cx={x(i)} cy={y(d.value)} r={data.length > 40 ? 0 : 2.5} className="fill-surface stroke-current" strokeWidth="1.5">
+          <circle
+            key={i}
+            cx={x(i)}
+            cy={y(d.value)}
+            r={data.length > 40 ? 0 : 2.5}
+            className="fill-surface stroke-current"
+            strokeWidth="1.5"
+          >
             <title>{`${d.label}: ${format(d.value)}`}</title>
           </circle>
         ))}
@@ -97,7 +125,12 @@ export function BarList({
   format = (n) => String(n),
   empty = 'Nothing to show yet.',
 }: {
-  rows: { label: ReactNode; value: number; note?: ReactNode; tone?: 'primary' | 'success' | 'warning' | 'danger' | 'muted' }[];
+  rows: {
+    label: ReactNode;
+    value: number;
+    note?: ReactNode;
+    tone?: 'primary' | 'success' | 'warning' | 'danger' | 'muted';
+  }[];
   format?: (n: number) => string;
   empty?: string;
 }) {
@@ -151,8 +184,20 @@ export function Donut({
   return (
     <div className="flex flex-wrap items-center gap-6">
       <div className="relative size-36 shrink-0">
-        <svg viewBox="0 0 100 100" className="size-full -rotate-90" role="img" aria-label="Share by group">
-          <circle cx="50" cy="50" r={R} fill="none" strokeWidth="12" className="stroke-surface-muted" />
+        <svg
+          viewBox="0 0 100 100"
+          className="size-full -rotate-90"
+          role="img"
+          aria-label="Share by group"
+        >
+          <circle
+            cx="50"
+            cy="50"
+            r={R}
+            fill="none"
+            strokeWidth="12"
+            className="stroke-surface-muted"
+          />
           {total > 0 &&
             parts.map((p) => {
               const len = (p.value / total) * C;
@@ -176,7 +221,9 @@ export function Donut({
             })}
         </svg>
         {centre && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">{centre}</div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+            {centre}
+          </div>
         )}
       </div>
       <ul className="min-w-0 flex-1 space-y-2 text-sm">
@@ -188,7 +235,11 @@ export function Donut({
             </span>
             <span className="shrink-0 font-medium tabular">
               {format(p.value)}
-              {total > 0 && <span className="ml-1.5 font-normal text-muted">{Math.round((p.value / total) * 100)}%</span>}
+              {total > 0 && (
+                <span className="ml-1.5 font-normal text-muted">
+                  {Math.round((p.value / total) * 100)}%
+                </span>
+              )}
             </span>
           </li>
         ))}
@@ -203,10 +254,20 @@ export function Sparkline({ values, className }: { values: number[]; className?:
   const W = 96;
   const H = 28;
   const max = Math.max(1, ...values);
-  const pts = values.map((v, i) => `${((i / (values.length - 1)) * W).toFixed(1)},${(H - 2 - (v / max) * (H - 4)).toFixed(1)}`);
+  const pts = values.map(
+    (v, i) =>
+      `${((i / (values.length - 1)) * W).toFixed(1)},${(H - 2 - (v / max) * (H - 4)).toFixed(1)}`,
+  );
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className={cn('h-7 w-24 text-primary', className)} aria-hidden>
-      <polyline points={pts.join(' ')} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round" strokeLinecap="round" />
+      <polyline
+        points={pts.join(' ')}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

@@ -29,10 +29,22 @@ const nextConfig: NextConfig = {
       { source: '/admin/payments', destination: '/admin/site/payments', permanent: false },
       { source: '/admin/brands', destination: '/admin/products/brands', permanent: false },
       { source: '/admin/categories', destination: '/admin/products/categories', permanent: false },
-      { source: '/admin/categories/:id', destination: '/admin/products/categories/:id', permanent: false },
+      {
+        source: '/admin/categories/:id',
+        destination: '/admin/products/categories/:id',
+        permanent: false,
+      },
       { source: '/admin/inventory', destination: '/admin/products?stock=low', permanent: false },
-      { source: '/admin/inventory/history', destination: '/admin/products/stock-history', permanent: false },
-      { source: '/admin/inventory/:variantId', destination: '/admin/products/stock/:variantId', permanent: false },
+      {
+        source: '/admin/inventory/history',
+        destination: '/admin/products/stock-history',
+        permanent: false,
+      },
+      {
+        source: '/admin/inventory/:variantId',
+        destination: '/admin/products/stock/:variantId',
+        permanent: false,
+      },
       { source: '/admin/security', destination: '/admin/profile?tab=security', permanent: false },
     ];
   },

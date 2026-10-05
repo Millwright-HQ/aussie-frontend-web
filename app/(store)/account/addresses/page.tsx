@@ -22,7 +22,9 @@ export default async function AddressesPage() {
       ? undefined
       : [
           ...open,
-          ...DISTRICTS.filter((d) => d.code === current && !open.some((o) => o.code === d.code)).map((d) => ({ ...d })),
+          ...DISTRICTS.filter(
+            (d) => d.code === current && !open.some((o) => o.code === d.code),
+          ).map((d) => ({ ...d })),
         ];
 
   return (

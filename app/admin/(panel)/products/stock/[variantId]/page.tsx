@@ -10,7 +10,11 @@ export const metadata = { title: 'Stock' };
  * Old and short links (`/admin/products/stock/<variant>`) find the variant's product and go to
  * its page: stock now lives inside each product.
  */
-export default async function StockRedirect({ params }: { params: Promise<{ variantId: string }> }) {
+export default async function StockRedirect({
+  params,
+}: {
+  params: Promise<{ variantId: string }>;
+}) {
   await requirePermission('inventory:read');
   const { variantId } = await params;
   if (!ulidSchema.safeParse(variantId).success) notFound();

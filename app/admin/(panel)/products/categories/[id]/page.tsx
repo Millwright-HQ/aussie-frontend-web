@@ -327,7 +327,12 @@ export default async function CategoryDefinitionsPage({
                       </summary>
                       <div className="space-y-4 border-t border-border bg-surface-muted/30 px-5 py-4">
                         <AttributeForm categoryId={id} def={a} />
-                        <DeleteDef categoryId={id} kind="attribute" defKey={a.key} label={a.label} />
+                        <DeleteDef
+                          categoryId={id}
+                          kind="attribute"
+                          defKey={a.key}
+                          label={a.label}
+                        />
                       </div>
                     </details>
                   </li>

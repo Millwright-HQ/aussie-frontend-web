@@ -104,7 +104,10 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   if (sp.cursor) qs.set('cursor', sp.cursor);
 
   const [page, admins] = await Promise.all([
-    api<{ items: AuditRecord[]; nextCursor: string | null }>('admin', `/v1/identity/admin/audit?${qs}`),
+    api<{ items: AuditRecord[]; nextCursor: string | null }>(
+      'admin',
+      `/v1/identity/admin/audit?${qs}`,
+    ),
     api<{ items: { sub: string; name: string }[] }>('admin', '/v1/identity/admin/admins').catch(
       () => ({ items: [] }),
     ),
@@ -142,7 +145,11 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <label className="relative block lg:col-span-2">
             <span className="sr-only">Search</span>
-            <Search aria-hidden size={15} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted" />
+            <Search
+              aria-hidden
+              size={15}
+              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
+            />
             <input
               name="q"
               defaultValue={filters.q}
@@ -228,13 +235,25 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
             <label htmlFor="f-from" className="mb-1 block text-xs text-muted">
               From
             </label>
-            <input id="f-from" type="date" name="from" defaultValue={filters.from} className="h-10 w-full rounded-[10px] border border-border bg-surface px-3 text-sm shadow-sm" />
+            <input
+              id="f-from"
+              type="date"
+              name="from"
+              defaultValue={filters.from}
+              className="h-10 w-full rounded-[10px] border border-border bg-surface px-3 text-sm shadow-sm"
+            />
           </div>
           <div>
             <label htmlFor="f-to" className="mb-1 block text-xs text-muted">
               To
             </label>
-            <input id="f-to" type="date" name="to" defaultValue={filters.to} className="h-10 w-full rounded-[10px] border border-border bg-surface px-3 text-sm shadow-sm" />
+            <input
+              id="f-to"
+              type="date"
+              name="to"
+              defaultValue={filters.to}
+              className="h-10 w-full rounded-[10px] border border-border bg-surface px-3 text-sm shadow-sm"
+            />
           </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -282,7 +301,10 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
                         <div className="min-w-0">
                           <p className="truncate font-medium">
                             {r.actorType === 'customer' && r.actorSub ? (
-                              <Link href={`/admin/customers/${r.actorSub}`} className="hover:underline">
+                              <Link
+                                href={`/admin/customers/${r.actorSub}`}
+                                className="hover:underline"
+                              >
                                 {name}
                               </Link>
                             ) : (
@@ -298,7 +320,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
                       <Badge className="mt-1">{serviceLabel(r.service)}</Badge>
                       {r.kind === 'view' && <span className="ml-1.5 text-xs text-muted">view</span>}
                     </Td>
-                    <Td className="max-w-[22rem] truncate text-muted" >
+                    <Td className="max-w-[22rem] truncate text-muted">
                       <span title={auditTarget(r)}>{auditTarget(r) || '—'}</span>
                     </Td>
                     <Td>

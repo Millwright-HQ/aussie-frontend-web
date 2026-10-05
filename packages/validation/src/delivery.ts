@@ -105,10 +105,10 @@ export const districtFeesSchema = z
       .max(25),
   })
   .strict()
-  .refine(
-    ({ districts }) => new Set(districts.map((d) => d.code)).size === districts.length,
-    { message: 'A district can only be listed once', path: ['districts'] },
-  );
+  .refine(({ districts }) => new Set(districts.map((d) => d.code)).size === districts.length, {
+    message: 'A district can only be listed once',
+    path: ['districts'],
+  });
 export type DistrictFees = z.infer<typeof districtFeesSchema>;
 
 const dimension = z.number().int().min(1).max(300);

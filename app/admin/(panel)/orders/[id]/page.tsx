@@ -70,7 +70,10 @@ function Stepper({ order }: { order: AdminOrder }) {
         {steps.map((s, i) => {
           const failed = s.status === 'CANCELLED' || s.status === 'RETURNED';
           return (
-            <li key={`${s.status}-${i}`} className="relative flex min-w-[112px] flex-1 flex-col items-center text-center">
+            <li
+              key={`${s.status}-${i}`}
+              className="relative flex min-w-[112px] flex-1 flex-col items-center text-center"
+            >
               {i > 0 && (
                 <span
                   aria-hidden
@@ -94,7 +97,9 @@ function Stepper({ order }: { order: AdminOrder }) {
               >
                 {s.state === 'done' ? <Check size={15} strokeWidth={3} /> : i + 1}
               </span>
-              <span className={cn('mt-2 text-[13px] font-medium', s.state === 'todo' && 'text-muted')}>
+              <span
+                className={cn('mt-2 text-[13px] font-medium', s.state === 'todo' && 'text-muted')}
+              >
                 {s.label}
                 {s.state === 'current' && <span className="sr-only"> (current)</span>}
               </span>
@@ -116,7 +121,9 @@ function PaymentCard({ order, canDecide }: { order: AdminOrder; canDecide: boole
     <Panel title="Payment" actions={<PaymentBadge status={order.paymentStatus} />}>
       <p className="text-sm text-muted">Bank transfer</p>
       {order.paymentProofAt && (
-        <p className="mt-1 text-sm text-muted">Slip uploaded {formatDateTime(order.paymentProofAt)}</p>
+        <p className="mt-1 text-sm text-muted">
+          Slip uploaded {formatDateTime(order.paymentProofAt)}
+        </p>
       )}
       {order.paymentStatus === 'REJECTED' && order.paymentNote && (
         <p className="mt-1 text-sm text-muted">Reason given: “{order.paymentNote}”</p>
@@ -137,8 +144,9 @@ function PaymentCard({ order, canDecide }: { order: AdminOrder; canDecide: boole
         (canDecide ? (
           <div className="mt-4 space-y-5">
             <p className="text-sm">
-              Check the slip shows <span className="font-medium">{formatLkr(order.totalCents)}</span>{' '}
-              paid to your account, then confirm.
+              Check the slip shows{' '}
+              <span className="font-medium">{formatLkr(order.totalCents)}</span> paid to your
+              account, then confirm.
             </p>
             <ActionForm
               action={decidePaymentAction.bind(null, order.id, 'confirm')}
@@ -152,7 +160,11 @@ function PaymentCard({ order, canDecide }: { order: AdminOrder; canDecide: boole
                 variant="danger"
                 size="sm"
               >
-                <Field id="reject-note" label="Reason for the customer" hint="They see this and can upload a new slip">
+                <Field
+                  id="reject-note"
+                  label="Reason for the customer"
+                  hint="They see this and can upload a new slip"
+                >
                   <Input id="reject-note" name="note" required maxLength={300} hasHint />
                 </Field>
               </ActionForm>
@@ -253,7 +265,13 @@ function StepForm({ order, to, canCod }: { order: AdminOrder; to: OrderStatus; c
         >
           <Input id={`cnote-${to}`} name="customerNote" maxLength={200} hasHint />
         </Field>
-        <Field id={`note-${to}`} label="Staff note" hint="Only staff see this" optional className="sm:col-span-2">
+        <Field
+          id={`note-${to}`}
+          label="Staff note"
+          hint="Only staff see this"
+          optional
+          className="sm:col-span-2"
+        >
           <Input id={`note-${to}`} name="note" maxLength={300} hasHint />
         </Field>
       </div>
@@ -321,7 +339,10 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 {order.lines.map((l) => (
                   <Tr key={l.variantId}>
                     <Td>
-                      <Link href={`/admin/products/${l.productId}`} className="font-medium hover:underline">
+                      <Link
+                        href={`/admin/products/${l.productId}`}
+                        className="font-medium hover:underline"
+                      >
                         {l.productName}
                       </Link>
                       {l.label && <span className="text-muted"> · {l.label}</span>}
@@ -360,7 +381,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 </div>
               )}
               {order.chargeableWeightG > 0 && (
-                <p className="pt-1 text-xs text-muted">Parcel weight charged: {order.chargeableWeightG} g</p>
+                <p className="pt-1 text-xs text-muted">
+                  Parcel weight charged: {order.chargeableWeightG} g
+                </p>
               )}
             </dl>
           </Panel>
@@ -369,7 +392,10 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             <ol className="space-y-4 text-sm">
               {[...order.history].reverse().map((h) => (
                 <li key={`${h.at}-${h.to}`} className="relative pl-5">
-                  <span aria-hidden className="absolute top-1.5 left-0 size-2 rounded-full bg-primary" />
+                  <span
+                    aria-hidden
+                    className="absolute top-1.5 left-0 size-2 rounded-full bg-primary"
+                  />
                   <span className="font-medium">{statusLabel(h.to)}</span>{' '}
                   <span className="text-muted">
                     {formatDateTime(h.at)} ·{' '}
@@ -414,7 +440,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                   {next.map((to) => (
                     <div
                       key={to}
-                      className={to === 'CANCELLED' || to === 'RETURNED' ? 'border-t border-border pt-4' : undefined}
+                      className={
+                        to === 'CANCELLED' || to === 'RETURNED'
+                          ? 'border-t border-border pt-4'
+                          : undefined
+                      }
                     >
                       <StepForm order={order} to={to} canCod={can(me, 'order:cod')} />
                     </div>

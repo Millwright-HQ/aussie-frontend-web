@@ -47,7 +47,8 @@ const SHORT_DATE = (iso: string) =>
 
 /** "+12% vs previous 30 days", or "new" when there was nothing before. */
 function trend(current: number, previous: number, days: number) {
-  if (previous === 0) return current > 0 ? { text: `new in the last ${days} days`, tone: 'up' as const } : undefined;
+  if (previous === 0)
+    return current > 0 ? { text: `new in the last ${days} days`, tone: 'up' as const } : undefined;
   const pct = Math.round(((current - previous) / previous) * 100);
   return {
     text: `${pct >= 0 ? '+' : ''}${pct}% vs previous ${days} days`,
@@ -57,7 +58,11 @@ function trend(current: number, previous: number, days: number) {
 
 function greeting(): string {
   const hour = Number(
-    new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: 'Asia/Colombo' }).format(new Date()),
+    new Intl.DateTimeFormat('en-GB', {
+      hour: 'numeric',
+      hour12: false,
+      timeZone: 'Asia/Colombo',
+    }).format(new Date()),
   );
   return hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 }
@@ -80,7 +85,10 @@ async function LowStock() {
       description="Published items at or below their alert level, worst first."
       actions={
         rows.length > 0 ? (
-          <Link href="/admin/products?stock=low" className="text-[13px] font-medium text-primary hover:underline">
+          <Link
+            href="/admin/products?stock=low"
+            className="text-[13px] font-medium text-primary hover:underline"
+          >
             View all {rows.length}
           </Link>
         ) : undefined
@@ -92,7 +100,10 @@ async function LowStock() {
       ) : (
         <ul className="divide-y divide-border">
           {rows.slice(0, 7).map((r) => (
-            <li key={r.variantId} className="flex items-center justify-between gap-4 px-5 py-2.5 text-sm">
+            <li
+              key={r.variantId}
+              className="flex items-center justify-between gap-4 px-5 py-2.5 text-sm"
+            >
               <Link
                 href={`/admin/products/${r.productId}/stock/${r.variantId}`}
                 className="min-w-0 truncate hover:underline"
@@ -122,7 +133,8 @@ function Attention({
     return (
       <Alert tone="success">
         <span className="flex items-center gap-2">
-          <ClipboardCheck aria-hidden size={16} /> Nothing is waiting for you. Everything is up to date.
+          <ClipboardCheck aria-hidden size={16} /> Nothing is waiting for you. Everything is up to
+          date.
         </span>
       </Alert>
     );
@@ -139,7 +151,10 @@ function Attention({
             href={i.href}
             className="flex items-center gap-3 rounded-xl border border-warning/35 bg-warning/8 p-3.5 transition-colors hover:bg-warning/14"
           >
-            <span aria-hidden className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-warning/18 text-warning">
+            <span
+              aria-hidden
+              className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-warning/18 text-warning"
+            >
               {i.icon}
             </span>
             <span className="min-w-0">
@@ -173,14 +188,41 @@ export default async function AdminDashboardPage({
   const attention = [
     ...(analytics
       ? [
-          { label: 'Orders to confirm', value: analytics.attention.awaitingConfirmation, href: '/admin/orders?status=PENDING', icon: <ShoppingBag aria-hidden size={18} /> },
-          { label: 'Transfer slips to check', value: analytics.attention.transferProofsToReview, href: '/admin/orders?status=PENDING', icon: <Banknote aria-hidden size={18} /> },
-          { label: 'To pack and ship', value: analytics.attention.toShip, href: '/admin/orders?status=CONFIRMED', icon: <Truck aria-hidden size={18} /> },
-          { label: 'Refunds due', value: analytics.attention.refundsDue, href: '/admin/orders?status=CANCELLED', icon: <Undo2 aria-hidden size={18} /> },
+          {
+            label: 'Orders to confirm',
+            value: analytics.attention.awaitingConfirmation,
+            href: '/admin/orders?status=PENDING',
+            icon: <ShoppingBag aria-hidden size={18} />,
+          },
+          {
+            label: 'Transfer slips to check',
+            value: analytics.attention.transferProofsToReview,
+            href: '/admin/orders?status=PENDING',
+            icon: <Banknote aria-hidden size={18} />,
+          },
+          {
+            label: 'To pack and ship',
+            value: analytics.attention.toShip,
+            href: '/admin/orders?status=CONFIRMED',
+            icon: <Truck aria-hidden size={18} />,
+          },
+          {
+            label: 'Refunds due',
+            value: analytics.attention.refundsDue,
+            href: '/admin/orders?status=CANCELLED',
+            icon: <Undo2 aria-hidden size={18} />,
+          },
         ]
       : []),
     ...(reviews
-      ? [{ label: 'Reviews to moderate', value: reviews.PENDING, href: '/admin/reviews', icon: <Star aria-hidden size={18} /> }]
+      ? [
+          {
+            label: 'Reviews to moderate',
+            value: reviews.PENDING,
+            href: '/admin/reviews',
+            icon: <Star aria-hidden size={18} />,
+          },
+        ]
       : []),
   ];
 
@@ -256,8 +298,13 @@ export default async function AdminDashboardPage({
               ) : (
                 <AreaChart
                   ariaLabel={`Revenue per day, last ${days} days`}
-                  data={a.series.map((d) => ({ label: SHORT_DATE(d.date), value: d.revenueCents / 100 }))}
-                  format={(n) => (n >= 1000 ? `Rs ${Math.round(n / 1000)}k` : `Rs ${Math.round(n)}`)}
+                  data={a.series.map((d) => ({
+                    label: SHORT_DATE(d.date),
+                    value: d.revenueCents / 100,
+                  }))}
+                  format={(n) =>
+                    n >= 1000 ? `Rs ${Math.round(n / 1000)}k` : `Rs ${Math.round(n)}`
+                  }
                   height={230}
                 />
               )}
@@ -303,8 +350,18 @@ export default async function AdminDashboardPage({
               ) : (
                 <Donut
                   parts={[
-                    { label: 'Cash on delivery', value: a.byPayment.COD.revenueCents, className: 'stroke-primary', dot: 'bg-primary' },
-                    { label: 'Bank transfer', value: a.byPayment.BANK_TRANSFER.revenueCents, className: 'stroke-success', dot: 'bg-success' },
+                    {
+                      label: 'Cash on delivery',
+                      value: a.byPayment.COD.revenueCents,
+                      className: 'stroke-primary',
+                      dot: 'bg-primary',
+                    },
+                    {
+                      label: 'Bank transfer',
+                      value: a.byPayment.BANK_TRANSFER.revenueCents,
+                      className: 'stroke-success',
+                      dot: 'bg-success',
+                    },
                   ]}
                   format={(n) => formatLkr(n)}
                   centre={
@@ -339,8 +396,18 @@ export default async function AdminDashboardPage({
               ) : (
                 <Donut
                   parts={[
-                    { label: 'Signed-in customers', value: a.customers.signedIn, className: 'stroke-primary', dot: 'bg-primary' },
-                    { label: 'Guest checkout', value: a.customers.guests, className: 'stroke-muted', dot: 'bg-muted' },
+                    {
+                      label: 'Signed-in customers',
+                      value: a.customers.signedIn,
+                      className: 'stroke-primary',
+                      dot: 'bg-primary',
+                    },
+                    {
+                      label: 'Guest checkout',
+                      value: a.customers.guests,
+                      className: 'stroke-muted',
+                      dot: 'bg-muted',
+                    },
                   ]}
                 />
               )}
@@ -355,14 +422,21 @@ export default async function AdminDashboardPage({
           </div>
         </>
       ) : can(me, 'order:read') ? (
-        <Alert tone="warning">Sales numbers are unavailable right now. Try again in a moment.</Alert>
+        <Alert tone="warning">
+          Sales numbers are unavailable right now. Try again in a moment.
+        </Alert>
       ) : (
         <Panel title="Your access">
           <p className="text-sm text-muted">
-            Role <span className="font-medium text-text">{me.roleId}</span> · {me.permissions.length}{' '}
-            permission{me.permissions.length === 1 ? '' : 's'}. Use the menu to open the areas you can manage.
+            Role <span className="font-medium text-text">{me.roleId}</span> ·{' '}
+            {me.permissions.length} permission{me.permissions.length === 1 ? '' : 's'}. Use the menu
+            to open the areas you can manage.
           </p>
-          {can(me, 'inventory:read') && <div className="mt-4"><LowStock /></div>}
+          {can(me, 'inventory:read') && (
+            <div className="mt-4">
+              <LowStock />
+            </div>
+          )}
         </Panel>
       )}
     </div>

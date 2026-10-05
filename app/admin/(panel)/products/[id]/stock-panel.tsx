@@ -2,17 +2,7 @@ import type { ProductDetail, Variant } from '@aussie/shared-types';
 import { DEFAULT_LOW_STOCK_THRESHOLD } from '@aussie/shared-types';
 import { History } from 'lucide-react';
 import Link from 'next/link';
-import {
-  Badge,
-  cn,
-  Panel,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-} from '@/app/admin/_ui';
+import { Badge, cn, Panel, Table, Tbody, Td, Th, Thead, Tr } from '@/app/admin/_ui';
 import { adjustStockAction } from '../stock/actions';
 import { StatusBadge } from '../stock/parts';
 import { QuickAdjust } from '../stock/quick-adjust';
@@ -53,7 +43,9 @@ export async function StockPanel({
       actions={
         <>
           {rows && (anyOut || anyLow) && (
-            <Badge tone={anyOut ? 'danger' : 'warning'}>{anyOut ? 'Some sold out' : 'Running low'}</Badge>
+            <Badge tone={anyOut ? 'danger' : 'warning'}>
+              {anyOut ? 'Some sold out' : 'Running low'}
+            </Badge>
           )}
           <Link
             href="/admin/products/stock-history"
@@ -96,7 +88,13 @@ export async function StockPanel({
                   >
                     {s ? s.onHand : '—'}
                   </Td>
-                  <Td>{s ? <StatusBadge status={s.status} /> : <span className="text-muted">Not tracked yet</span>}</Td>
+                  <Td>
+                    {s ? (
+                      <StatusBadge status={s.status} />
+                    ) : (
+                      <span className="text-muted">Not tracked yet</span>
+                    )}
+                  </Td>
                   <Td className="text-right text-muted tabular">
                     {s ? s.threshold : DEFAULT_LOW_STOCK_THRESHOLD}
                   </Td>

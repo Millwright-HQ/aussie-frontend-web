@@ -186,7 +186,10 @@ export function ConfirmAction({
             {description && <div className="mt-2 text-sm text-muted">{description}</div>}
             {extra && <div className="mt-4">{extra}</div>}
             {state.error && (
-              <p role="alert" className="mt-3 rounded-[10px] bg-danger/10 px-3 py-2 text-sm text-danger">
+              <p
+                role="alert"
+                className="mt-3 rounded-[10px] bg-danger/10 px-3 py-2 text-sm text-danger"
+              >
                 {state.error}
               </p>
             )}
@@ -195,7 +198,11 @@ export function ConfirmAction({
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant={tone === 'danger' ? 'danger' : 'primary'} disabled={pending}>
+            <Button
+              type="submit"
+              variant={tone === 'danger' ? 'danger' : 'primary'}
+              disabled={pending}
+            >
               {pending ? 'Working…' : confirmLabel}
             </Button>
           </div>

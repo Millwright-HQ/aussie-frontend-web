@@ -119,9 +119,9 @@ describe('admin profile + audit query', () => {
     expect(adminProfileUpdateSchema.safeParse({}).success).toBe(false);
     expect(adminProfileUpdateSchema.safeParse({ name: 'New Name' }).success).toBe(true);
     expect(adminProfileUpdateSchema.safeParse({ avatar: null }).success).toBe(true);
-    expect(adminProfileUpdateSchema.safeParse({ avatar: 'data:image/png;base64,AAAA' }).success).toBe(
-      true,
-    );
+    expect(
+      adminProfileUpdateSchema.safeParse({ avatar: 'data:image/png;base64,AAAA' }).success,
+    ).toBe(true);
     expect(adminProfileUpdateSchema.safeParse({ avatar: 'https://x.test/a.png' }).success).toBe(
       false,
     );

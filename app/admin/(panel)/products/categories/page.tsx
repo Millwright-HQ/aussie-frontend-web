@@ -51,7 +51,13 @@ function CategoryForm({ category, all }: { category?: Category | undefined; all:
       {category && <input type="hidden" name="id" value={category.id} />}
       <div className="grid gap-3 sm:grid-cols-2">
         <Field id={`name-${key}`} label="Name">
-          <Input id={`name-${key}`} name="name" defaultValue={category?.name} required maxLength={60} />
+          <Input
+            id={`name-${key}`}
+            name="name"
+            defaultValue={category?.name}
+            required
+            maxLength={60}
+          />
         </Field>
         <Field id={`parent-${key}`} label="Parent">
           <Select id={`parent-${key}`} name="parentId" defaultValue={category?.parentId ?? ''}>

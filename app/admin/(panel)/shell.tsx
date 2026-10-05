@@ -53,7 +53,8 @@ export interface NavGroup {
 function currentOf(pathname: string, hrefs: string[]): string | undefined {
   let best: string | undefined;
   for (const h of hrefs) {
-    const hit = h === '/admin' ? pathname === '/admin' : pathname === h || pathname.startsWith(`${h}/`);
+    const hit =
+      h === '/admin' ? pathname === '/admin' : pathname === h || pathname.startsWith(`${h}/`);
     if (hit && (!best || h.length > best.length)) best = h;
   }
   return best;
@@ -61,7 +62,9 @@ function currentOf(pathname: string, hrefs: string[]): string | undefined {
 
 function Nav({ groups, onNavigate }: { groups: NavGroup[]; onNavigate?: () => void }) {
   const pathname = usePathname();
-  const all = groups.flatMap((g) => g.items.flatMap((i) => [i.href, ...(i.children?.map((c) => c.href) ?? [])]));
+  const all = groups.flatMap((g) =>
+    g.items.flatMap((i) => [i.href, ...(i.children?.map((c) => c.href) ?? [])]),
+  );
   const current = currentOf(pathname, all);
   const [open, setOpen] = useState<Record<string, boolean>>({});
 
@@ -78,7 +81,8 @@ function Nav({ groups, onNavigate }: { groups: NavGroup[]; onNavigate?: () => vo
             {g.items.map((item) => {
               const Icon = ICONS[item.icon] ?? LayoutDashboard;
               const childHrefs = item.children?.map((c) => c.href) ?? [];
-              const inSection = current === item.href || (current !== undefined && childHrefs.includes(current));
+              const inSection =
+                current === item.href || (current !== undefined && childHrefs.includes(current));
               const expanded = item.children ? (open[item.href] ?? inSection) : false;
               const base =
                 'flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-sm transition-colors hover:bg-surface-muted';

@@ -36,7 +36,10 @@ async function saveProfile(body: Record<string, unknown>, ok: string): Promise<A
 export async function saveNameAction(_prev: ActionState, form: FormData): Promise<ActionState> {
   const name = nameSchema.safeParse(form.get('name'));
   if (!name.success) return { error: name.error.issues[0]?.message ?? 'Enter your full name' };
-  return saveProfile({ name: name.data }, 'Name updated. It shows everywhere from your next sign-in.');
+  return saveProfile(
+    { name: name.data },
+    'Name updated. It shows everywhere from your next sign-in.',
+  );
 }
 
 /** A new email changes how they sign in, so it needs the current password first. */
@@ -54,13 +57,17 @@ export async function saveEmailAction(_prev: ActionState, form: FormData): Promi
   } catch (err) {
     return { error: authErrorMessage(err) };
   }
-  return saveProfile({ email: email.data }, `Email changed. Sign in with ${email.data} from now on.`);
+  return saveProfile(
+    { email: email.data },
+    `Email changed. Sign in with ${email.data} from now on.`,
+  );
 }
 
 export async function saveAvatarAction(_prev: ActionState, form: FormData): Promise<ActionState> {
   if (form.get('remove') === '1') return saveProfile({ avatar: null }, 'Picture removed.');
   const avatar = avatarSchema.safeParse(form.get('avatar'));
-  if (!avatar.success) return { error: avatar.error.issues[0]?.message ?? 'Choose a picture first.' };
+  if (!avatar.success)
+    return { error: avatar.error.issues[0]?.message ?? 'Choose a picture first.' };
   return saveProfile({ avatar: avatar.data }, 'Picture updated.');
 }
 
@@ -75,11 +82,13 @@ export async function changePasswordAction(
   if (!proposed.success) {
     return {
       fieldErrors: {
-        password: proposed.error.issues[0]?.message ?? `Use at least ${ADMIN_PASSWORD_MIN} characters`,
+        password:
+          proposed.error.issues[0]?.message ?? `Use at least ${ADMIN_PASSWORD_MIN} characters`,
       },
     };
   }
-  if (form.get('confirm') !== proposed.data) return { fieldErrors: { confirm: 'Passwords do not match' } };
+  if (form.get('confirm') !== proposed.data)
+    return { fieldErrors: { confirm: 'Passwords do not match' } };
   if (proposed.data === current) {
     return { fieldErrors: { password: 'Choose a password different from the current one' } };
   }
@@ -101,7 +110,10 @@ export async function changePasswordAction(
 
 // ── Authenticator app ───────────────────────────────────────────────────────
 
-export async function enableAuthenticator(_prev: ActionState, form: FormData): Promise<ActionState> {
+export async function enableAuthenticator(
+  _prev: ActionState,
+  form: FormData,
+): Promise<ActionState> {
   const code = sixDigitCodeSchema.safeParse(form.get('code'));
   if (!code.success) return { error: 'Enter the 6-digit code from your app.' };
   try {
@@ -118,7 +130,10 @@ export async function enableAuthenticator(_prev: ActionState, form: FormData): P
   redirect(next || '/admin/profile?tab=security&enabled=1');
 }
 
-export async function disableAuthenticator(_prev: ActionState, form: FormData): Promise<ActionState> {
+export async function disableAuthenticator(
+  _prev: ActionState,
+  form: FormData,
+): Promise<ActionState> {
   const code = sixDigitCodeSchema.safeParse(form.get('code'));
   if (!code.success) return { error: 'Enter the current 6-digit code from your app.' };
   try {

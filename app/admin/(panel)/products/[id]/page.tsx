@@ -63,7 +63,11 @@ export default async function EditProductPage({
           <>
             {editable && <DuplicateProduct productId={product.id} />}
             {product.status === 'ACTIVE' && (
-              <Link href={`/p/${product.slug}`} target="_blank" className={buttonVariants({ variant: 'outline' })}>
+              <Link
+                href={`/p/${product.slug}`}
+                target="_blank"
+                className={buttonVariants({ variant: 'outline' })}
+              >
                 View on store <ExternalLink aria-hidden size={14} />
               </Link>
             )}
@@ -83,7 +87,11 @@ export default async function EditProductPage({
 
       {editable ? (
         <>
-          <MediaManager productId={product.id} images={product.images} variants={product.variants} />
+          <MediaManager
+            productId={product.id}
+            images={product.images}
+            variants={product.variants}
+          />
           <ProductEditor
             product={product}
             brands={brands}

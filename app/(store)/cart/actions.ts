@@ -32,7 +32,9 @@ export async function addToBagAction(_prev: BagState, form: FormData): Promise<B
   // Never more than what is in stock, counting what is already in the bag.
   const lines = await getCart();
   const inBag = lines.find((l) => l.variantId === variantId.data)?.qty ?? 0;
-  const units = availableUnits((await getAvailability(productId.data, { fresh: true }))?.[variantId.data]);
+  const units = availableUnits(
+    (await getAvailability(productId.data, { fresh: true }))?.[variantId.data],
+  );
   if (units !== undefined && inBag + qty > units) {
     if (units === 0) return { error: 'Sorry, this item just sold out.' };
     return {
@@ -60,7 +62,9 @@ export async function setQuantityAction(form: FormData): Promise<void> {
   const lines = await getCart();
   const line = lines.find((l) => l.variantId === variantId.data);
   if (!line) return;
-  const units = availableUnits((await getAvailability(line.productId, { fresh: true }))?.[line.variantId]);
+  const units = availableUnits(
+    (await getAvailability(line.productId, { fresh: true }))?.[line.variantId],
+  );
   const capped = units === undefined ? qty : Math.min(qty, Math.max(1, units));
   await saveCart(lines.map((l) => (l.variantId === variantId.data ? { ...l, qty: capped } : l)));
   revalidatePath('/', 'layout');

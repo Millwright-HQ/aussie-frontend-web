@@ -17,13 +17,21 @@ function RoleEditor({ role }: { role?: RoleRow | undefined }) {
           <Input id={`name-${key}`} name="name" defaultValue={role?.name} required maxLength={60} />
         </Field>
         <Field id={`desc-${key}`} label="Description" optional>
-          <Input id={`desc-${key}`} name="description" defaultValue={role?.description} maxLength={300} />
+          <Input
+            id={`desc-${key}`}
+            name="description"
+            defaultValue={role?.description}
+            maxLength={300}
+          />
         </Field>
       </div>
       <fieldset className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <legend className="mb-2 text-[13px] font-medium">Permissions</legend>
         {PERMISSION_GROUPS.map((g) => (
-          <div key={g.label} className="space-y-2 rounded-xl border border-border bg-surface-muted/30 p-3">
+          <div
+            key={g.label}
+            className="space-y-2 rounded-xl border border-border bg-surface-muted/30 p-3"
+          >
             <p className="text-xs font-semibold tracking-wide text-muted uppercase">{g.label}</p>
             {g.permissions.map((p) => (
               <Checkbox

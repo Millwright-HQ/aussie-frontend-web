@@ -70,13 +70,15 @@ export default async function AdminsPage() {
                         <Avatar name={a.name} {...(a.avatar ? { src: a.avatar } : {})} size={40} />
                         <div className="min-w-0">
                           <p className="truncate font-medium">
-                            {a.name} {self && <span className="text-xs font-normal text-muted">(you)</span>}
+                            {a.name}{' '}
+                            {self && <span className="text-xs font-normal text-muted">(you)</span>}
                           </p>
                           <p className="truncate text-[13px] text-muted">{a.email}</p>
                           <p className="mt-0.5 flex items-center gap-1 text-xs text-muted">
                             {a.totpEnabled ? (
                               <>
-                                <ShieldCheck aria-hidden size={12} className="text-success" /> Authenticator on
+                                <ShieldCheck aria-hidden size={12} className="text-success" />{' '}
+                                Authenticator on
                               </>
                             ) : (
                               <>
@@ -91,12 +93,23 @@ export default async function AdminsPage() {
                       {self ? (
                         <span>{roleName(a.roleId)}</span>
                       ) : (
-                        <ActionForm action={changeRole} submitLabel="Save" size="sm" variant="outline" inline>
+                        <ActionForm
+                          action={changeRole}
+                          submitLabel="Save"
+                          size="sm"
+                          variant="outline"
+                          inline
+                        >
                           <input type="hidden" name="sub" value={a.sub} />
                           <label className="sr-only" htmlFor={`role-${a.sub}`}>
                             Role for {a.name}
                           </label>
-                          <Select id={`role-${a.sub}`} name="roleId" defaultValue={a.roleId} className="h-9 w-44">
+                          <Select
+                            id={`role-${a.sub}`}
+                            name="roleId"
+                            defaultValue={a.roleId}
+                            className="h-9 w-44"
+                          >
                             {roles.map((r) => (
                               <option key={r.id} value={r.id}>
                                 {r.name}
@@ -111,19 +124,28 @@ export default async function AdminsPage() {
                         {a.status === 'ACTIVE' ? 'Active' : 'Disabled'}
                       </Badge>
                     </Td>
-                    <Td className="whitespace-nowrap text-muted">{formatDateTime(a.lastLoginAt)}</Td>
+                    <Td className="whitespace-nowrap text-muted">
+                      {formatDateTime(a.lastLoginAt)}
+                    </Td>
                     <Td>
                       {self ? (
-                        <p className="text-right text-xs text-muted">Another admin manages your account.</p>
+                        <p className="text-right text-xs text-muted">
+                          Another admin manages your account.
+                        </p>
                       ) : (
                         <RowActions>
                           <ConfirmAction
                             iconOnly
                             tone="primary"
                             action={setAdminStatus}
-                            fields={{ sub: a.sub, action: a.status === 'ACTIVE' ? 'disable' : 'enable' }}
+                            fields={{
+                              sub: a.sub,
+                              action: a.status === 'ACTIVE' ? 'disable' : 'enable',
+                            }}
                             label={a.status === 'ACTIVE' ? `Disable ${a.name}` : `Enable ${a.name}`}
-                            title={a.status === 'ACTIVE' ? `Disable ${a.name}?` : `Enable ${a.name}?`}
+                            title={
+                              a.status === 'ACTIVE' ? `Disable ${a.name}?` : `Enable ${a.name}?`
+                            }
                             description={
                               a.status === 'ACTIVE'
                                 ? 'They are signed out everywhere and cannot sign in until you enable them again.'

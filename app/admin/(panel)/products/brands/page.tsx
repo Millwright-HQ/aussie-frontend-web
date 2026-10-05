@@ -4,14 +4,7 @@ import { requirePermission } from '@/lib/admin';
 import { getBrands, getCategoryTree } from '@/lib/catalog';
 import { ActionForm } from '@/app/admin/(panel)/action-form';
 import { deleteTaxonomyAction, saveBrandAction } from '@/app/admin/(panel)/catalog/actions';
-import {
-  ConfirmAction,
-  EmptyState,
-  Field,
-  Input,
-  PageHeader,
-  Panel,
-} from '@/app/admin/_ui';
+import { ConfirmAction, EmptyState, Field, Input, PageHeader, Panel } from '@/app/admin/_ui';
 import { ProductTabs } from '../tabs';
 
 export const metadata = { title: 'Brands' };
@@ -19,11 +12,21 @@ export const metadata = { title: 'Brands' };
 function BrandForm({ brand }: { brand?: Brand | undefined }) {
   const key = brand?.id ?? 'new';
   return (
-    <ActionForm action={saveBrandAction} submitLabel={brand ? 'Save changes' : 'Add brand'} size="sm">
+    <ActionForm
+      action={saveBrandAction}
+      submitLabel={brand ? 'Save changes' : 'Add brand'}
+      size="sm"
+    >
       {brand && <input type="hidden" name="id" value={brand.id} />}
       <div className="grid gap-3 sm:grid-cols-3">
         <Field id={`bname-${key}`} label="Name">
-          <Input id={`bname-${key}`} name="name" defaultValue={brand?.name} required maxLength={60} />
+          <Input
+            id={`bname-${key}`}
+            name="name"
+            defaultValue={brand?.name}
+            required
+            maxLength={60}
+          />
         </Field>
         <Field id={`bcountry-${key}`} label="Country" optional>
           <Input

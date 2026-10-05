@@ -76,8 +76,15 @@ export default async function CustomerPage({ params }: { params: Promise<{ sub: 
 
       <div className="grid gap-3 sm:grid-cols-3">
         <Stat label="Orders" value={orders ? orders.length : '—'} />
-        <Stat label="Spent" value={spent !== undefined ? formatLkr(spent) : '—'} note="excl. cancelled & returned" />
-        <Stat label="Offers by email" value={customer.marketingOptIn ? 'Subscribed' : 'Not subscribed'} />
+        <Stat
+          label="Spent"
+          value={spent !== undefined ? formatLkr(spent) : '—'}
+          note="excl. cancelled & returned"
+        />
+        <Stat
+          label="Offers by email"
+          value={customer.marketingOptIn ? 'Subscribed' : 'Not subscribed'}
+        />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
@@ -120,14 +127,19 @@ export default async function CustomerPage({ params }: { params: Promise<{ sub: 
                   {orders.map((o) => (
                     <Tr key={o.id}>
                       <Td>
-                        <Link href={`/admin/orders/${o.id}`} className="font-medium text-primary hover:underline">
+                        <Link
+                          href={`/admin/orders/${o.id}`}
+                          className="font-medium text-primary hover:underline"
+                        >
                           {o.orderNumber}
                         </Link>
                         <span className="block text-xs text-muted">
                           {o.itemCount} item{o.itemCount === 1 ? '' : 's'}
                         </span>
                       </Td>
-                      <Td className="whitespace-nowrap text-muted">{formatOrderDate(o.createdAt)}</Td>
+                      <Td className="whitespace-nowrap text-muted">
+                        {formatOrderDate(o.createdAt)}
+                      </Td>
                       <Td className="text-right tabular">{formatLkr(o.totalCents)}</Td>
                       <Td>
                         <OrderStatusBadge status={o.status} />

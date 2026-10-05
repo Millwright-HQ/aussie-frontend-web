@@ -34,7 +34,8 @@ export default async function CheckoutPage({
   if (!holdId) redirect(startUrl());
   const outcome = await holdBag(lines, holdId);
   if (outcome.ok && outcome.hold.holdId !== holdId) redirect(startUrl(outcome.hold.holdId));
-  if (!outcome.ok && outcome.hold && outcome.hold.holdId !== holdId) redirect(startUrl(outcome.hold.holdId));
+  if (!outcome.ok && outcome.hold && outcome.hold.holdId !== holdId)
+    redirect(startUrl(outcome.hold.holdId));
 
   if (!outcome.ok) {
     // Someone else bought it, or the stock was lowered, since the customer chose these items.
@@ -57,8 +58,10 @@ export default async function CheckoutPage({
                   <li key={l.variantId} className="flex justify-between gap-4 p-4">
                     <span>
                       {l.snapshot.productName}
-                      {l.snapshot.label && <span className="text-muted"> · {l.snapshot.label}</span>} ×{' '}
-                      {l.qty}
+                      {l.snapshot.label && (
+                        <span className="text-muted"> · {l.snapshot.label}</span>
+                      )}{' '}
+                      × {l.qty}
                     </span>
                     <span className="text-danger">
                       {s?.available ? `only ${s.available} left` : 'sold out'}

@@ -29,7 +29,12 @@ const GROUPS: { label?: string; items: ItemDef[] }[] = [
     label: 'Sales',
     items: [
       { href: '/admin/orders', label: 'Orders', icon: 'orders', permission: 'order:read' },
-      { href: '/admin/customers', label: 'Customers', icon: 'customers', permission: 'customer:read' },
+      {
+        href: '/admin/customers',
+        label: 'Customers',
+        icon: 'customers',
+        permission: 'customer:read',
+      },
       { href: '/admin/reviews', label: 'Reviews', icon: 'reviews', permission: 'review:read' },
     ],
   },
@@ -98,11 +103,19 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const groups: NavGroup[] = GROUPS.map((g) => ({
     ...(g.label ? { label: g.label } : {}),
     items: g.items.flatMap((item) => {
-      if (!item.children) return allowed(item) ? [{ href: item.href, label: item.label, icon: item.icon }] : [];
+      if (!item.children)
+        return allowed(item) ? [{ href: item.href, label: item.label, icon: item.icon }] : [];
       const kids = item.children.filter(allowed);
       const first = kids[0];
       return first
-        ? [{ href: first.href, label: item.label, icon: item.icon, children: kids.map(({ href, label }) => ({ href, label })) }]
+        ? [
+            {
+              href: first.href,
+              label: item.label,
+              icon: item.icon,
+              children: kids.map(({ href, label }) => ({ href, label })),
+            },
+          ]
         : [];
     }),
   })).filter((g) => g.items.length > 0);
