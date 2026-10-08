@@ -28,6 +28,8 @@ export interface VariantRow {
   opts: Record<string, OptionCell>;
   price: string;
   compareAt: string;
+  /** What the store pays per unit; admin-only. */
+  cost: string;
   weightG: string;
   lengthCm: string;
   widthCm: string;
@@ -42,6 +44,7 @@ export const newRow = (isDefault = false): VariantRow => ({
   opts: {},
   price: '',
   compareAt: '',
+  cost: '',
   weightG: '',
   lengthCm: '',
   widthCm: '',
@@ -64,6 +67,7 @@ export function rowFromVariant(v: Variant): VariantRow {
     opts: Object.fromEntries(v.options.map((o) => [o.key, { value: o.value, hex: o.hex ?? '' }])),
     price: toRupees(v.priceCents),
     compareAt: toRupees(v.compareAtCents),
+    cost: toRupees(v.costCents),
     weightG: String(v.weightG),
     lengthCm: v.lengthCm === undefined ? '' : String(v.lengthCm),
     widthCm: v.widthCm === undefined ? '' : String(v.widthCm),
@@ -175,6 +179,7 @@ export function buildInput(
       }),
       priceCents: toCents(v.price) ?? Number.NaN,
       compareAtCents: toCents(v.compareAt),
+      costCents: toCents(v.cost),
       weightG: Number(v.weightG || Number.NaN),
       lengthCm: v.lengthCm.trim() === '' ? undefined : Number(v.lengthCm),
       widthCm: v.widthCm.trim() === '' ? undefined : Number(v.widthCm),

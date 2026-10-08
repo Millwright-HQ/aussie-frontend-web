@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import {
   attributeDefCreateSchema,
   categoryInputSchema,
+  discountedCents,
   optionDefCreateSchema,
   parseAttributeFilter,
   productInputSchema,
   productListQuerySchema,
+  siteDiscountSchema,
   slugify,
 } from './index.js';
 
@@ -72,6 +74,41 @@ describe('variant dimensions', () => {
           .success,
       ).toBe(false);
     }
+  });
+});
+
+describe('variant cost', () => {
+  const withCost = (costCents: unknown) => ({ ...base, variants: [{ ...ruby, costCents }] });
+
+  it('is optional, and empty means unknown', () => {
+    expect(productInputSchema.parse(base).variants[0]?.costCents).toBeUndefined();
+    expect(productInputSchema.parse(withCost('')).variants[0]?.costCents).toBeUndefined();
+  });
+
+  it('accepts whole cents including 0 and rejects negatives and fractions', () => {
+    expect(productInputSchema.parse(withCost(0)).variants[0]?.costCents).toBe(0);
+    expect(productInputSchema.parse(withCost(120000)).variants[0]?.costCents).toBe(120000);
+    for (const bad of [-1, 1.5, 200_000_001]) {
+      expect(productInputSchema.safeParse(withCost(bad)).success).toBe(false);
+    }
+  });
+});
+
+describe('site discount', () => {
+  it('is a whole percentage from 0 to 90', () => {
+    for (const ok of [0, 10, 90])
+      expect(siteDiscountSchema.safeParse({ percent: ok }).success).toBe(true);
+    for (const bad of [-1, 91, 12.5, '10']) {
+      expect(siteDiscountSchema.safeParse({ percent: bad }).success).toBe(false);
+    }
+    expect(siteDiscountSchema.safeParse({ percent: 10, extra: 1 }).success).toBe(false);
+  });
+
+  it('takes the percentage off a price, rounded to the cent', () => {
+    expect(discountedCents(245000, 0)).toBe(245000);
+    expect(discountedCents(245000, 20)).toBe(196000);
+    expect(discountedCents(9999, 15)).toBe(8499); // 8499.15
+    expect(discountedCents(101, 50)).toBe(51); // 50.5 rounds up
   });
 });
 

@@ -91,6 +91,8 @@ export interface Variant {
   options: VariantOption[];
   priceCents: number;
   compareAtCents?: number;
+  /** What the store pays for one unit (integer cents). Admin-only: never sent to the storefront. */
+  costCents?: number;
   weightG: number;
   /** Packed size in whole cm (all three or none); delivery uses the higher of actual and volumetric weight. */
   lengthCm?: number;
@@ -141,6 +143,9 @@ export interface Product {
   publishedAt?: string;
 }
 
+/** A variant as shoppers see it: no cost price. */
+export type StorefrontVariant = Omit<Variant, 'costCents'>;
+
 export interface ProductDetail extends Product {
   variants: Variant[];
   images: ProductImage[];
@@ -164,7 +169,8 @@ export interface ProductOptionAxis {
 }
 
 /** Public product page payload. */
-export interface StorefrontProduct extends ProductDetail {
+export interface StorefrontProduct extends Omit<ProductDetail, 'variants'> {
+  variants: StorefrontVariant[];
   brandName?: string;
   specs: ProductSpec[];
   optionAxes: ProductOptionAxis[];
@@ -214,6 +220,17 @@ export interface ProductPage {
     brands: { slug: string; name: string; count: number }[];
     attributes: AttributeFacet[];
   };
+}
+
+/**
+ * Store-wide discount: this percentage comes off every variant's price. The catalog applies it
+ * wherever it returns a price (listings, product page, cart/checkout lookup), so orders snapshot
+ * the discounted price. The undiscounted price is shown as the compare-at price.
+ */
+export interface SiteDiscount {
+  /** Whole percent, 0 = no discount. */
+  percent: number;
+  updatedAt?: string;
 }
 
 /** Current, trusted data for one variant (used by the cart and by checkout; never from the browser). */

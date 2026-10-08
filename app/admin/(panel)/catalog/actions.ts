@@ -397,6 +397,7 @@ export async function duplicateProductAction(
         options: v.options,
         priceCents: v.priceCents,
         compareAtCents: v.compareAtCents,
+        costCents: v.costCents,
         weightG: v.weightG,
         lengthCm: v.lengthCm,
         widthCm: v.widthCm,
