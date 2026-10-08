@@ -38,6 +38,9 @@ interface Row {
   status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
   minPriceCents: number;
   maxPriceCents: number;
+  /** Range of the variants' cost prices; missing until a cost has been entered. */
+  minCostCents?: number;
+  maxCostCents?: number;
   variantCount: number;
   cover?: { base: string; alt: string };
   updatedAt: string;
@@ -198,6 +201,7 @@ export default async function ProductsPage({
               <Th>Status</Th>
               {showStock && <Th>Stock</Th>}
               <Th>Price</Th>
+              <Th>Cost</Th>
               <Th>Updated</Th>
               <Th>
                 <span className="sr-only">Actions</span>
@@ -207,7 +211,7 @@ export default async function ProductsPage({
           <Tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={showStock ? 6 : 5}>
+                <td colSpan={showStock ? 7 : 6}>
                   <EmptyState
                     icon={<PackageSearch size={20} />}
                     title={q || status || lowOnly ? 'No products match' : 'No products yet'}
@@ -270,6 +274,18 @@ export default async function ProductsPage({
                   <Td className="tabular whitespace-nowrap">
                     {formatLkr(r.minPriceCents)}
                     {r.maxPriceCents !== r.minPriceCents && ` – ${formatLkr(r.maxPriceCents)}`}
+                  </Td>
+                  <Td className="tabular whitespace-nowrap">
+                    {r.minCostCents === undefined ? (
+                      <span className="text-muted">—</span>
+                    ) : (
+                      <>
+                        {formatLkr(r.minCostCents)}
+                        {r.maxCostCents !== r.minCostCents &&
+                          r.maxCostCents !== undefined &&
+                          ` – ${formatLkr(r.maxCostCents)}`}
+                      </>
+                    )}
                   </Td>
                   <Td className="whitespace-nowrap text-muted">{formatDateTime(r.updatedAt)}</Td>
                   <Td>
