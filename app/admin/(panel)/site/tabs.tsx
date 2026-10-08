@@ -12,6 +12,9 @@ export function SiteTabs({ me, current }: { me: AdminMe; current: string }) {
           { href: '/admin/site/pages', label: 'Pages' },
         ]
       : []),
+    ...(can(me, 'product:read')
+      ? [{ href: '/admin/site/pricing', label: 'Pricing and discount' }]
+      : []),
     ...(can(me, 'delivery:read')
       ? [{ href: '/admin/site/delivery', label: 'Delivery configuration' }]
       : []),

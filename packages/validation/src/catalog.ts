@@ -188,6 +188,16 @@ export const variantInputSchema = z
       (v) => (v === '' || v === null ? undefined : v),
       priceSchema.optional(),
     ),
+    /** Purchase cost per unit; empty = unknown. Unlike the price it may be 0. */
+    costCents: z.preprocess(
+      (v) => (v === '' || v === null ? undefined : v),
+      z
+        .number({ message: 'Enter the cost' })
+        .int('Use at most 2 decimal places')
+        .min(0, 'Cost cannot be negative')
+        .max(200_000_000, 'Cost looks too high')
+        .optional(),
+    ),
     weightG: z
       .number({ message: 'Enter the packed weight in grams' })
       .int('Use whole grams')
@@ -211,6 +221,24 @@ export const variantInputSchema = z
     path: ['compareAtCents'],
   });
 export type VariantInput = z.infer<typeof variantInputSchema>;
+
+/** Capped so a typo cannot give the shop away. */
+export const MAX_SITE_DISCOUNT_PERCENT = 90;
+export const siteDiscountSchema = z
+  .object({
+    percent: z
+      .number({ message: 'Enter a percentage' })
+      .int('Use a whole percentage')
+      .min(0, 'Cannot be negative')
+      .max(MAX_SITE_DISCOUNT_PERCENT, `At most ${MAX_SITE_DISCOUNT_PERCENT}%`),
+  })
+  .strict();
+export type SiteDiscountInput = z.infer<typeof siteDiscountSchema>;
+
+/** Price after the store-wide discount, rounded to the nearest cent. */
+export function discountedCents(priceCents: number, percent: number): number {
+  return percent <= 0 ? priceCents : Math.round((priceCents * (100 - percent)) / 100);
+}
 
 const attributeValueSchema = z.union([
   z.string().max(5000),

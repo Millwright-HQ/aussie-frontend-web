@@ -465,6 +465,22 @@ export function ProductEditor({
                       />
                     </Field>
                     <Field
+                      id={`cost-${v.key}`}
+                      label="Cost (Rs)"
+                      hint="What you pay per unit. Only admins see it"
+                      error={e('costCents')}
+                      optional
+                    >
+                      <Input
+                        id={`cost-${v.key}`}
+                        inputMode="decimal"
+                        value={v.cost}
+                        onChange={(ev) => updateRow(v.key, { cost: ev.target.value })}
+                        invalid={!!e('costCents')}
+                        hasHint
+                      />
+                    </Field>
+                    <Field
                       id={`w-${v.key}`}
                       label="Weight (g)"
                       hint="Packed, for delivery fees"
