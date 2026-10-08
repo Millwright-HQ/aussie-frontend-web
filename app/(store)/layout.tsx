@@ -2,6 +2,7 @@ import type { CategoryNode } from '@aussie/shared-types';
 import { Menu, Search, ShoppingBag, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { BrandIcon, type BrandName } from '@/components/brand-icons';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { FloatingActions } from './_components/floating-actions';
 import { cartCount, getCart } from '@/lib/cart';
@@ -18,12 +19,18 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const { settings, festival } = site;
   const mode = await readTheme('store', settings.theme.defaultMode);
   const storeName = settings.storeName;
-  const socials: [string, string][] = [
-    ['Facebook', settings.facebook],
-    ['Instagram', settings.instagram],
-    ['TikTok', settings.tiktok],
-    ['YouTube', settings.youtube],
-  ].flatMap(([label, href]) => (href ? [[label, href] as [string, string]] : []));
+  const whatsappDigits = settings.whatsapp?.replace(/\D/g, '');
+  const socials: { name: BrandName; label: string; href: string }[] = [
+    { name: 'instagram' as const, label: 'Instagram', href: settings.instagram },
+    { name: 'facebook' as const, label: 'Facebook', href: settings.facebook },
+    { name: 'tiktok' as const, label: 'TikTok', href: settings.tiktok },
+    { name: 'youtube' as const, label: 'YouTube', href: settings.youtube },
+    {
+      name: 'whatsapp' as const,
+      label: 'WhatsApp',
+      href: whatsappDigits ? `https://wa.me/${whatsappDigits}` : '',
+    },
+  ].flatMap((x) => (x.href ? [{ ...x, href: x.href }] : []));
 
   return (
     <div
@@ -45,20 +52,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       {((settings.announcement.enabled && settings.announcement.text) || socials.length > 0) && (
         <div className="bg-text text-bg">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 text-xs md:px-6 lg:px-8">
-            <ul className="hidden gap-3 sm:flex" aria-label="Follow us">
-              {socials.map(([label, href]) => (
-                <li key={label}>
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline-offset-4 hover:underline"
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <SocialLinks socials={socials} size={14} className="hidden gap-3 sm:flex" />
             <p className="flex-1 text-center tracking-wide uppercase">
               {settings.announcement.enabled && settings.announcement.text ? (
                 settings.announcement.href ? (
@@ -105,19 +99,18 @@ export default async function StoreLayout({ children }: { children: React.ReactN
               href="/"
               className="flex items-center gap-2 font-display text-xl font-semibold text-text"
             >
-              {settings.logoPath && (
+              {settings.logoPath ? (
                 <Image
                   unoptimized
                   src={sitePictureUrl(settings.logoPath)}
-                  alt=""
+                  alt={storeName}
                   width={160}
                   height={36}
                   className="h-9 w-auto object-contain"
                 />
+              ) : (
+                storeName
               )}
-              <span className={settings.logoPath ? 'sr-only sm:not-sr-only' : undefined}>
-                {storeName}
-              </span>
             </Link>
           </div>
           <form
@@ -221,7 +214,6 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 text-sm text-muted sm:grid-cols-2 md:px-6 lg:grid-cols-4 lg:px-8">
           <div className="space-y-2">
             <p className="font-display text-base font-semibold text-text">{storeName}</p>
-            <p>{settings.tagline ?? 'Delivered island-wide in Sri Lanka.'}</p>
             {settings.footerNote && <p>{settings.footerNote}</p>}
           </div>
           <ul className="space-y-2">
@@ -258,18 +250,6 @@ export default async function StoreLayout({ children }: { children: React.ReactN
                 </a>
               </li>
             )}
-            {settings.whatsapp && (
-              <li>
-                <a
-                  href={`https://wa.me/${settings.whatsapp.replace(/\D/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-text"
-                >
-                  WhatsApp {settings.whatsapp}
-                </a>
-              </li>
-            )}
             {settings.email && (
               <li>
                 <a href={`mailto:${settings.email}`} className="hover:text-text">
@@ -278,35 +258,48 @@ export default async function StoreLayout({ children }: { children: React.ReactN
               </li>
             )}
             {settings.address && <li>{settings.address}</li>}
-            {(
-              [
-                ['Facebook', settings.facebook],
-                ['Instagram', settings.instagram],
-                ['TikTok', settings.tiktok],
-                ['YouTube', settings.youtube],
-              ] as const
-            ).map(
-              ([label, href]) =>
-                href && (
-                  <li key={label}>
-                    <a
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-text"
-                    >
-                      {label}
-                    </a>
-                  </li>
-                ),
+            {socials.length > 0 && (
+              <li>
+                <SocialLinks socials={socials} size={20} className="flex gap-4 pt-1" />
+              </li>
             )}
           </ul>
         </div>
         <p className="border-t border-border px-4 py-4 text-center text-xs text-muted">
-          © {new Date().getFullYear()} {storeName}. Prices in LKR.
+          © {new Date().getFullYear()} {storeName}
         </p>
       </footer>
     </div>
+  );
+}
+
+/** Brand icons as links; the words are there for screen readers and as the hover tooltip. */
+function SocialLinks({
+  socials,
+  size,
+  className,
+}: {
+  socials: { name: BrandName; label: string; href: string }[];
+  size: number;
+  className: string;
+}) {
+  return (
+    <ul className={className} aria-label="Follow us">
+      {socials.map((x) => (
+        <li key={x.name}>
+          <a
+            href={x.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={x.label}
+            className="inline-flex opacity-80 transition-opacity hover:opacity-100"
+          >
+            <BrandIcon name={x.name} width={size} height={size} />
+            <span className="sr-only">{x.label}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
   );
 }
 

@@ -1,7 +1,8 @@
 'use client';
 
-import { ArrowUp, MessageCircle } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { BrandIcon } from '@/components/brand-icons';
 
 /** WhatsApp chat (when the owner has set a number) and a back-to-top button, floating over the page. */
 export function FloatingActions({ whatsapp, storeName }: { whatsapp?: string; storeName: string }) {
@@ -23,9 +24,9 @@ export function FloatingActions({ whatsapp, storeName }: { whatsapp?: string; st
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Chat with us on WhatsApp"
-          className="fixed bottom-5 left-4 z-40 inline-flex size-12 items-center justify-center rounded-full bg-text text-bg shadow-md print:hidden"
+          className="fixed bottom-5 left-4 z-40 inline-flex size-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-md print:hidden"
         >
-          <MessageCircle aria-hidden size={22} />
+          <BrandIcon name="whatsapp" width={26} height={26} />
         </a>
       )}
       {showTop && (

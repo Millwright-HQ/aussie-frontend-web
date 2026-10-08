@@ -43,7 +43,7 @@ export default async function ProductPage({ params }: Props) {
   const [product, tree] = await Promise.all([getProduct(slug), getCategoryTree()]);
   if (!product) notFound();
   const [availability, districts] = await Promise.all([
-    getAvailability(product.id),
+    getAvailability(product.id, { fresh: true }),
     getDistricts(),
   ]);
   // Precomputed here: the client view must not import server-only modules.

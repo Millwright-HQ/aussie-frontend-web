@@ -4,7 +4,7 @@ import { Stars } from '../../_components/stars';
 import type { ProductImage, ProductOptionAxis, Variant } from '@aussie/shared-types';
 import { formatLkr, Swatch } from '@aussie/ui';
 import Image from 'next/image';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { imageUrl } from '@/lib/media';
 import {
   axisValues,
@@ -30,6 +30,57 @@ export type StockView = Record<
   { out: boolean; low: boolean; label: string; max?: number | undefined }
 >;
 
+const STOCK_POLL_MS = 20_000;
+
+/**
+ * Keeps the stock on screen current: the server's numbers first, then a fresh read every 20s while
+ * the tab is visible, when the tab is shown again, and when the browser restores the page from
+ * its back/forward cache (which would otherwise bring back old numbers).
+ */
+function useLiveStock(productId: string, variants: Variant[], initial: StockView): StockView {
+  const [stock, setStock] = useState(initial);
+  useEffect(() => setStock(initial), [initial]);
+  useEffect(() => {
+    let stopped = false;
+    const refresh = async () => {
+      try {
+        const res = await fetch(`/api/availability?productId=${encodeURIComponent(productId)}`, {
+          cache: 'no-store',
+        });
+        if (!res.ok || stopped) return;
+        const { variants: live } = (await res.json()) as { variants: StockView };
+        if (stopped) return;
+        setStock(
+          Object.fromEntries(
+            variants.map((v) => [
+              v.id,
+              live[v.id] ?? { out: true, low: false, label: 'Sold out', max: 0 },
+            ]),
+          ),
+        );
+      } catch {
+        // Keep showing the last numbers.
+      }
+    };
+    const timer = setInterval(() => {
+      if (document.visibilityState === 'visible') void refresh();
+    }, STOCK_POLL_MS);
+    const onShow = () => {
+      if (document.visibilityState === 'visible') void refresh();
+    };
+    document.addEventListener('visibilitychange', onShow);
+    window.addEventListener('pageshow', onShow);
+    void refresh();
+    return () => {
+      stopped = true;
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', onShow);
+      window.removeEventListener('pageshow', onShow);
+    };
+  }, [productId, variants]);
+  return stock;
+}
+
 /** Diagonal strike over an unavailable option (CSS only; no inline styles under our CSP). */
 function Strike() {
   return (
@@ -47,7 +98,7 @@ export function ProductView({
   variants,
   images,
   optionAxes,
-  stock,
+  stock: initialStock,
   slug,
   districts,
   rating,
@@ -63,6 +114,7 @@ export function ProductView({
   districts: DistrictChoice[];
   rating?: { average: number; count: number } | undefined;
 }) {
+  const stock = useLiveStock(productId, variants, initialStock);
   const isOut = (v: Variant) => Boolean(stock[v.id]?.out);
   const initial = initialVariant(variants, isOut);
   const [selectedId, setSelectedId] = useState(initial?.id ?? '');

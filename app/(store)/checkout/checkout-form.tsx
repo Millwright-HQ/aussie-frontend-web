@@ -84,6 +84,9 @@ function HoldTimer({
   );
 }
 
+/** Pending in-site-leave release, cancelled when the form mounts again right away. */
+let leaveTimer: ReturnType<typeof setTimeout> | undefined;
+
 export function CheckoutForm({
   lines,
   subtotalCents,
@@ -118,6 +121,26 @@ export function CheckoutForm({
   const [slipBusy, setSlipBusy] = useState(false);
   const [slipError, setSlipError] = useState<string>();
   const file = useRef<HTMLInputElement>(null);
+
+  // Leaving without ordering gives the held stock back at once (the 30-minute sweep is the fallback).
+  // Not while the order is being placed: that order needs the hold.
+  const placing = useRef(false);
+  placing.current = pending;
+  useEffect(() => {
+    const leave = () => {
+      if (!placing.current) navigator.sendBeacon('/checkout/leave');
+    };
+    window.addEventListener('pagehide', leave);
+    return () => {
+      window.removeEventListener('pagehide', leave);
+      // Moving to another page inside the site (no pagehide). Deferred a tick so a dev-mode
+      // remount does not release the hold it is about to use again.
+      leaveTimer = setTimeout(leave, 0);
+    };
+  }, []);
+  useEffect(() => {
+    clearTimeout(leaveTimer);
+  }, []);
 
   const byTransfer = payment === 'BANK_TRANSFER';
   const districtName = districts.find((d) => d.code === district)?.name;

@@ -9,6 +9,7 @@ import { ChevronRight, Download, Inbox, Search } from 'lucide-react';
 import Link from 'next/link';
 import { requirePermission } from '@/lib/admin';
 import { api, ApiError } from '@/lib/api';
+import { listOpenHolds } from '@/lib/holds';
 import { formatOrderDate, statusLabel } from '@/lib/order-format';
 import {
   Button,
@@ -26,6 +27,7 @@ import {
   Tr,
 } from '@/app/admin/_ui';
 import { OrderStatusBadge, PaymentBadge } from '@/app/admin/_ui/order-badge';
+import { HoldsIndicator } from './holds-indicator';
 
 export const metadata = { title: 'Orders' };
 
@@ -59,7 +61,7 @@ export default async function OrdersBoardPage({
     ...(sp.cursor ? { cursor: sp.cursor } : {}),
   });
 
-  const [counts, result] = await Promise.all([
+  const [counts, result, holds] = await Promise.all([
     api<Record<OrderStatus, number>>('admin', '/v1/orders/admin/counts'),
     api<{ items: Row[]; nextCursor: string | null }>('admin', `/v1/orders/admin/orders?${qs}`)
       .then((page) => ({ page, error: undefined as string | undefined }))
@@ -69,6 +71,7 @@ export default async function OrdersBoardPage({
         }
         throw err;
       }),
+    listOpenHolds(),
   ]);
   const { page, error } = result;
   const districtName = (code: string) => DISTRICTS.find((d) => d.code === code)?.name ?? code;
@@ -79,23 +82,26 @@ export default async function OrdersBoardPage({
         title="Orders"
         description="Open an order to confirm it, check payment, and move it through delivery."
         actions={
-          <form method="get" role="search" className="relative">
-            <label htmlFor="q" className="sr-only">
-              Search by order number or phone
-            </label>
-            <Search
-              aria-hidden
-              size={15}
-              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
-            />
-            <input
-              id="q"
-              name="q"
-              defaultValue={q}
-              placeholder="Order no. or phone"
-              className="h-10 w-64 rounded-[10px] border border-border bg-surface pr-3 pl-9 text-sm shadow-sm"
-            />
-          </form>
+          <div className="flex items-center gap-2">
+            <HoldsIndicator holds={holds} />
+            <form method="get" role="search" className="relative">
+              <label htmlFor="q" className="sr-only">
+                Search by order number or phone
+              </label>
+              <Search
+                aria-hidden
+                size={15}
+                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
+              />
+              <input
+                id="q"
+                name="q"
+                defaultValue={q}
+                placeholder="Order no. or phone"
+                className="h-10 w-64 rounded-[10px] border border-border bg-surface pr-3 pl-9 text-sm shadow-sm"
+              />
+            </form>
+          </div>
         }
       />
 

@@ -149,6 +149,41 @@ export async function saveDistrictsAction(
   }, 'Districts saved.');
 }
 
+/**
+ * Fixed pricing, the simple way: one price for every district, in one go. Which districts are
+ * switched on is left exactly as it is; only the price changes.
+ */
+export async function saveAllPricesAction(
+  _prev: ActionState,
+  form: FormData,
+): Promise<ActionState> {
+  const price = cents(form.get('price'));
+  if (!Number.isFinite(price) || price < 0) {
+    return { error: 'Enter the price in rupees, for example 200 or 200.00' };
+  }
+  let current: { districts: { code: string; enabled: boolean }[] };
+  try {
+    current = await api('admin', '/v1/delivery/admin/config');
+  } catch (err) {
+    if (err instanceof ApiError) return { error: err.userMessage };
+    throw err;
+  }
+  const fees = districtFeesSchema.safeParse({
+    districts: DISTRICTS.map((d) => ({
+      code: d.code,
+      enabled: current.districts.find((x) => x.code === d.code)?.enabled !== false,
+      fixedFeeCents: price,
+    })),
+  });
+  if (!fees.success) {
+    return { error: 'Enter the price in rupees, for example 200 or 200.00' };
+  }
+  return call(
+    () => api('admin', '/v1/delivery/admin/districts/fees', { method: 'PUT', body: fees.data }),
+    'Every district now has this price.',
+  );
+}
+
 /** Try the rate card: the same quote shoppers get, for a made-up parcel. */
 export async function previewQuoteAction(_prev: ActionState, form: FormData): Promise<ActionState> {
   const dims = ['lengthCm', 'widthCm', 'heightCm'].map((k) => optionalInt(form.get(k)));

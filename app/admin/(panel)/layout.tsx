@@ -79,6 +79,17 @@ const GROUPS: { label?: string; items: ItemDef[] }[] = [
     ],
   },
   {
+    label: 'Marketing',
+    items: [
+      {
+        href: '/admin/newsletter',
+        label: 'Newsletter',
+        icon: 'newsletter',
+        permission: 'content:write',
+      },
+    ],
+  },
+  {
     label: 'Team',
     items: [
       { href: '/admin/admins', label: 'Admins', icon: 'admins', permission: 'admin:manage' },
