@@ -1,4 +1,4 @@
-import { FESTIVAL_KEYS, FESTIVAL_MODES, PAGE_SLUGS, THEME_MODES } from '@aussie/shared-types';
+import { PAGE_SLUGS, THEME_MODES } from '@aussie/shared-types';
 import { z } from 'zod';
 import { lkMobileSchema, optionalText, ulidSchema } from './schemas.js';
 
@@ -66,12 +66,7 @@ const whatsappText = z.preprocess(empty, lkMobileSchema.optional());
 
 export const siteSettingsSchema = z
   .object({
-    storeName: z.string().trim().min(1, 'Enter the store name').max(60),
     tagline: optionalText(120),
-    logoPath: z.preprocess(
-      empty,
-      z.string().regex(SITE_IMAGE_PATH, 'Upload the logo again').optional(),
-    ),
     phone: phoneText,
     whatsapp: whatsappText,
     email: emailText,
@@ -95,38 +90,6 @@ export const siteSettingsSchema = z
     theme: z
       .object({
         defaultMode: z.enum(THEME_MODES),
-        brandColor: z.preprocess(
-          empty,
-          z
-            .string()
-            .regex(/^#[0-9a-fA-F]{6}$/, 'Pick a colour')
-            .transform((c) => c.toLowerCase())
-            .optional(),
-        ),
-        festival: z
-          .object({
-            mode: z.enum(FESTIVAL_MODES),
-            key: z.enum(FESTIVAL_KEYS),
-            startsOn: dateSchema,
-            endsOn: dateSchema,
-          })
-          .strict()
-          .superRefine((f, ctx) => {
-            if (f.mode !== 'scheduled') return;
-            if (!f.startsOn || !f.endsOn) {
-              ctx.addIssue({
-                code: 'custom',
-                path: ['startsOn'],
-                message: 'Choose the first and last day',
-              });
-            } else if (f.startsOn > f.endsOn) {
-              ctx.addIssue({
-                code: 'custom',
-                path: ['endsOn'],
-                message: 'The last day must not be before the first day',
-              });
-            }
-          }),
       })
       .strict(),
     home: z

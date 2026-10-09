@@ -87,7 +87,7 @@ function Nav({ groups, onNavigate }: { groups: NavGroup[]; onNavigate?: () => vo
                 current === item.href || (current !== undefined && childHrefs.includes(current));
               const expanded = item.children ? (open[item.href] ?? inSection) : false;
               const base =
-                'flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-sm transition-colors hover:bg-surface-muted';
+                'flex w-full items-center gap-3 rounded-sm px-3 py-2 text-sm transition-colors hover:bg-surface-muted';
               return (
                 <li key={item.href}>
                   <div className="flex items-center">
@@ -110,7 +110,7 @@ function Nav({ groups, onNavigate }: { groups: NavGroup[]; onNavigate?: () => vo
                         aria-expanded={expanded}
                         aria-label={`${expanded ? 'Collapse' : 'Expand'} ${item.label}`}
                         onClick={() => setOpen((o) => ({ ...o, [item.href]: !expanded }))}
-                        className="ml-1 flex size-8 shrink-0 items-center justify-center rounded-[10px] text-muted hover:bg-surface-muted hover:text-text"
+                        className="ml-1 flex size-8 shrink-0 items-center justify-center rounded-sm text-muted hover:bg-surface-muted hover:text-text"
                       >
                         <ChevronDown
                           aria-hidden
@@ -128,7 +128,7 @@ function Nav({ groups, onNavigate }: { groups: NavGroup[]; onNavigate?: () => vo
                             href={c.href}
                             onClick={onNavigate}
                             aria-current={current === c.href ? 'page' : undefined}
-                            className="block rounded-[10px] px-3 py-1.5 text-[13px] text-muted transition-colors hover:bg-surface-muted hover:text-text aria-[current=page]:bg-primary/10 aria-[current=page]:font-medium aria-[current=page]:text-primary"
+                            className="block rounded-sm px-3 py-1.5 text-[13px] text-muted transition-colors hover:bg-surface-muted hover:text-text aria-[current=page]:bg-primary/10 aria-[current=page]:font-medium aria-[current=page]:text-primary"
                           >
                             {c.label}
                           </Link>
@@ -210,7 +210,7 @@ export function AdminShell({
               type="button"
               aria-label="Close menu"
               onClick={() => setMenu(false)}
-              className="absolute top-3 right-3 flex size-8 items-center justify-center rounded-[10px] text-muted hover:bg-surface-muted"
+              className="absolute top-3 right-3 flex size-8 items-center justify-center rounded-sm text-muted hover:bg-surface-muted"
             >
               <X aria-hidden size={18} />
             </button>
@@ -225,7 +225,7 @@ export function AdminShell({
             type="button"
             aria-label="Open menu"
             onClick={() => setMenu(true)}
-            className="flex size-9 items-center justify-center rounded-[10px] text-text hover:bg-surface-muted lg:hidden"
+            className="flex size-9 items-center justify-center rounded-sm text-text hover:bg-surface-muted lg:hidden"
           >
             <Menu aria-hidden size={20} />
           </button>

@@ -37,11 +37,11 @@ export default async function LocalMailPage({
             name="to"
             defaultValue={to}
             placeholder="Only mail to… (an email address)"
-            className="h-10 flex-1 rounded-[10px] border border-border bg-surface px-3 text-sm"
+            className="h-10 flex-1 rounded-sm border border-border bg-surface px-3 text-sm"
           />
           <button
             type="submit"
-            className="h-10 rounded-[10px] bg-primary px-4 text-sm font-medium text-primary-fg"
+            className="h-10 rounded-sm bg-primary px-4 text-sm font-medium text-primary-fg"
           >
             Filter
           </button>
@@ -68,7 +68,7 @@ export default async function LocalMailPage({
                   {m.highlights.map((h) => (
                     <code
                       key={h}
-                      className="rounded-[8px] bg-primary/15 px-2 py-1 font-mono text-sm font-semibold text-primary select-all"
+                      className="rounded-sm bg-primary/15 px-2 py-1 font-mono text-sm font-semibold text-primary select-all"
                     >
                       {h}
                     </code>

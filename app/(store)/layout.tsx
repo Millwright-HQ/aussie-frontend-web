@@ -1,14 +1,14 @@
 import type { CategoryNode } from '@aussie/shared-types';
 import { Menu, Search, ShoppingBag, User } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
+import { BrandLogo } from '@/components/brand-logo';
 import { BrandIcon, type BrandName } from '@/components/brand-icons';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { FloatingActions } from './_components/floating-actions';
 import { cartCount, getCart } from '@/lib/cart';
 import { getCategoryTree } from '@/lib/catalog';
-import { getSite, sitePictureUrl } from '@/lib/content';
-import { brandVars } from '@/lib/brand';
+import { getSite } from '@/lib/content';
+import { STORE_NAME } from '@/lib/site';
 import { readTheme } from '@/lib/theme';
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
@@ -16,9 +16,9 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const categories: CategoryNode[] = await getCategoryTree().catch(() => []);
   const bagCount = cartCount(await getCart());
   const site = await getSite();
-  const { settings, festival } = site;
+  const { settings } = site;
   const mode = await readTheme('store', settings.theme.defaultMode);
-  const storeName = settings.storeName;
+  const storeName = STORE_NAME;
   const whatsappDigits = settings.whatsapp?.replace(/\D/g, '');
   const socials: { name: BrandName; label: string; href: string }[] = [
     { name: 'instagram' as const, label: 'Instagram', href: settings.instagram },
@@ -36,8 +36,6 @@ export default async function StoreLayout({ children }: { children: React.ReactN
     <div
       data-theme-root="store"
       data-theme={mode}
-      data-festival={festival ?? undefined}
-      style={brandVars(settings.theme.brandColor) as React.CSSProperties | undefined}
       className="flex min-h-dvh flex-col bg-bg text-text"
     >
       <a
@@ -46,9 +44,6 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       >
         Skip to content
       </a>
-      {festival && (
-        <div aria-hidden className="h-1 bg-linear-to-r from-primary via-accent to-primary" />
-      )}
       {((settings.announcement.enabled && settings.announcement.text) || socials.length > 0) && (
         <div className="bg-text text-bg">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 text-xs md:px-6 lg:px-8">
@@ -99,18 +94,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
               href="/"
               className="flex items-center gap-2 font-display text-xl font-semibold text-text"
             >
-              {settings.logoPath ? (
-                <Image
-                  unoptimized
-                  src={sitePictureUrl(settings.logoPath)}
-                  alt={storeName}
-                  width={160}
-                  height={36}
-                  className="h-9 w-auto object-contain"
-                />
-              ) : (
-                storeName
-              )}
+              <BrandLogo />
             </Link>
           </div>
           <form

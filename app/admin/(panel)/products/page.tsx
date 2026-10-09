@@ -188,7 +188,7 @@ export default async function ProductsPage({
             name="q"
             defaultValue={sp.q}
             placeholder="Search name or brand"
-            className="h-10 w-full rounded-[10px] border border-border bg-surface pr-3 pl-9 text-sm shadow-sm"
+            className="h-10 w-full rounded-sm border border-border bg-surface pr-3 pl-9 text-sm shadow-sm"
           />
         </form>
       </div>
@@ -236,7 +236,7 @@ export default async function ProductsPage({
                 <Tr key={r.id}>
                   <Td>
                     <Link href={`/admin/products/${r.id}`} className="flex items-center gap-3">
-                      <span className="relative size-11 shrink-0 overflow-hidden rounded-[10px] bg-surface-muted">
+                      <span className="relative size-11 shrink-0 overflow-hidden rounded-sm bg-surface-muted">
                         {r.cover && (
                           <Image
                             src={imageUrl(r.cover.base)}

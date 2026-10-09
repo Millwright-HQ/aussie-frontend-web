@@ -98,7 +98,7 @@ export default async function OrdersBoardPage({
                 name="q"
                 defaultValue={q}
                 placeholder="Order no. or phone"
-                className="h-10 w-64 rounded-[10px] border border-border bg-surface pr-3 pl-9 text-sm shadow-sm"
+                className="h-10 w-64 rounded-sm border border-border bg-surface pr-3 pl-9 text-sm shadow-sm"
               />
             </form>
           </div>
@@ -176,7 +176,7 @@ export default async function OrdersBoardPage({
                       href={`/admin/orders/${o.id}`}
                       aria-label={`Open order ${o.orderNumber}`}
                       title={`Open order ${o.orderNumber}`}
-                      className="inline-flex size-8 items-center justify-center rounded-[10px] text-muted hover:bg-surface-muted hover:text-text"
+                      className="inline-flex size-8 items-center justify-center rounded-sm text-muted hover:bg-surface-muted hover:text-text"
                     >
                       <ChevronRight aria-hidden size={16} />
                     </Link>
@@ -211,7 +211,7 @@ export default async function OrdersBoardPage({
               type="date"
               name="from"
               required
-              className="h-10 rounded-[10px] border border-border bg-surface px-3 shadow-sm"
+              className="h-10 rounded-sm border border-border bg-surface px-3 shadow-sm"
             />
           </label>
           <label className="block">
@@ -220,7 +220,7 @@ export default async function OrdersBoardPage({
               type="date"
               name="to"
               required
-              className="h-10 rounded-[10px] border border-border bg-surface px-3 shadow-sm"
+              className="h-10 rounded-sm border border-border bg-surface px-3 shadow-sm"
             />
           </label>
           <Button type="submit" variant="outline">

@@ -72,7 +72,7 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
       </Card>
       <Card>
         <h2 className="text-[15px] font-semibold">Formatting guide</h2>
-        <pre className="mt-3 overflow-x-auto rounded-[10px] bg-surface-muted p-4 text-xs leading-relaxed">{`## A heading
+        <pre className="mt-3 overflow-x-auto rounded-sm bg-surface-muted p-4 text-xs leading-relaxed">{`## A heading
 Start a new paragraph after a blank line.
 
 - A bullet point

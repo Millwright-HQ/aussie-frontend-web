@@ -85,7 +85,7 @@ export default async function VariantStockPage({
 
       <Panel>
         <div className="flex flex-wrap items-center gap-4">
-          <span className="relative size-16 shrink-0 overflow-hidden rounded-[10px] bg-surface-muted">
+          <span className="relative size-16 shrink-0 overflow-hidden rounded-sm bg-surface-muted">
             {cover && (
               <Image src={imageUrl(cover.base)} alt="" fill sizes="64px" className="object-cover" />
             )}

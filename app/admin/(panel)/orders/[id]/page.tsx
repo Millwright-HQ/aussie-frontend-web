@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { can, formatDateTime, requirePermission } from '@/lib/admin';
 import { api, ApiError } from '@/lib/api';
-import { getSite } from '@/lib/content';
+import { STORE_NAME } from '@/lib/site';
 import { buildTimeline, statusLabel } from '@/lib/order-format';
 import { ActionForm } from '../../action-form';
 import { changeStatusAction, decidePaymentAction } from '../actions';
@@ -292,7 +292,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   if (!order) notFound();
   const next = nextStatuses(order.status);
   const canAct = can(me, 'order:update-status');
-  const storeName = (await getSite()).settings.storeName;
+  const storeName = STORE_NAME;
   const canEditShipping = canAct && ['PENDING', 'CONFIRMED', 'PACKED'].includes(order.status);
   const district =
     DISTRICTS.find((d) => d.code === order.shipping.district)?.name ?? order.shipping.district;
@@ -429,7 +429,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             actions={<Truck aria-hidden size={18} className="text-muted" />}
           >
             {order.courier && (
-              <p className="mb-4 rounded-[10px] bg-surface-muted px-3 py-2 text-sm">
+              <p className="mb-4 rounded-sm bg-surface-muted px-3 py-2 text-sm">
                 Courier <span className="font-medium">{order.courier}</span> · tracking{' '}
                 <span className="font-mono">{order.trackingNo}</span>
               </p>

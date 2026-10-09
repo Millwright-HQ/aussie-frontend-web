@@ -110,7 +110,7 @@ function Branch({
   return (
     <li>
       <details className="group">
-        <summary className="flex cursor-pointer list-none items-center gap-2 rounded-[10px] px-2 py-2 hover:bg-surface-muted/60">
+        <summary className="flex cursor-pointer list-none items-center gap-2 rounded-sm px-2 py-2 hover:bg-surface-muted/60">
           <ChevronRight
             aria-hidden
             size={15}
@@ -127,7 +127,7 @@ function Branch({
           </span>
           <Link
             href={`/admin/products/categories/${node.id}`}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-[10px] px-2 py-1 text-[13px] text-muted hover:bg-surface-muted hover:text-text"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-sm px-2 py-1 text-[13px] text-muted hover:bg-surface-muted hover:text-text"
           >
             <Settings2 aria-hidden size={14} /> Fields &amp; options
             <span className="tabular">({countOf(node.id)})</span>

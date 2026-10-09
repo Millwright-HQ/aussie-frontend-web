@@ -52,7 +52,7 @@ export async function StockPanel({
           )}
           <Link
             href="/admin/products/stock-history"
-            className="inline-flex h-8 items-center gap-1.5 rounded-[10px] px-2.5 text-[13px] text-muted hover:bg-surface-muted hover:text-text"
+            className="inline-flex h-8 items-center gap-1.5 rounded-sm px-2.5 text-[13px] text-muted hover:bg-surface-muted hover:text-text"
           >
             <History aria-hidden size={14} /> All stock history
           </Link>

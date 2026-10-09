@@ -58,7 +58,7 @@ export function HoldsIndicator({ holds }: { holds: OpenHold[] }) {
         aria-expanded={open}
         aria-label={label}
         title={label}
-        className="relative inline-flex size-10 items-center justify-center rounded-[10px] border border-border bg-surface text-muted shadow-sm hover:text-text"
+        className="relative inline-flex size-10 items-center justify-center rounded-sm border border-border bg-surface text-muted shadow-sm hover:text-text"
       >
         <Clock aria-hidden size={17} />
         {holds.length > 0 && (

@@ -7,7 +7,7 @@ import { Alert, Button, Field, Input } from '@/app/admin/_ui';
 import type { PasswordState } from './actions';
 
 const adminInput =
-  'block h-10 w-full rounded-[10px] border border-border bg-surface px-3 pr-11 text-sm text-text shadow-sm aria-[invalid=true]:border-danger';
+  'block h-10 w-full rounded-sm border border-border bg-surface px-3 pr-11 text-sm text-text shadow-sm aria-[invalid=true]:border-danger';
 
 /** Change your own password: current one first, then the new one with a live checklist. */
 export function PasswordForm({

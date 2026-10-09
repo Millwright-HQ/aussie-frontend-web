@@ -16,7 +16,7 @@ const REASONS: { value: Reason; label: string; sign: 1 | -1 | 0 }[] = [
 ];
 
 const field =
-  'h-9 rounded-[10px] border border-border bg-surface px-2.5 text-sm shadow-sm hover:border-text/30 focus-visible:border-primary focus-visible:outline-2';
+  'h-9 rounded-sm border border-border bg-surface px-2.5 text-sm shadow-sm hover:border-text/30 focus-visible:border-primary focus-visible:outline-2';
 
 /**
  * One-line stock change for a variant: how many, why. Positive reasons add, "damaged" removes

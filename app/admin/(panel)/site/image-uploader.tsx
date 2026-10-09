@@ -89,7 +89,7 @@ export function ImageUploader({
         accept={SITE_IMAGE_TYPES.join(',')}
         disabled={busy}
         aria-label={`${label}: choose a picture`}
-        className="block w-full text-sm file:mr-3 file:min-h-10 file:rounded-[10px] file:border file:border-border file:bg-surface file:px-4"
+        className="block w-full text-sm file:mr-3 file:min-h-10 file:rounded-sm file:border file:border-border file:bg-surface file:px-4"
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) void upload(file);

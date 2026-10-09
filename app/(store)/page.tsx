@@ -4,6 +4,7 @@ import { Banknote, ShieldCheck, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { getCategoryTree, listProducts } from '@/lib/catalog';
 import { getSite, sitePictureUrl } from '@/lib/content';
+import { STORE_NAME } from '@/lib/site';
 import { HeroSlider } from './_components/hero-slider';
 import Image from 'next/image';
 import { ProductCard } from './_components/product-card';
@@ -24,7 +25,7 @@ export default async function HomePage() {
     <>
       {slides.length > 0 ? (
         <>
-          <h1 className="sr-only">{site.settings.storeName}</h1>
+          <h1 className="sr-only">{STORE_NAME}</h1>
           <HeroSlider banners={slides} />
         </>
       ) : (

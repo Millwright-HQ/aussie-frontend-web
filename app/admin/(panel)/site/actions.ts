@@ -68,9 +68,7 @@ export async function requestSiteUploadAction(
 
 export async function saveSettingsAction(_prev: ActionState, form: FormData): Promise<ActionState> {
   const parsed = siteSettingsSchema.safeParse({
-    storeName: text(form, 'storeName'),
     tagline: text(form, 'tagline'),
-    logoPath: flag(form, 'removeLogo') ? '' : text(form, 'logoPath'),
     phone: text(form, 'phone'),
     whatsapp: text(form, 'whatsapp'),
     email: text(form, 'email'),
@@ -87,13 +85,6 @@ export async function saveSettingsAction(_prev: ActionState, form: FormData): Pr
     },
     theme: {
       defaultMode: text(form, 'defaultMode'),
-      brandColor: flag(form, 'useBrandColor') ? text(form, 'brandColor') : '',
-      festival: {
-        mode: text(form, 'festivalMode'),
-        key: text(form, 'festivalKey'),
-        startsOn: text(form, 'festivalStartsOn'),
-        endsOn: text(form, 'festivalEndsOn'),
-      },
     },
     home: {
       showCategories: flag(form, 'showCategories'),

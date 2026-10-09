@@ -1,10 +1,9 @@
-import { FESTIVALS, type Banner, type InfoPage, type SiteSettings } from '@aussie/shared-types';
+import { type Banner, type InfoPage, type SiteSettings } from '@aussie/shared-types';
 import { Card, Field, Input, PageHeader, Select } from '@/app/admin/_ui';
 import { formatDateTime, requirePermission } from '@/lib/admin';
 import { api } from '@/lib/api';
 import { ActionForm } from '../action-form';
 import { saveSettingsAction } from './actions';
-import { ImageUploader } from './image-uploader';
 import { SiteTabs } from './tabs';
 
 export const metadata = { title: 'Site settings' };
@@ -43,14 +42,12 @@ const Check = ({
 export default async function SiteSettingsPage() {
   const me = await requirePermission('content:write');
   const { settings: s } = await api<AdminSite>('admin', '/v1/content/admin/site');
-  const cdn = process.env.NEXT_PUBLIC_CDN_URL ?? '';
-  const festival = s.theme.festival;
 
   return (
     <div className="max-w-4xl">
       <PageHeader
         title="Site settings"
-        description="Everything customers see around your products: your store name and logo, contact details, the announcement bar, festival colours and what appears on the home page. Changes show on the shop within a minute."
+        description="Everything customers see around your products: contact details, the announcement bar, the default theme and what appears on the home page. Changes show on the shop within a minute."
       />
       <SiteTabs me={me} current="/admin/site" />
 
@@ -58,15 +55,6 @@ export default async function SiteSettingsPage() {
         <Card>
           <h2 className="text-[15px] font-semibold">Store details</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <Field id="storeName" label="Store name" className="sm:col-span-2">
-              <Input
-                id="storeName"
-                name="storeName"
-                defaultValue={s.storeName}
-                maxLength={60}
-                required
-              />
-            </Field>
             <Field
               id="tagline"
               label="Tagline"
@@ -76,15 +64,6 @@ export default async function SiteSettingsPage() {
             >
               <Input id="tagline" name="tagline" defaultValue={s.tagline} maxLength={120} hasHint />
             </Field>
-            <div className="sm:col-span-2">
-              <ImageUploader
-                name="logoPath"
-                label="Logo"
-                initialPath={s.logoPath}
-                previewUrlBase={cdn}
-              />
-              {s.logoPath && <Check name="removeLogo" label="Remove the logo" checked={false} />}
-            </div>
             <Field id="phone" label="Phone" optional>
               <Input id="phone" name="phone" type="tel" defaultValue={s.phone} />
             </Field>
@@ -183,74 +162,6 @@ export default async function SiteSettingsPage() {
                 <option value="dark">Dark</option>
               </Select>
             </Field>
-            <div className="sm:col-span-2">
-              <span className="block text-sm font-medium">Brand colour</span>
-              <label className="mt-1 flex min-h-10 items-center gap-3 text-sm">
-                <input
-                  type="checkbox"
-                  name="useBrandColor"
-                  defaultChecked={Boolean(s.theme.brandColor)}
-                  className="size-5 accent-primary"
-                />
-                Use my brand colour for buttons and links
-              </label>
-              <div className="mt-2 flex items-center gap-3">
-                <input
-                  type="color"
-                  name="brandColor"
-                  aria-label="Brand colour"
-                  defaultValue={s.theme.brandColor ?? '#111111'}
-                  className="h-11 w-16 cursor-pointer rounded-[10px] border border-border bg-surface p-1"
-                />
-                <p className="text-xs text-muted">
-                  Pick the colour of your logo. If it is too light to read, we darken it a little
-                  for text and buttons (and lighten it on the dark theme) so it stays readable.
-                  Without one, buttons are black.
-                </p>
-              </div>
-            </div>
-            <Field id="festivalMode" label="Festival look">
-              <Select id="festivalMode" name="festivalMode" defaultValue={festival.mode}>
-                <option value="off">Off</option>
-                <option value="on">On now (until I switch it off)</option>
-                <option value="scheduled">On between two dates</option>
-              </Select>
-            </Field>
-            <Field id="festivalKey" label="Which festival">
-              <Select id="festivalKey" name="festivalKey" defaultValue={festival.key}>
-                {FESTIVALS.map((f) => (
-                  <option key={f.key} value={f.key}>
-                    {f.label}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field
-              id="festivalStartsOn"
-              label="First day"
-              hint="Only for “between two dates”"
-              optional
-            >
-              <Input
-                id="festivalStartsOn"
-                name="festivalStartsOn"
-                type="date"
-                defaultValue={festival.startsOn}
-                hasHint
-              />
-            </Field>
-            <Field id="festivalEndsOn" label="Last day" optional>
-              <Input
-                id="festivalEndsOn"
-                name="festivalEndsOn"
-                type="date"
-                defaultValue={festival.endsOn}
-              />
-            </Field>
-            <p className="text-xs text-muted sm:col-span-2">
-              A festival look recolours the shop (buttons, links, backgrounds) and adds a thin
-              colour strip under the announcement bar. Dates follow Sri Lanka time.
-            </p>
           </div>
         </Card>
 

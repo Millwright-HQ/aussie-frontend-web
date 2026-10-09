@@ -154,7 +154,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
               name="q"
               defaultValue={filters.q}
               placeholder="Search tasks, ids, names, addresses…"
-              className="h-10 w-full rounded-[10px] border border-border bg-surface pr-3 pl-9 text-sm shadow-sm"
+              className="h-10 w-full rounded-sm border border-border bg-surface pr-3 pl-9 text-sm shadow-sm"
             />
           </label>
           <div>
@@ -240,7 +240,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
               type="date"
               name="from"
               defaultValue={filters.from}
-              className="h-10 w-full rounded-[10px] border border-border bg-surface px-3 text-sm shadow-sm"
+              className="h-10 w-full rounded-sm border border-border bg-surface px-3 text-sm shadow-sm"
             />
           </div>
           <div>
@@ -252,7 +252,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
               type="date"
               name="to"
               defaultValue={filters.to}
-              className="h-10 w-full rounded-[10px] border border-border bg-surface px-3 text-sm shadow-sm"
+              className="h-10 w-full rounded-sm border border-border bg-surface px-3 text-sm shadow-sm"
             />
           </div>
         </div>

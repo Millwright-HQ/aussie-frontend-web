@@ -14,11 +14,10 @@ export const CONTENT_TAG = 'content';
 export const FALLBACK_SITE: PublicSite = {
   settings: DEFAULT_SITE_SETTINGS,
   banners: [],
-  festival: null,
   pages: [],
 };
 
-/** Store details, live banners, the festival look and page links (cached for a minute). */
+/** Store details, live banners and page links (cached for a minute). */
 export async function getSite(): Promise<PublicSite> {
   if (!API_URL) return FALLBACK_SITE;
   try {

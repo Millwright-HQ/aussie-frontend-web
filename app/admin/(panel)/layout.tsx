@@ -1,3 +1,4 @@
+import { BrandLogo } from '@/components/brand-logo';
 import type { Permission } from '@aussie/shared-types';
 import { ExternalLink, LogOut, Mail, UserRound } from 'lucide-react';
 import Link from 'next/link';
@@ -136,13 +137,8 @@ export default async function PanelLayout({ children }: { children: React.ReactN
       groups={groups}
       brand={
         <Link href="/admin" className="flex items-center gap-2.5 font-semibold tracking-tight">
-          <span
-            aria-hidden
-            className="flex size-7 items-center justify-center rounded-[9px] bg-primary text-sm font-bold text-primary-fg"
-          >
-            A
-          </span>
-          Aussie Admin
+          <BrandLogo height="h-6" />
+          <span className="text-xs tracking-[0.14em] text-muted uppercase">Admin</span>
         </Link>
       }
       topbar={
@@ -151,7 +147,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
             <Link
               href="/dev/mail"
               target="_blank"
-              className="mr-1 inline-flex h-9 items-center gap-1.5 rounded-[10px] px-3 text-[13px] text-muted hover:bg-surface-muted hover:text-text"
+              className="mr-1 inline-flex h-9 items-center gap-1.5 rounded-sm px-3 text-[13px] text-muted hover:bg-surface-muted hover:text-text"
             >
               <Mail aria-hidden size={14} /> Local mail
             </Link>
@@ -159,14 +155,14 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           <Link
             href="/"
             target="_blank"
-            className="mr-1 inline-flex h-9 items-center gap-1.5 rounded-[10px] px-3 text-[13px] text-muted hover:bg-surface-muted hover:text-text"
+            className="mr-1 inline-flex h-9 items-center gap-1.5 rounded-sm px-3 text-[13px] text-muted hover:bg-surface-muted hover:text-text"
           >
             View store <ExternalLink aria-hidden size={14} />
           </Link>
           <ThemeToggle
             scope="admin"
             initial={mode}
-            className="inline-flex size-9 items-center justify-center rounded-[10px] text-muted hover:bg-surface-muted hover:text-text"
+            className="inline-flex size-9 items-center justify-center rounded-sm text-muted hover:bg-surface-muted hover:text-text"
           />
         </>
       }
@@ -182,13 +178,13 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           <div className="mt-2 grid grid-cols-2 gap-1.5">
             <Link
               href="/admin/profile"
-              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-[10px] bg-surface-muted text-[13px] font-medium hover:bg-border"
+              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-sm bg-surface-muted text-[13px] font-medium hover:bg-border"
             >
               <UserRound aria-hidden size={14} /> Profile
             </Link>
             <form action={signOut} className="contents">
               <ConfirmSubmit
-                title="Sign out of Aussie Admin?"
+                title="Sign out of OZARA Admin?"
                 description="You will need to sign in again to continue. This sign-out is recorded in the audit log."
                 confirmLabel="Sign out"
                 triggerVariant="secondary"

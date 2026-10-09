@@ -15,7 +15,7 @@ export function AutoRefresh() {
     <button
       type="button"
       onClick={() => router.refresh()}
-      className="inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-border px-3 text-sm hover:bg-surface-muted"
+      className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-border px-3 text-sm hover:bg-surface-muted"
     >
       <RefreshCw aria-hidden size={14} /> Refresh
     </button>
