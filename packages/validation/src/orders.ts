@@ -34,6 +34,11 @@ export const checkoutSchema = z
     /** Name, phone and delivery address (the phone is where staff confirm the order). */
     shipping: addressSchema,
     email: optionalEmail,
+    /** The customer's instructions for this order (gift wrap, call first…). */
+    instructions: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      z.string().trim().max(500, 'Keep the instructions under 500 characters').optional(),
+    ),
     items: itemsSchema,
     paymentMethod: z.enum(PAYMENT_METHODS).default('COD'),
     /** The stock hold made when the checkout opened; the order takes over that hold. */

@@ -1,51 +1,75 @@
-import { Bell, Mail, Sparkles, Users } from 'lucide-react';
-import { requirePermission } from '@/lib/admin';
-import { Badge, Card, EmptyState, PageHeader } from '@/app/admin/_ui';
+import type { NewsletterSubscriber } from '@aussie/shared-types';
+import { Mail } from 'lucide-react';
+import { api } from '@/lib/api';
+import { formatDateTime, requirePermission } from '@/lib/admin';
+import {
+  Badge,
+  EmptyState,
+  PageHeader,
+  Panel,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from '@/app/admin/_ui';
 
 export const metadata = { title: 'Newsletter' };
 
-const PLANNED = [
-  {
-    icon: Sparkles,
-    title: 'New product announcements',
-    text: 'Pick products you just added and send customers a clean email with photos, prices and a Shop now button.',
-  },
-  {
-    icon: Bell,
-    title: 'Offers and back-in-stock',
-    text: 'Tell people about a sale, a festival offer, or that a sold-out item is back.',
-  },
-  {
-    icon: Users,
-    title: 'Only people who said yes',
-    text: 'Goes only to customers who ticked the marketing box at sign-up. Everyone gets an unsubscribe link, and anyone who unsubscribes is never emailed again.',
-  },
-] as const;
+const SOURCE: Record<NewsletterSubscriber['source'], string> = {
+  footer: 'Shop footer',
+  'coming-soon': 'Coming-soon page',
+};
 
 export default async function NewsletterPage() {
   await requirePermission('content:write');
+  const { items } = await api<{ items: NewsletterSubscriber[] }>(
+    'admin',
+    '/v1/content/admin/newsletter',
+  );
+
   return (
     <div className="max-w-4xl space-y-6">
       <PageHeader
         title="Newsletter"
-        description="Send news and new-product emails to customers who agreed to receive them."
-        actions={<Badge tone="info">Coming soon</Badge>}
+        description="Emails collected from the shop footer and the coming-soon page. Sending newsletters from here is coming soon."
+        actions={<Badge tone="info">{items.length} subscribed</Badge>}
       />
-      <Card>
-        <EmptyState icon={<Mail size={20} />} title="Newsletters are coming soon">
-          Nothing to set up yet. When this is ready you will write or pick products, preview the
-          email, send yourself a test, and then send it to your subscribers.
-        </EmptyState>
-      </Card>
-      <ul className="grid gap-4 sm:grid-cols-3">
-        {PLANNED.map(({ icon: Icon, title, text }) => (
-          <li key={title} className="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <Icon aria-hidden size={18} className="text-primary" />
-            <p className="mt-2 text-sm font-medium">{title}</p>
-            <p className="mt-1 text-[13px] text-muted">{text}</p>
-          </li>
-        ))}
-      </ul>
+      {items.length === 0 ? (
+        <Panel>
+          <EmptyState icon={<Mail size={20} />} title="No subscribers yet">
+            Visitors who leave their email in the footer or on the coming-soon page show up here.
+          </EmptyState>
+        </Panel>
+      ) : (
+        <Panel flush>
+          <div className="overflow-x-auto">
+            <Table>
+              <Thead>
+                <tr>
+                  <Th>Email</Th>
+                  <Th>Signed up from</Th>
+                  <Th>When</Th>
+                </tr>
+              </Thead>
+              <Tbody>
+                {items.map((s) => (
+                  <Tr key={s.email}>
+                    <Td>
+                      <a href={`mailto:${s.email}`} className="hover:underline">
+                        {s.email}
+                      </a>
+                    </Td>
+                    <Td>{SOURCE[s.source]}</Td>
+                    <Td className="whitespace-nowrap text-muted">{formatDateTime(s.createdAt)}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </div>
+        </Panel>
+      )}
     </div>
   );
 }

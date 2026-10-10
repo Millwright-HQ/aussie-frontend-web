@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { deepestTrail, getCategoryTree, getProduct } from '@/lib/catalog';
-import { getDistricts } from '@/lib/delivery';
 import { availabilityLabel, availableUnits, getAvailability } from '@/lib/inventory';
 import { ProductView } from './product-view';
 import { getProductReviews } from '@/lib/reviews';
@@ -42,10 +41,7 @@ export default async function ProductPage({ params }: Props) {
   if (!validSlug(slug)) notFound();
   const [product, tree] = await Promise.all([getProduct(slug), getCategoryTree()]);
   if (!product) notFound();
-  const [availability, districts] = await Promise.all([
-    getAvailability(product.id, { fresh: true }),
-    getDistricts(),
-  ]);
+  const availability = await getAvailability(product.id, { fresh: true });
   // Precomputed here: the client view must not import server-only modules.
   const stock = Object.fromEntries(
     product.variants.map((v) => {
@@ -102,7 +98,6 @@ export default async function ProductPage({ params }: Props) {
         stock={stock}
         slug={slug}
         rating={(await getProductReviews(product.id))?.summary}
-        districts={districts.map(({ code, name }) => ({ code, name }))}
       />
 
       <div className="mt-12 max-w-3xl">

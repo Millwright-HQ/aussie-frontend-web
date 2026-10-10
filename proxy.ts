@@ -2,10 +2,13 @@ import { NextResponse, type NextRequest } from 'next/server';
 import type { Audience } from './lib/auth/config';
 import { cookieNames, cookiePath } from './lib/auth/cookies';
 import { type CookieChange, refreshIfNeeded } from './lib/auth/refresh';
+import { isUnlocked, readSiteLock, UNLOCK_COOKIE } from './lib/site-lock';
 
 /** Admin pages reachable while signed out (the multi-step sign-in). */
 const ADMIN_PUBLIC = ['/admin/login'];
 /** Customer pages that need a session. Sign-in/up/verify/reset pages stay public. */
+/** Pages the launch lock never hides. */
+const SITE_LOCK_OPEN = /^\/(coming-soon|dev)(\/|$)/;
 const CUSTOMER_PROTECTED = /^\/account(\/(welcome|addresses|security))?\/?$/;
 
 /**
@@ -45,7 +48,20 @@ export async function proxy(request: NextRequest) {
   requestHeaders.set('x-nonce', nonce);
   requestHeaders.set('Content-Security-Policy', csp);
 
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  // Launch lock: until visitors enter the password they only see the "coming soon" page.
+  // The admin panel, that page itself and files (logo, fonts…) are never locked.
+  let response = NextResponse.next({ request: { headers: requestHeaders } });
+  if (!isAdmin && !SITE_LOCK_OPEN.test(pathname) && !/\.[a-z0-9]+$/i.test(pathname)) {
+    const lock = await readSiteLock();
+    if (lock.enabled && !isUnlocked(request.cookies.get(UNLOCK_COOKIE)?.value, lock.version)) {
+      response = NextResponse.rewrite(new URL('/coming-soon', request.url), {
+        request: { headers: requestHeaders },
+        status: 503,
+      });
+      response.headers.set('Retry-After', '3600');
+      response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    }
+  }
   for (const c of changes ?? []) response.cookies.set(c.name, c.value, c.options);
   if (changes === null && hasRefresh) clearCookies(response, audience); // dead session on a public page
   response.headers.set('Content-Security-Policy', csp);

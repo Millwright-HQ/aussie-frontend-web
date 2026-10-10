@@ -3,12 +3,13 @@ import { Menu, Search, ShoppingBag, User } from 'lucide-react';
 import Link from 'next/link';
 import { BrandLogo } from '@/components/brand-logo';
 import { BrandIcon, type BrandName } from '@/components/brand-icons';
+import { NewsletterForm } from '@/components/newsletter-form';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { FloatingActions } from './_components/floating-actions';
 import { cartCount, getCart } from '@/lib/cart';
 import { getCategoryTree } from '@/lib/catalog';
 import { getSite } from '@/lib/content';
-import { STORE_NAME } from '@/lib/site';
+import { DEFAULT_CONTACT_EMAIL, STORE_NAME } from '@/lib/site';
 import { readTheme } from '@/lib/theme';
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
@@ -19,6 +20,12 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const { settings } = site;
   const mode = await readTheme('store', settings.theme.defaultMode);
   const storeName = STORE_NAME;
+  // Information pages, grouped for the footer: help, company, and the legal line at the very bottom.
+  const inGroup = (slugs: string[]) => site.pages.filter((p) => slugs.includes(p.slug));
+  const care = inGroup(['delivery', 'returns', 'contact']);
+  const company = inGroup(['about']);
+  const legal = inGroup(['terms', 'privacy']);
+  const contactEmail = settings.email ?? DEFAULT_CONTACT_EMAIL;
   const whatsappDigits = settings.whatsapp?.replace(/\D/g, '');
   const socials: { name: BrandName; label: string; href: string }[] = [
     { name: 'instagram' as const, label: 'Instagram', href: settings.instagram },
@@ -44,26 +51,17 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       >
         Skip to content
       </a>
-      {((settings.announcement.enabled && settings.announcement.text) || socials.length > 0) && (
+      {settings.announcement.enabled && settings.announcement.text && (
         <div className="bg-text text-bg">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 text-xs md:px-6 lg:px-8">
-            <SocialLinks socials={socials} size={14} className="hidden gap-3 sm:flex" />
-            <p className="flex-1 text-center tracking-wide uppercase">
-              {settings.announcement.enabled && settings.announcement.text ? (
-                settings.announcement.href ? (
-                  <a
-                    href={settings.announcement.href}
-                    className="underline-offset-4 hover:underline"
-                  >
-                    {settings.announcement.text}
-                  </a>
-                ) : (
-                  settings.announcement.text
-                )
-              ) : null}
-            </p>
-            <span aria-hidden className="hidden w-24 sm:block" />
-          </div>
+          <p className="mx-auto max-w-7xl px-4 py-2 text-center text-xs tracking-wide uppercase md:px-6 lg:px-8">
+            {settings.announcement.href ? (
+              <a href={settings.announcement.href} className="underline-offset-4 hover:underline">
+                {settings.announcement.text}
+              </a>
+            ) : (
+              settings.announcement.text
+            )}
+          </p>
         </div>
       )}
       <header className="relative border-b border-border bg-surface">
@@ -194,65 +192,117 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         {children}
       </main>
       <FloatingActions whatsapp={settings.whatsapp} storeName={storeName} />
-      <footer className="border-t border-border bg-surface-muted">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 text-sm text-muted sm:grid-cols-2 md:px-6 lg:grid-cols-4 lg:px-8">
-          <div className="space-y-2">
-            <p className="font-display text-base font-semibold text-text">{storeName}</p>
+      <footer className="border-t border-border bg-surface-muted text-sm text-muted">
+        <div className="mx-auto grid max-w-7xl gap-x-8 gap-y-10 px-4 py-10 md:px-6 lg:grid-cols-[1.2fr_2.6fr_1.4fr] lg:px-8">
+          <div className="space-y-4">
+            <Link href="/" aria-label={`${storeName} home`} className="inline-block">
+              <BrandLogo height="h-8" />
+            </Link>
             {settings.footerNote && <p>{settings.footerNote}</p>}
-          </div>
-          <ul className="space-y-2">
-            {categories.slice(0, 6).map((c) => (
-              <li key={c.id}>
-                <Link href={`/c/${c.slug}`} className="hover:text-text">
-                  {c.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <ul className="space-y-2">
-            {site.pages.map((p) => (
-              <li key={p.slug}>
-                <Link href={`/info/${p.slug}`} className="hover:text-text">
-                  {p.title}
-                </Link>
-              </li>
-            ))}
-            <li>
-              <Link href="/track" className="hover:text-text">
-                Track your order
-              </Link>
-            </li>
-          </ul>
-          <ul className="space-y-2">
-            {settings.phone && (
+            <ul className="space-y-1">
+              {settings.phone && (
+                <li>
+                  <a
+                    href={`tel:${settings.phone.replace(/[^+\d]/g, '')}`}
+                    className="hover:text-text"
+                  >
+                    {settings.phone}
+                  </a>
+                </li>
+              )}
               <li>
-                <a
-                  href={`tel:${settings.phone.replace(/[^+\d]/g, '')}`}
-                  className="hover:text-text"
-                >
-                  {settings.phone}
+                <a href={`mailto:${contactEmail}`} className="hover:text-text">
+                  {contactEmail}
                 </a>
               </li>
-            )}
-            {settings.email && (
-              <li>
-                <a href={`mailto:${settings.email}`} className="hover:text-text">
-                  {settings.email}
-                </a>
-              </li>
-            )}
-            {settings.address && <li>{settings.address}</li>}
+              {settings.address && <li>{settings.address}</li>}
+            </ul>
             {socials.length > 0 && (
-              <li>
-                <SocialLinks socials={socials} size={20} className="flex gap-4 pt-1" />
-              </li>
+              <SocialLinks socials={socials} size={20} className="flex gap-4" />
             )}
-          </ul>
+          </div>
+
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3">
+            <FooterColumn title="Shop">
+              <li>
+                <Link href="/shop" className="hover:text-text">
+                  All products
+                </Link>
+              </li>
+              {categories.slice(0, 5).map((c) => (
+                <li key={c.id}>
+                  <Link href={`/c/${c.slug}`} className="hover:text-text">
+                    {c.name}
+                  </Link>
+                </li>
+              ))}
+            </FooterColumn>
+            <FooterColumn title="Customer care">
+              <li>
+                <Link href="/track" className="hover:text-text">
+                  Track your order
+                </Link>
+              </li>
+              {care.map((p) => (
+                <li key={p.slug}>
+                  <Link href={`/info/${p.slug}`} className="hover:text-text">
+                    {p.title}
+                  </Link>
+                </li>
+              ))}
+            </FooterColumn>
+            {company.length > 0 && (
+              <FooterColumn title="Company">
+                {company.map((p) => (
+                  <li key={p.slug}>
+                    <Link href={`/info/${p.slug}`} className="hover:text-text">
+                      {p.title}
+                    </Link>
+                  </li>
+                ))}
+              </FooterColumn>
+            )}
+          </nav>
+
+          <div>
+            <h2 className="text-xs font-semibold tracking-wide text-text uppercase">
+              Stay in the loop
+            </h2>
+            <p className="mt-3">New arrivals, offers and back-in-stock news. No spam.</p>
+            <div className="mt-3">
+              <NewsletterForm source="footer" />
+            </div>
+          </div>
         </div>
-        <p className="border-t border-border px-4 py-4 text-center text-xs text-muted">
-          © {new Date().getFullYear()} {storeName}
-        </p>
+
+        <div className="border-t border-border">
+          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs md:flex-row md:px-6 lg:px-8">
+            <p>
+              © {new Date().getFullYear()} {storeName}
+            </p>
+            {legal.length > 0 && (
+              <ul className="flex flex-wrap justify-center gap-x-5 gap-y-1">
+                {legal.map((p) => (
+                  <li key={p.slug}>
+                    <Link href={`/info/${p.slug}`} className="hover:text-text">
+                      {p.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
       </footer>
+    </div>
+  );
+}
+
+function FooterColumn({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <h2 className="text-xs font-semibold tracking-wide text-text uppercase">{title}</h2>
+      <ul className="mt-3 space-y-2">{children}</ul>
     </div>
   );
 }

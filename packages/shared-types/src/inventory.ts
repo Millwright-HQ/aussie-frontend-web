@@ -46,6 +46,38 @@ export interface VariantAvailability {
   count?: number;
 }
 
+/** "Tell me when it is back": a shopper waiting for a sold-out variant. */
+export type WaitlistStatus = 'WAITING' | 'NOTIFIED';
+
+export interface WaitlistEntry {
+  variantId: string;
+  productId: string;
+  productName: string;
+  /** e.g. "Ruby · 30 ml" (empty for single-variant products). */
+  label: string;
+  /** Product page slug, so the "it is back" email can link to it. */
+  slug: string;
+  email: string;
+  name?: string;
+  phone?: string;
+  status: WaitlistStatus;
+  createdAt: string;
+  notifiedAt?: string;
+}
+
+/** Admin view: how many people wait for each variant, to plan the next bulk order. */
+export interface WaitlistVariantSummary {
+  variantId: string;
+  productId: string;
+  productName: string;
+  label: string;
+  sku: string;
+  onHand: number;
+  waiting: number;
+  notified: number;
+  latestAt: string;
+}
+
 export interface OrderLineQty {
   variantId: string;
   qty: number;

@@ -5,6 +5,7 @@ import {
   bannerInputSchema,
   pageInputSchema,
   pageSlugSchema,
+  siteLockSchema,
   siteSettingsSchema,
   siteUploadRequestSchema,
 } from '@aussie/validation';
@@ -62,6 +63,24 @@ export async function requestSiteUploadAction(
     if (err instanceof ApiError) return { error: err.userMessage };
     throw err;
   }
+}
+
+// ── Launch lock ─────────────────────────────────────────────────────────────
+
+export async function saveSiteLockAction(_prev: ActionState, form: FormData): Promise<ActionState> {
+  const parsed = siteLockSchema.safeParse({
+    enabled: flag(form, 'enabled'),
+    message: text(form, 'message'),
+    password: text(form, 'password'),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Check the form' };
+  return save(
+    () => api('admin', '/v1/content/admin/site-lock', { method: 'PUT', body: parsed.data }),
+    parsed.data.enabled
+      ? 'The shop is locked. Visitors need the password; the admin panel is not affected.'
+      : 'The shop is open to everyone.',
+    ['/admin/site/launch'],
+  );
 }
 
 // ── Store details, announcement and appearance ──────────────────────────────

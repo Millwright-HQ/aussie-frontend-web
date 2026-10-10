@@ -1,9 +1,7 @@
 import { buttonVariants, Button, formatLkr } from '@aussie/ui';
-import { DISTRICTS } from '@aussie/validation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getCart } from '@/lib/cart';
-import { describeQuote, getDistricts, getQuote } from '@/lib/delivery';
 import { availableUnits, getAvailability } from '@/lib/inventory';
 import { imageUrl } from '@/lib/media';
 import { bagHasUnavailable, bagSubtotal, loadBag } from '@/lib/orders';
@@ -12,18 +10,8 @@ import { removeFromBagAction, setQuantityAction } from './actions';
 
 export const metadata = { title: 'Your bag' };
 
-const districtCode = (v: string | string[] | undefined) => {
-  const code = Array.isArray(v) ? v[0] : v;
-  return DISTRICTS.find((d) => d.code === code)?.code;
-};
-
-export default async function CartPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const district = districtCode((await searchParams).district);
-  const [bag, districts] = await Promise.all([loadBag(await getCart()), getDistricts()]);
+export default async function CartPage() {
+  const bag = await loadBag(await getCart());
   // Units in stock per variant, so quantities can never go past what exists.
   const stockByProduct = new Map(
     await Promise.all(
@@ -36,26 +24,6 @@ export default async function CartPage({
     availableUnits(stockByProduct.get(l.productId)?.[l.variantId]);
   const subtotal = bagSubtotal(bag);
   const blocked = bagHasUnavailable(bag);
-
-  // Delivery fee preview (checkout works it out again from the same data).
-  const quote =
-    district && bag.length > 0 && !blocked
-      ? await getQuote({
-          district,
-          subtotalCents: subtotal,
-          items: bag.map((l) => ({
-            weightG: l.snapshot.weightG ?? 1,
-            qty: l.qty,
-            ...(l.snapshot.lengthCm && l.snapshot.widthCm && l.snapshot.heightCm
-              ? {
-                  lengthCm: l.snapshot.lengthCm,
-                  widthCm: l.snapshot.widthCm,
-                  heightCm: l.snapshot.heightCm,
-                }
-              : {}),
-          })),
-        })
-      : undefined;
 
   if (bag.length === 0) {
     return (
@@ -78,7 +46,7 @@ export default async function CartPage({
             const s = l.snapshot;
             return (
               <li key={l.variantId} className="flex gap-4 py-5">
-                <div className="relative size-24 shrink-0 overflow-hidden rounded-md bg-surface-muted">
+                <div className="relative size-20 shrink-0 overflow-hidden rounded-md bg-surface-muted sm:size-24">
                   {s.imageBase && (
                     <Image
                       src={imageUrl(s.imageBase)}
@@ -108,9 +76,14 @@ export default async function CartPage({
                       Only {unitsOf(l)} in stock. Please lower the quantity to continue.
                     </p>
                   )}
+                  {s.available && (
+                    <p className="mt-1 font-medium tabular sm:hidden">
+                      {formatLkr((s.priceCents ?? 0) * l.qty)}
+                    </p>
+                  )}
                   <div className="mt-3 flex flex-wrap items-center gap-3">
                     {s.available && (
-                      <form action={setQuantityAction} className="flex items-center gap-2">
+                      <form action={setQuantityAction} className="flex flex-wrap items-center gap-2">
                         <input type="hidden" name="variantId" value={l.variantId} />
                         <QuantityInput
                           id={`qty-${l.variantId}`}
@@ -132,7 +105,9 @@ export default async function CartPage({
                   </div>
                 </div>
                 {s.available && (
-                  <p className="font-medium tabular">{formatLkr((s.priceCents ?? 0) * l.qty)}</p>
+                  <p className="hidden font-medium tabular sm:block">
+                    {formatLkr((s.priceCents ?? 0) * l.qty)}
+                  </p>
                 )}
               </li>
             );
@@ -149,51 +124,15 @@ export default async function CartPage({
               </div>
             </dl>
 
-            <form method="get" className="mt-4 space-y-2">
-              <label htmlFor="district" className="block text-sm font-medium">
-                Delivery district
-              </label>
-              <div className="flex gap-2">
-                <select
-                  id="district"
-                  name="district"
-                  defaultValue={district ?? ''}
-                  className="min-h-11 flex-1 rounded-sm border border-border bg-surface px-2"
-                >
-                  <option value="" disabled>
-                    Choose…
-                  </option>
-                  {districts.map((d) => (
-                    <option key={d.code} value={d.code}>
-                      {d.name}
-                    </option>
-                  ))}
-                </select>
-                <Button type="submit" variant="outline" size="sm">
-                  Show fee
-                </Button>
-              </div>
-            </form>
-
-            {quote && !quote.ok && <p className="mt-3 text-sm text-danger">{quote.message}</p>}
-            {quote?.ok && (
-              <>
-                <p className="mt-3 text-sm text-muted">{describeQuote(quote.quote)}</p>
-                <p className="mt-3 flex justify-between border-t border-border pt-3 font-medium">
-                  <span>Total (cash on delivery)</span>
-                  <span className="tabular">{formatLkr(subtotal + quote.quote.totalFeeCents)}</span>
-                </p>
-              </>
-            )}
-            {!quote && (
-              <p className="mt-3 text-sm text-muted">Delivery fee is added at checkout.</p>
-            )}
+            <p className="mt-3 text-sm text-muted">
+              Delivery fee is worked out at checkout, once you enter your address.
+            </p>
 
             {blocked ? (
               <p className="mt-4 text-sm text-danger">Remove unavailable items to check out.</p>
             ) : (
               <Link
-                href={district ? `/checkout/start?district=${district}` : '/checkout/start'}
+                href="/checkout/start"
                 className={`${buttonVariants({ size: 'lg' })} mt-4 w-full`}
               >
                 Check out

@@ -1,5 +1,6 @@
-import { PAGE_SLUGS, THEME_MODES } from '@aussie/shared-types';
+import { INQUIRY_STATUSES, INQUIRY_TOPICS, PAGE_SLUGS, THEME_MODES } from '@aussie/shared-types';
 import { z } from 'zod';
+import { ORDER_NUMBER_PATTERN } from './orders.js';
 import { lkMobileSchema, optionalText, ulidSchema } from './schemas.js';
 
 export const MAX_SITE_IMAGE_BYTES = 3 * 1024 * 1024;
@@ -151,3 +152,99 @@ export const siteUploadRequestSchema = z
 export type SiteUploadRequest = z.infer<typeof siteUploadRequestSchema>;
 
 export const bannerIdSchema = ulidSchema;
+
+export const SITE_LOCK_MIN_PASSWORD = 6;
+
+/** Admin: switch the launch lock on/off, change its message and (optionally) the password. */
+export const siteLockSchema = z
+  .object({
+    enabled: z.boolean(),
+    message: optionalText(300),
+    /** Leave empty to keep the current password. */
+    password: z.preprocess(
+      (v) => (typeof v === 'string' && v === '' ? undefined : v),
+      z
+        .string()
+        .min(SITE_LOCK_MIN_PASSWORD, `Use at least ${SITE_LOCK_MIN_PASSWORD} characters`)
+        .max(100)
+        .optional(),
+    ),
+  })
+  .strict();
+export type SiteLockInput = z.infer<typeof siteLockSchema>;
+
+export const siteLockVerifySchema = z
+  .object({
+    password: z.string({ message: 'Enter the password' }).min(1, 'Enter the password').max(100),
+  })
+  .strict();
+export type SiteLockVerify = z.infer<typeof siteLockVerifySchema>;
+
+export const NEWSLETTER_SOURCES = ['footer', 'coming-soon'] as const;
+
+/** A visitor joining the newsletter / launch list. */
+export const newsletterSignupSchema = z
+  .object({
+    email: z
+      .string({ message: 'Enter your email' })
+      .trim()
+      .toLowerCase()
+      .email('Enter a valid email address')
+      .max(200),
+    source: z.enum(NEWSLETTER_SOURCES).default('footer'),
+  })
+  .strict();
+export type NewsletterSignup = z.infer<typeof newsletterSignupSchema>;
+
+// ── Contact page inquiries ──────────────────────────────────────────────────
+
+export const inquirySchema = z
+  .object({
+    name: z.string({ message: 'Enter your name' }).trim().min(2, 'Enter your name').max(100),
+    email: z
+      .string({ message: 'Enter your email' })
+      .trim()
+      .toLowerCase()
+      .email('Enter a valid email address')
+      .max(200),
+    phone: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      lkMobileSchema.optional(),
+    ),
+    topic: z.enum(INQUIRY_TOPICS, { message: 'Choose what this is about' }),
+    orderNumber: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      z
+        .string()
+        .trim()
+        .toUpperCase()
+        .regex(ORDER_NUMBER_PATTERN, 'Enter the order number, e.g. AC-26-00042')
+        .optional(),
+    ),
+    subject: z.string({ message: 'Enter a subject' }).trim().min(3, 'Enter a subject').max(120),
+    message: z
+      .string({ message: 'Write your message' })
+      .trim()
+      .min(10, 'Please write a little more (at least 10 characters)')
+      .max(2000, 'Keep the message under 2000 characters'),
+  })
+  .strict()
+  .superRefine((q, ctx) => {
+    if (q.topic === 'ORDER' && !q.orderNumber) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['orderNumber'],
+        message: 'Add your order number so we can find it',
+      });
+    }
+  });
+export type InquiryInput = z.infer<typeof inquirySchema>;
+
+/** Staff: move an inquiry to a new status and/or leave an internal note. */
+export const inquiryStatusSchema = z
+  .object({
+    status: z.enum(INQUIRY_STATUSES, { message: 'Choose a status' }),
+    note: optionalText(500),
+  })
+  .strict();
+export type InquiryStatusInput = z.infer<typeof inquiryStatusSchema>;

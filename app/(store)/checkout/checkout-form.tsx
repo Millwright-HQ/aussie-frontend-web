@@ -143,7 +143,6 @@ export function CheckoutForm({
   }, []);
 
   const byTransfer = payment === 'BANK_TRANSFER';
-  const districtName = districts.find((d) => d.code === district)?.name;
 
   // The fee follows the district and the bag.
   useEffect(() => {
@@ -226,43 +225,10 @@ export function CheckoutForm({
           </Alert>
         )}
 
-        <section aria-labelledby="where">
-          <h2 id="where" className="text-h3">
-            1. Where should we deliver?
-          </h2>
-          <div className="mt-3 max-w-md">
-            <label htmlFor="district-pick" className="sr-only">
-              District
-            </label>
-            <Select
-              id="district-pick"
-              name="district-pick"
-              value={district}
-              onChange={(e) => setDistrict(e.target.value)}
-            >
-              <option value="" disabled>
-                Choose your district…
-              </option>
-              {districts.map((d) => (
-                <option key={d.code} value={d.code}>
-                  {d.name}
-                  {d.feeCents !== undefined ? ` · ${formatLkr(d.feeCents)}` : ''}
-                </option>
-              ))}
-            </Select>
-          </div>
-          {district && quote && !quote.ok && (
-            <p className="mt-3 text-sm text-danger">{quote.message}</p>
-          )}
-          {!district && (
-            <p className="mt-2 text-sm text-muted">Choose your district to see the delivery fee.</p>
-          )}
-        </section>
-
         {bank && (
           <section aria-labelledby="payment">
             <h2 id="payment" className="text-h3">
-              2. How would you like to pay?
+              1. How would you like to pay?
             </h2>
             <div
               className="mt-3 grid gap-3 sm:grid-cols-2"
@@ -271,7 +237,7 @@ export function CheckoutForm({
             >
               {(
                 [
-                  ['COD', 'Cash on delivery', 'Pay in cash when the parcel arrives.', Wallet],
+                  ['COD', 'Cash on delivery', 'Pay in cash.', Wallet],
                   [
                     'BANK_TRANSFER',
                     'Bank transfer',
@@ -367,7 +333,7 @@ export function CheckoutForm({
 
         <section aria-labelledby="details">
           <h2 id="details" className="text-h3">
-            {bank ? '3' : '2'}. Your details
+            {bank ? '2' : '1'}. Your details and delivery address
           </h2>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             <Field id="fullName" label="Full name" error={err('fullName')}>
@@ -452,9 +418,34 @@ export function CheckoutForm({
                 invalid={!!err('postalCode')}
               />
             </Field>
-            <p className="text-sm sm:col-span-2">
-              District: <span className="font-medium">{districtName ?? 'not chosen yet'}</span>
-            </p>
+            <div className="sm:col-span-2">
+              <label htmlFor="district-pick" className="mb-1.5 block text-sm font-medium">
+                District
+              </label>
+              <Select
+                id="district-pick"
+                name="district-pick"
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+              >
+                <option value="" disabled>
+                  Choose your district…
+                </option>
+                {districts.map((d) => (
+                  <option key={d.code} value={d.code}>
+                    {d.name}
+                  </option>
+                ))}
+              </Select>
+              {district && quote && !quote.ok && (
+                <p className="mt-2 text-sm text-danger">{quote.message}</p>
+              )}
+              {!district && (
+                <p className="mt-2 text-sm text-muted">
+                  Choose your district to see the delivery fee.
+                </p>
+              )}
+            </div>
             <Field
               id="notes"
               label="Delivery notes"
@@ -464,6 +455,16 @@ export function CheckoutForm({
               className="sm:col-span-2"
             >
               <Textarea id="notes" name="notes" rows={2} />
+            </Field>
+            <Field
+              id="instructions"
+              label="Order instructions"
+              hint="Anything we should know about this order, e.g. gift wrap or call before delivery"
+              error={err('instructions')}
+              optional
+              className="sm:col-span-2"
+            >
+              <Textarea id="instructions" name="instructions" rows={3} maxLength={500} />
             </Field>
           </div>
 

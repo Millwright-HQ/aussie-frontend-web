@@ -10,6 +10,7 @@ export function SiteTabs({ me, current }: { me: AdminMe; current: string }) {
           { href: '/admin/site', label: 'General' },
           { href: '/admin/site/banners', label: 'Banners' },
           { href: '/admin/site/pages', label: 'Pages' },
+          { href: '/admin/site/launch', label: 'Launch lock' },
         ]
       : []),
     ...(can(me, 'product:read')

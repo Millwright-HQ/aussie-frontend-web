@@ -1,6 +1,6 @@
 import { ADJUSTMENT_REASONS } from '@aussie/shared-types';
 import { z } from 'zod';
-import { optionalText, ulidSchema } from './schemas.js';
+import { lkMobileSchema, optionalText, ulidSchema } from './schemas.js';
 
 export const stockAdjustmentSchema = z
   .object({
@@ -63,3 +63,27 @@ export type Allocation = z.infer<typeof allocationSchema>;
 export const stockFilterSchema = z
   .object({ filter: z.enum(['all', 'low', 'out']).default('all') })
   .strict();
+
+/** A shopper joining the waitlist for a sold-out variant. */
+export const waitlistSignupSchema = z
+  .object({
+    productId: ulidSchema,
+    variantId: ulidSchema,
+    slug: z
+      .string()
+      .trim()
+      .regex(/^[a-z0-9-]{1,120}$/, 'Could not find this product'),
+    email: z
+      .string({ message: 'Enter your email' })
+      .trim()
+      .toLowerCase()
+      .email('Enter a valid email address')
+      .max(200),
+    name: optionalText(100),
+    phone: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      lkMobileSchema.optional(),
+    ),
+  })
+  .strict();
+export type WaitlistSignup = z.infer<typeof waitlistSignupSchema>;

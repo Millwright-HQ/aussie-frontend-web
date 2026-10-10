@@ -478,6 +478,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               </span>
             </p>
             {order.shipping.notes && <p className="mt-2 text-sm">Note: {order.shipping.notes}</p>}
+            {order.instructions && (
+              <p className="mt-2 text-sm">
+                <span className="font-medium">Order instructions:</span> {order.instructions}
+              </p>
+            )}
             {canEditShipping && <ShippingForm order={order} />}
           </Panel>
 

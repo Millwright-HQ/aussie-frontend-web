@@ -47,6 +47,7 @@ export default async function PackingSlipPage({ params }: { params: Promise<{ id
           </p>
           <p className="mt-1 font-semibold">{order.shipping.phone}</p>
           {order.shipping.notes && <p className="mt-1">Note: {order.shipping.notes}</p>}
+          {order.instructions && <p className="mt-1">Order instructions: {order.instructions}</p>}
         </div>
         <div>
           <h2 className="font-semibold">Collect cash on delivery</h2>

@@ -13,8 +13,8 @@ import {
   pickVariant,
   valueUnavailable,
 } from '@/lib/variant-select';
+import { WaitlistForm } from './waitlist-form';
 import { AddToBag } from './add-to-bag';
-import { DeliveryBox, type DistrictChoice } from './delivery-box';
 
 /** Images for the selected variant first, then shots shared by all variants. */
 function imagesFor(images: ProductImage[], variantId: string) {
@@ -100,7 +100,6 @@ export function ProductView({
   optionAxes,
   stock: initialStock,
   slug,
-  districts,
   rating,
 }: {
   productId: string;
@@ -111,7 +110,6 @@ export function ProductView({
   optionAxes: ProductOptionAxis[];
   stock: StockView;
   slug: string;
-  districts: DistrictChoice[];
   rating?: { average: number; count: number } | undefined;
 }) {
   const stock = useLiveStock(productId, variants, initialStock);
@@ -276,14 +274,23 @@ export function ProductView({
           </p>
         )}
 
-        <AddToBag
-          productId={productId}
-          variantId={selected.id}
-          soldOut={Boolean(selectedStock?.out)}
-          maxQty={selectedStock?.max}
-          className={selectedStock?.label ? 'mt-3' : 'mt-8'}
-        />
-        <DeliveryBox key={selected.id} slug={slug} variantId={selected.id} districts={districts} />
+        {selectedStock?.out ? (
+          <WaitlistForm
+            key={selected.id}
+            productId={productId}
+            variantId={selected.id}
+            slug={slug}
+            className={selectedStock.label ? 'mt-3' : 'mt-8'}
+          />
+        ) : (
+          <AddToBag
+            productId={productId}
+            variantId={selected.id}
+            soldOut={false}
+            maxQty={selectedStock?.max}
+            className={selectedStock?.label ? 'mt-3' : 'mt-8'}
+          />
+        )}
         <p className="mt-4 text-xs text-muted">SKU {selected.sku}</p>
       </div>
     </div>

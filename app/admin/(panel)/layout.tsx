@@ -37,6 +37,12 @@ const GROUPS: { label?: string; items: ItemDef[] }[] = [
         permission: 'customer:read',
       },
       { href: '/admin/reviews', label: 'Reviews', icon: 'reviews', permission: 'review:read' },
+      {
+        href: '/admin/inquiries',
+        label: 'Inquiries',
+        icon: 'newsletter',
+        permission: 'customer:read',
+      },
     ],
   },
   {
@@ -50,6 +56,7 @@ const GROUPS: { label?: string; items: ItemDef[] }[] = [
           { href: '/admin/products', label: 'All products', permission: 'product:read' },
           { href: '/admin/products/brands', label: 'Brands', permission: 'category:write' },
           { href: '/admin/products/categories', label: 'Categories', permission: 'category:write' },
+          { href: '/admin/products/waitlist', label: 'Waitlist', permission: 'inventory:read' },
         ],
       },
     ],
@@ -65,6 +72,7 @@ const GROUPS: { label?: string; items: ItemDef[] }[] = [
           { href: '/admin/site', label: 'General', permission: 'content:write' },
           { href: '/admin/site/banners', label: 'Banners', permission: 'content:write' },
           { href: '/admin/site/pages', label: 'Pages', permission: 'content:write' },
+          { href: '/admin/site/launch', label: 'Launch lock', permission: 'content:write' },
           {
             href: '/admin/site/delivery',
             label: 'Delivery configuration',

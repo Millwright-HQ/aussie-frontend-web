@@ -1,47 +1,33 @@
 'use server';
 
-import { districtSchema, ulidSchema } from '@aussie/validation';
-import { getProduct } from '@/lib/catalog';
-import { describeQuote, getQuote } from '@/lib/delivery';
+import { waitlistSignupSchema } from '@aussie/validation';
+import { publicPost } from '@/lib/orders';
 
-export interface EstimateState {
+export interface WaitlistState {
   ok?: string;
   error?: string;
 }
 
-/**
- * "How much is delivery to my district?" for one unit of the chosen variant. Weight and size come
- * from the catalog on the server, never from the browser. The checkout (later milestone) works the
- * real fee out again from the whole order.
- */
-export async function estimateDeliveryAction(
-  slug: string,
-  variantId: string,
-  _prev: EstimateState,
+/** "Tell me when it is back" for a sold-out variant. The server re-checks that it really is sold out. */
+export async function joinWaitlistAction(
+  _prev: WaitlistState,
   form: FormData,
-): Promise<EstimateState> {
-  const district = districtSchema.safeParse(form.get('district'));
-  if (!district.success) return { error: 'Choose your district' };
-  // nosemgrep: ajinabraham.njsscan.dos.regex_dos.regex_dos -- bounded, linear pattern
-  if (!/^[a-z0-9-]{1,120}$/.test(slug) || !ulidSchema.safeParse(variantId).success) {
-    return { error: 'Could not find this product' };
-  }
-  const product = await getProduct(slug);
-  const variant = product?.variants.find((v) => v.id === variantId);
-  if (!variant) return { error: 'Could not find this product' };
-
-  const result = await getQuote({
-    district: district.data,
-    subtotalCents: variant.priceCents,
-    items: [
-      {
-        weightG: variant.weightG,
-        qty: 1,
-        ...(variant.lengthCm && variant.widthCm && variant.heightCm
-          ? { lengthCm: variant.lengthCm, widthCm: variant.widthCm, heightCm: variant.heightCm }
-          : {}),
-      },
-    ],
+): Promise<WaitlistState> {
+  const text = (name: string) => {
+    const v = form.get(name);
+    return typeof v === 'string' ? v : '';
+  };
+  const parsed = waitlistSignupSchema.safeParse({
+    productId: text('productId'),
+    variantId: text('variantId'),
+    slug: text('slug'),
+    email: text('email'),
+    name: text('name'),
+    phone: text('phone'),
   });
-  return result.ok ? { ok: describeQuote(result.quote) } : { error: result.message };
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Check your details' };
+
+  const res = await publicPost<{ ok: boolean }>('/v1/inventory/waitlist', parsed.data);
+  if (!res.ok) return { error: res.message };
+  return { ok: `Thanks! We will email ${parsed.data.email} as soon as it is back.` };
 }

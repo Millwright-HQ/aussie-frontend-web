@@ -25,7 +25,7 @@ export default async function ShopPage({
           name="q"
           defaultValue={params.q}
           placeholder="Search products or brands"
-          className="min-h-11 flex-1 rounded-sm border border-border bg-surface px-3"
+          className="min-h-11 min-w-0 flex-1 rounded-sm border border-border bg-surface px-3"
         />
         <button
           type="submit"

@@ -74,6 +74,70 @@ export interface InfoPage {
 }
 
 /** What the storefront gets in one call (cached briefly). */
+/** Launch lock: while on, the public shop asks for a password (the admin panel is never locked). */
+export interface SiteLockPublic {
+  enabled: boolean;
+  message?: string;
+  /** Changes whenever the password changes, so old unlock cookies stop working. */
+  version?: string;
+}
+
+export interface SiteLockAdmin {
+  enabled: boolean;
+  message?: string;
+  hasPassword: boolean;
+  updatedAt?: string;
+}
+
+/** Someone who left their email for news and launch updates (a lead; nothing is sent yet). */
+export interface NewsletterSubscriber {
+  email: string;
+  /** Where they signed up. */
+  source: 'footer' | 'coming-soon';
+  createdAt: string;
+}
+
+/** What a customer is writing to us about (picks the label in the email and the admin inbox). */
+export const INQUIRY_TOPICS = ['ORDER', 'PRODUCT', 'WEBSITE_BUG', 'FEATURE', 'OTHER'] as const;
+export type InquiryTopic = (typeof INQUIRY_TOPICS)[number];
+
+export const INQUIRY_TOPIC_LABELS: Record<InquiryTopic, string> = {
+  ORDER: 'An order',
+  PRODUCT: 'A product',
+  WEBSITE_BUG: 'A problem with the website',
+  FEATURE: 'A suggestion or feature request',
+  OTHER: 'Something else',
+};
+
+/** Where a Contact page message stands. Staff reply by email themselves and then update this. */
+export const INQUIRY_STATUSES = ['NEW', 'IN_PROGRESS', 'ADDRESSED', 'CLOSED'] as const;
+export type InquiryStatus = (typeof INQUIRY_STATUSES)[number];
+
+export const INQUIRY_STATUS_LABELS: Record<InquiryStatus, string> = {
+  NEW: 'New',
+  IN_PROGRESS: 'In progress',
+  ADDRESSED: 'Addressed',
+  CLOSED: 'Closed',
+};
+
+/** A message from the Contact page, kept in the database and handled from the admin. */
+export interface Inquiry {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  topic: InquiryTopic;
+  orderNumber?: string;
+  subject: string;
+  message: string;
+  status: InquiryStatus;
+  /** Internal note for staff (what was done, who was told). Never shown to the customer. */
+  note?: string;
+  createdAt: string;
+  /** Last status or note change. */
+  updatedAt?: string;
+}
+
 export interface PublicSite {
   settings: SiteSettings;
   /** Banners that are active today, in order. */
