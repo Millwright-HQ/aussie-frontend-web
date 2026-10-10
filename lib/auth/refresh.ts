@@ -52,7 +52,11 @@ export async function refreshIfNeeded(
         options: cookieOptions(a, t.expiresIn),
       },
     ];
-  } catch {
-    return null;
+  } catch (err) {
+    // Only a refusal from Cognito (token expired, revoked, user disabled) ends the session.
+    // A network blip or throttle must not sign anyone out: keep the cookies and retry next request.
+    const name = (err as { name?: string })?.name;
+    if (name === 'NotAuthorizedException' || name === 'UserNotFoundException') return null;
+    return [];
   }
 }
