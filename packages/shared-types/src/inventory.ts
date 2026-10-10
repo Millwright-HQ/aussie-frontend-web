@@ -108,6 +108,12 @@ export interface StockChangedDetail {
   variantId: string;
   /** On hand after the change (never negative). */
   onHand: number;
+  /**
+   * The stock row's version after the change. It only ever goes up, so a consumer that mirrors the
+   * level ignores an event older than the one it already applied (EventBridge does not keep order).
+   * Absent on events sent before versions existed: those are applied as before.
+   */
+  version?: number;
 }
 
 export const EVENTS = {
