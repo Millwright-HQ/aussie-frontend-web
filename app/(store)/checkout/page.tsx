@@ -31,7 +31,9 @@ export default async function CheckoutPage({
   const startUrl = (adopt?: string) =>
     `/checkout/start?${new URLSearchParams({ ...(adopt ? { adopt } : {}), ...(district ? { district } : {}) })}`;
   const holdId = await readHoldId();
-  if (!holdId) redirect(startUrl());
+  // Try to hold even with no hold yet. If it works the start route stores it (pages cannot set
+  // cookies); if nothing can be held (everything sold out) say so here, instead of bouncing between
+  // this page and the start route forever, which showed a blank page.
   const outcome = await holdBag(lines, holdId);
   if (outcome.ok && outcome.hold.holdId !== holdId) redirect(startUrl(outcome.hold.holdId));
   if (!outcome.ok && outcome.hold && outcome.hold.holdId !== holdId)
