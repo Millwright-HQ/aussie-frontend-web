@@ -31,7 +31,6 @@ const TASKS = [
   { value: '.create', label: 'Created something' },
   { value: '.update', label: 'Updated something' },
   { value: '.delete', label: 'Deleted something' },
-  { value: '.view', label: 'Looked at something' },
   { value: 'admin.login', label: 'Signed in' },
   { value: 'session.signout', label: 'Signed out' },
   { value: 'authenticator', label: 'Authenticator (2-step)' },
@@ -65,7 +64,6 @@ type Search = {
   service?: string;
   action?: string;
   outcome?: string;
-  kind?: string;
   from?: string;
   to?: string;
   cursor?: string;
@@ -90,7 +88,6 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
     service: pick(sp.service, AUDIT_SERVICES),
     action: TASKS.find((t) => t.value && t.value === sp.action)?.value,
     outcome: pick(sp.outcome, ['success', 'failed', 'denied'] as const),
-    kind: pick(sp.kind, ['change', 'view'] as const),
     from: sp.from && DAY.test(sp.from) ? sp.from : undefined,
     to: sp.to && DAY.test(sp.to) ? sp.to : undefined,
   };
@@ -133,7 +130,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
     <div>
       <PageHeader
         title="Audit log"
-        description="Every sign-in, change and view across the whole store: admins, customers and guests. Newest first, times in Sri Lanka time. Open an entry for every detail."
+        description="Every sign-in and change (plus any view that was rejected or failed) across the whole store: admins, customers and guests. Newest first, times in Sri Lanka time. Open an entry for every detail."
       />
 
       <form
@@ -219,16 +216,6 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
               <option value="success">Worked</option>
               <option value="failed">Failed</option>
               <option value="denied">Not allowed</option>
-            </Select>
-          </div>
-          <div>
-            <label htmlFor="f-kind" className="mb-1 block text-xs text-muted">
-              Type
-            </label>
-            <Select id="f-kind" name="kind" defaultValue={filters.kind ?? ''}>
-              <option value="">Changes and views</option>
-              <option value="change">Changes only</option>
-              <option value="view">Views only</option>
             </Select>
           </div>
           <div>
@@ -318,8 +305,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
                     <Td>
                       <p className="font-medium">{label}</p>
                       <Badge className="mt-1">{serviceLabel(r.service)}</Badge>
-                      {r.kind === 'view' && <span className="ml-1.5 text-xs text-muted">view</span>}
-                    </Td>
+                                          </Td>
                     <Td className="max-w-[22rem] truncate text-muted">
                       <span title={auditTarget(r)}>{auditTarget(r) || '—'}</span>
                     </Td>

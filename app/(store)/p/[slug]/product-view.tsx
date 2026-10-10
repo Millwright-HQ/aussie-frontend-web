@@ -24,7 +24,7 @@ function imagesFor(images: ProductImage[], variantId: string) {
   return list.length ? list : images;
 }
 
-/** Per variant: sold out?, shopper text ("5 in stock", "Sold out"; empty = unknown), units on hand. */
+/** Per variant: sold out?, shopper text ("Sold out", "Last one…"; empty = nothing to say), units on hand. */
 export type StockView = Record<
   string,
   { out: boolean; low: boolean; label: string; max?: number | undefined }
