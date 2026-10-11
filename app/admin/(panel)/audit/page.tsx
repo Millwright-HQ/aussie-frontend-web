@@ -305,7 +305,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
                     <Td>
                       <p className="font-medium">{label}</p>
                       <Badge className="mt-1">{serviceLabel(r.service)}</Badge>
-                                          </Td>
+                    </Td>
                     <Td className="max-w-[22rem] truncate text-muted">
                       <span title={auditTarget(r)}>{auditTarget(r) || '—'}</span>
                     </Td>

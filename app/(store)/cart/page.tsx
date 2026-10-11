@@ -83,7 +83,10 @@ export default async function CartPage() {
                   )}
                   <div className="mt-3 flex flex-wrap items-center gap-3">
                     {s.available && (
-                      <form action={setQuantityAction} className="flex flex-wrap items-center gap-2">
+                      <form
+                        action={setQuantityAction}
+                        className="flex flex-wrap items-center gap-2"
+                      >
                         <input type="hidden" name="variantId" value={l.variantId} />
                         <QuantityInput
                           id={`qty-${l.variantId}`}
