@@ -62,6 +62,18 @@ describe('payment slips', () => {
       'AC-26-00042',
     );
   });
+  it('accepts a prefix of two to six letters, such as OZARA', () => {
+    for (const orderNumber of ['AC-26-00042', 'OZARA-26-00001', 'ozara-26-00001']) {
+      expect(
+        proofRequestSchema.safeParse({ ...base, contentType: 'image/png', orderNumber }).success,
+      ).toBe(true);
+    }
+    for (const orderNumber of ['A-26-00042', 'OZARAAA-26-00001', 'OZARA-2026-1']) {
+      expect(
+        proofRequestSchema.safeParse({ ...base, contentType: 'image/png', orderNumber }).success,
+      ).toBe(false);
+    }
+  });
 });
 
 describe('payment decision', () => {

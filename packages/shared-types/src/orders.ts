@@ -103,7 +103,7 @@ export interface OrderShipping {
 
 export interface Order {
   id: string;
-  /** Human-friendly, e.g. AC-26-00042. */
+  /** Human-friendly, e.g. OZARA-26-00042. */
   orderNumber: string;
   status: OrderStatus;
   /** Signed-in customer who placed it (absent for guests). */

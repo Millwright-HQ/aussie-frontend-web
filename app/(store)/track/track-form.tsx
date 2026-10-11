@@ -15,7 +15,7 @@ export function TrackForm() {
         className="space-y-4 rounded-md border border-border bg-surface p-6"
       >
         {state.error && <Alert>{state.error}</Alert>}
-        <Field id="orderNumber" label="Order number" hint="Like AC-26-00042">
+        <Field id="orderNumber" label="Order number" hint="Like OZARA-26-00042">
           <Input id="orderNumber" name="orderNumber" autoCapitalize="characters" required hasHint />
         </Field>
         <Field id="phone" label="Mobile number used for the order">
