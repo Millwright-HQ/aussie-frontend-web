@@ -106,7 +106,8 @@ async function finish(
 
 export async function signIn(_prev: FormState, form: FormData): Promise<FormState> {
   const email = emailSchema.safeParse(form.get('email'));
-  const password = String(form.get('password') ?? '');
+  // Cognito passwords never start or end with a space; one picked up when pasting would only fail the sign-in.
+  const password = String(form.get('password') ?? '').trim();
   if (!email.success || !password) return { error: 'Enter your email and password.' };
   const next = safeNext(form.get('next'), '/admin', '/admin');
 
