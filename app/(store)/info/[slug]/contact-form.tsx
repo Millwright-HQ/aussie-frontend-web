@@ -85,7 +85,7 @@ export function ContactForm() {
         <Field
           id="c-order"
           label="Order number"
-          hint="From your confirmation email, e.g. AC-26-00042"
+          hint="From your confirmation email, e.g. OZARA-26-00042"
           error={err('orderNumber')}
           className="sm:col-span-2"
         >

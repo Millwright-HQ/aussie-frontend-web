@@ -218,7 +218,7 @@ export const inquirySchema = z
         .string()
         .trim()
         .toUpperCase()
-        .regex(ORDER_NUMBER_PATTERN, 'Enter the order number, e.g. AC-26-00042')
+        .regex(ORDER_NUMBER_PATTERN, 'Enter the order number, e.g. OZARA-26-00042')
         .optional(),
     ),
     subject: z.string({ message: 'Enter a subject' }).trim().min(3, 'Enter a subject').max(120),

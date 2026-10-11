@@ -4,7 +4,7 @@ import { MAX_ORDER_LINES } from './inventory.js';
 import { addressSchema, lkMobileSchema, paginationSchema, ulidSchema } from './schemas.js';
 
 export const MAX_QTY_PER_LINE = 20;
-export const ORDER_NUMBER_PATTERN = /^[A-Z]{2,4}-\d{2}-\d{5,}$/;
+export const ORDER_NUMBER_PATTERN = /^[A-Z]{2,6}-\d{2}-\d{5,}$/;
 
 const optionalEmail = z.preprocess(
   (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
@@ -93,7 +93,7 @@ export const proofRequestSchema = z
       .string()
       .trim()
       .toUpperCase()
-      .regex(ORDER_NUMBER_PATTERN, 'Enter your order number, like AC-26-00042'),
+      .regex(ORDER_NUMBER_PATTERN, 'Enter your order number, like OZARA-26-00042'),
     phone: lkMobileSchema,
     contentType: z.enum(PROOF_CONTENT_TYPES, { message: 'Upload a JPG, PNG, WebP or PDF' }),
   })
@@ -133,7 +133,7 @@ export const trackSchema = z
       .string()
       .trim()
       .toUpperCase()
-      .regex(ORDER_NUMBER_PATTERN, 'Enter your order number, like AC-26-00042'),
+      .regex(ORDER_NUMBER_PATTERN, 'Enter your order number, like OZARA-26-00042'),
     phone: lkMobileSchema,
   })
   .strict();
