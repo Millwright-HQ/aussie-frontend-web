@@ -124,7 +124,7 @@ export function NewPasswordPair({
             onClick={() => setShow((s) => !s)}
             aria-label={show ? 'Hide password' : 'Show password'}
             aria-pressed={show}
-            className="absolute top-1/2 right-1.5 flex size-8 -translate-y-1/2 items-center justify-center rounded-[8px] text-muted hover:bg-surface-muted hover:text-text"
+            className="absolute top-1/2 right-1.5 flex size-8 -translate-y-1/2 items-center justify-center rounded-sm text-muted hover:bg-surface-muted hover:text-text"
           >
             {show ? <EyeOff aria-hidden size={16} /> : <Eye aria-hidden size={16} />}
           </button>

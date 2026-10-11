@@ -3,6 +3,7 @@ import { DEFAULT_LOW_STOCK_THRESHOLD } from '@aussie/shared-types';
 import { History } from 'lucide-react';
 import Link from 'next/link';
 import { Badge, cn, Panel, Table, Tbody, Td, Th, Thead, Tr } from '@/app/admin/_ui';
+import { heldByVariant, listOpenHolds } from '@/lib/holds';
 import { adjustStockAction } from '../stock/actions';
 import { StatusBadge } from '../stock/parts';
 import { QuickAdjust } from '../stock/quick-adjust';
@@ -28,6 +29,8 @@ export async function StockPanel({
     rows = null;
   }
   const byVariant = new Map((rows ?? []).map((r) => [r.variantId, r]));
+  // Units taken off sale by customers who are in checkout right now (already left out of "On hand").
+  const held = heldByVariant(await listOpenHolds());
   const total = (rows ?? []).reduce((n, r) => n + r.onHand, 0);
   const anyOut = (rows ?? []).some((r) => r.status === 'out');
   const anyLow = (rows ?? []).some((r) => r.status === 'low');
@@ -49,7 +52,7 @@ export async function StockPanel({
           )}
           <Link
             href="/admin/products/stock-history"
-            className="inline-flex h-8 items-center gap-1.5 rounded-[10px] px-2.5 text-[13px] text-muted hover:bg-surface-muted hover:text-text"
+            className="inline-flex h-8 items-center gap-1.5 rounded-sm px-2.5 text-[13px] text-muted hover:bg-surface-muted hover:text-text"
           >
             <History aria-hidden size={14} /> All stock history
           </Link>
@@ -87,6 +90,14 @@ export async function StockPanel({
                     )}
                   >
                     {s ? s.onHand : '—'}
+                    {(held.get(v.id) ?? 0) > 0 && (
+                      <span
+                        className="block text-xs font-normal text-muted"
+                        title="Taken off sale while these customers check out. It comes back if they don't order in time."
+                      >
+                        {held.get(v.id)} held in checkout
+                      </span>
+                    )}
                   </Td>
                   <Td>
                     {s ? (

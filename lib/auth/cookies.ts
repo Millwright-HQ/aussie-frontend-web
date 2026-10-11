@@ -11,7 +11,7 @@ export const cookieNames = (a: Audience) => ({
   flow: `aussie_${a}_flow`,
 });
 
-export const REFRESH_MAX_AGE = { admin: 8 * 3600, customer: 30 * 86400 } as const;
+export const REFRESH_MAX_AGE = { admin: 48 * 3600, customer: 30 * 86400 } as const;
 export const FLOW_MAX_AGE = 10 * 60;
 
 export interface CookieOptions {

@@ -20,7 +20,7 @@ export { cn, formatLkPhone, formatLkr, Swatch };
 // ── Buttons ───────────────────────────────────────────────────────────────────
 
 export const buttonVariants = cva(
-  'inline-flex shrink-0 items-center justify-center gap-2 rounded-[10px] text-sm font-medium whitespace-nowrap transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex shrink-0 items-center justify-center gap-2 rounded-sm text-sm font-medium whitespace-nowrap transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -51,7 +51,7 @@ export function Button({ className, variant, size, type = 'button', ...props }: 
 }
 
 const iconBase =
-  'inline-flex size-8 shrink-0 items-center justify-center rounded-[10px] text-muted transition-colors hover:bg-surface-muted hover:text-text focus-visible:outline-2 disabled:opacity-50';
+  'inline-flex size-8 shrink-0 items-center justify-center rounded-sm text-muted transition-colors hover:bg-surface-muted hover:text-text focus-visible:outline-2 disabled:opacity-50';
 
 /** Square icon button with an accessible name and tooltip (edit, delete, view…). */
 export function IconButton({
@@ -111,7 +111,7 @@ export function IconLink({
 // ── Form controls ─────────────────────────────────────────────────────────────
 
 const control =
-  'block h-10 w-full rounded-[10px] border border-border bg-surface px-3 text-sm text-text shadow-sm placeholder:text-muted/70 transition-colors hover:border-text/30 focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-0 disabled:opacity-60 aria-[invalid=true]:border-danger';
+  'block h-10 w-full rounded-sm border border-border bg-surface px-3 text-sm text-text shadow-sm placeholder:text-muted/70 transition-colors hover:border-text/30 focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-0 disabled:opacity-60 aria-[invalid=true]:border-danger';
 
 export interface FieldProps {
   id: string;
@@ -451,7 +451,7 @@ export function Stat({
         {icon && (
           <span
             aria-hidden
-            className="flex size-8 items-center justify-center rounded-[10px] bg-primary/10 text-primary"
+            className="flex size-8 items-center justify-center rounded-sm bg-primary/10 text-primary"
           >
             {icon}
           </span>

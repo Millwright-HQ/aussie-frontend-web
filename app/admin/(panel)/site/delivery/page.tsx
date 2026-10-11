@@ -1,11 +1,13 @@
-import type { DeliveryChange, DeliveryConfig, DeliveryZone } from '@aussie/shared-types';
+import type { DeliveryConfig, DeliveryZone } from '@aussie/shared-types';
 import { Trash2 } from 'lucide-react';
+import Link from 'next/link';
 import { Alert, Card, ConfirmAction, Field, Input, PageHeader, Select } from '@/app/admin/_ui';
 import { DISTRICTS } from '@aussie/validation';
-import { can, formatDateTime, requirePermission } from '@/lib/admin';
+import { can, requirePermission } from '@/lib/admin';
 import { api } from '@/lib/api';
 import { ActionForm } from '@/app/admin/(panel)/action-form';
 import {
+  saveAllPricesAction,
   saveDistrictsAction,
   deleteZoneAction,
   previewQuoteAction,
@@ -18,7 +20,7 @@ import { SiteTabs } from '../tabs';
 
 export const metadata = { title: 'Delivery configuration' };
 
-type View = DeliveryConfig & { changes: DeliveryChange[] };
+type View = DeliveryConfig;
 
 const rupees = (cents: number) => (cents / 100).toFixed(2);
 const rs = (cents: number) =>
@@ -66,6 +68,10 @@ function SettingsCard({ view, canVerify }: { view: View; canVerify: boolean }) {
             </label>
           ))}
         </fieldset>
+        <p className="text-[13px] text-muted">
+          Choose a method and press “Save settings”. The page then shows only the options for that
+          method.
+        </p>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <Field id="codFee" label="COD fee (Rs)" hint="Added to every cash-on-delivery order">
@@ -93,53 +99,66 @@ function SettingsCard({ view, canVerify }: { view: View; canVerify: boolean }) {
           </Field>
         </div>
 
-        <details open={s.mode === 'WEIGHT'} className="rounded-xl border border-border p-4">
-          <summary className="cursor-pointer text-sm font-medium">
-            Weight settings{' '}
-            <span className="font-normal text-muted">
-              ({s.mode === 'WEIGHT' ? 'in use' : 'not used while the price is fixed'})
-            </span>
-          </summary>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <Field
-              id="maxWeightG"
-              label="Heaviest order (g)"
-              hint="Above this, checkout says “contact us”"
-            >
-              <Input
+        {s.mode === 'WEIGHT' ? (
+          <section
+            aria-labelledby="weight-settings"
+            className="rounded-xl border border-border p-4"
+          >
+            <h3 id="weight-settings" className="text-sm font-medium">
+              Weight settings
+            </h3>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Field
                 id="maxWeightG"
-                name="maxWeightG"
-                inputMode="numeric"
-                defaultValue={s.maxWeightG}
-                required
-                hasHint
-              />
-            </Field>
-            <Field id="packagingWeightG" label="Packaging weight (g)" hint="Added to every parcel">
-              <Input
+                label="Heaviest order (g)"
+                hint="Above this, checkout says “contact us”"
+              >
+                <Input
+                  id="maxWeightG"
+                  name="maxWeightG"
+                  inputMode="numeric"
+                  defaultValue={s.maxWeightG}
+                  required
+                  hasHint
+                />
+              </Field>
+              <Field
                 id="packagingWeightG"
-                name="packagingWeightG"
-                inputMode="numeric"
-                defaultValue={s.packagingWeightG}
-                hasHint
-              />
-            </Field>
-            <Field
-              id="volumetricDivisor"
-              label="Volumetric divisor"
-              hint="Size weight (kg) = L × W × H in cm ÷ this. 5000 is a common figure: ask your courier"
-            >
-              <Input
+                label="Packaging weight (g)"
+                hint="Added to every parcel"
+              >
+                <Input
+                  id="packagingWeightG"
+                  name="packagingWeightG"
+                  inputMode="numeric"
+                  defaultValue={s.packagingWeightG}
+                  hasHint
+                />
+              </Field>
+              <Field
                 id="volumetricDivisor"
-                name="volumetricDivisor"
-                inputMode="numeric"
-                defaultValue={s.volumetricDivisor}
-                required
-                hasHint
-              />
-            </Field>
-          </div>
-        </details>
+                label="Volumetric divisor"
+                hint="Size weight (kg) = L × W × H in cm ÷ this. 5000 is a common figure: ask your courier"
+              >
+                <Input
+                  id="volumetricDivisor"
+                  name="volumetricDivisor"
+                  inputMode="numeric"
+                  defaultValue={s.volumetricDivisor}
+                  required
+                  hasHint
+                />
+              </Field>
+            </div>
+          </section>
+        ) : (
+          <>
+            {/* Not used while the price is fixed; kept as they are when saving. */}
+            <input type="hidden" name="maxWeightG" value={s.maxWeightG} />
+            <input type="hidden" name="packagingWeightG" value={s.packagingWeightG} />
+            <input type="hidden" name="volumetricDivisor" value={s.volumetricDivisor} />
+          </>
+        )}
 
         <label className="flex min-h-10 items-center gap-2 text-sm">
           <input
@@ -174,58 +193,130 @@ function SettingsCard({ view, canVerify }: { view: View; canVerify: boolean }) {
   );
 }
 
-/** Every district: offered at checkout or not, its fixed price, and its zone (delivery days / weight rates). */
-function DistrictsCard({ view, canWrite }: { view: View; canWrite: boolean }) {
-  const fixed = view.settings.mode === 'FIXED';
-  const byCode = new Map(view.districts.map((d) => [d.code, d]));
+const commonPriceCents = (view: View) => {
+  const prices = new Set(view.districts.filter((d) => d.enabled).map((d) => d.fixedFeeCents));
+  return prices.size === 1 ? [...prices][0] : undefined;
+};
+
+/** Fixed pricing: one price for every district, or open the list to set them one by one. */
+function FixedPricesCard({ view, canWrite }: { view: View; canWrite: boolean }) {
+  const same = commonPriceCents(view);
   const on = view.districts.filter((d) => d.enabled).length;
   return (
     <Card>
-      <h2 className="text-[15px] font-semibold">Districts</h2>
+      <h2 className="text-[15px] font-semibold">Delivery price</h2>
       <p className="mt-1 text-sm text-muted">
-        {on} of {DISTRICTS.length} switched on. A district that is switched off does not appear in
-        any district list, and orders to it are refused.{' '}
-        {fixed
-          ? 'The price is what the customer pays for delivery to that district.'
-          : 'Prices below are kept for the fixed-price method; the weight bands are used right now.'}
+        {same !== undefined
+          ? `Every district you deliver to costs ${rs(same)}.`
+          : 'Districts have different prices (see the list below).'}
       </p>
       {canWrite ? (
-        <ActionForm action={saveDistrictsAction} submitLabel="Save districts" className="mt-4">
-          <div className="overflow-x-auto rounded-xl border border-border">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-border bg-surface-muted/60 text-xs font-medium text-muted">
-                <tr>
-                  <th className="px-4 py-2.5">On</th>
-                  <th className="px-4 py-2.5">District</th>
-                  <th className="px-4 py-2.5">Price (Rs){fixed ? '' : ' (not used now)'}</th>
-                  <th className="px-4 py-2.5">Zone</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {DISTRICTS.map((d) => {
-                  const row = byCode.get(d.code);
-                  return (
-                    <tr
-                      key={d.code}
-                      className={row?.enabled === false ? 'bg-surface-muted/40' : undefined}
-                    >
-                      <td className="px-4 py-2">
-                        <input
-                          type="checkbox"
-                          id={`on-${d.code}`}
-                          name={`on-${d.code}`}
-                          defaultChecked={row?.enabled !== false}
-                          aria-label={`Deliver to ${d.name}`}
-                          className="size-4 accent-primary"
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        <label htmlFor={`on-${d.code}`} className="font-medium">
-                          {d.name}
-                        </label>{' '}
-                        <span className="text-xs text-muted">{d.province}</span>
-                      </td>
-                      <td className="px-4 py-2">
+        <ActionForm action={saveAllPricesAction} submitLabel="Save price" className="mt-4">
+          <Field
+            id="all-price"
+            label="Price for every district (Rs)"
+            hint="Applies to all districts at once. Which ones you deliver to stays as it is."
+          >
+            <Input
+              id="all-price"
+              name="price"
+              inputMode="decimal"
+              defaultValue={same !== undefined ? rupees(same) : ''}
+              placeholder="e.g. 200"
+              required
+              hasHint
+              className="w-40"
+            />
+          </Field>
+        </ActionForm>
+      ) : (
+        <p className="mt-3 text-sm text-muted">You can view but not change the price.</p>
+      )}
+
+      <details className="mt-5 rounded-xl border border-border p-4">
+        <summary className="cursor-pointer text-sm font-medium">
+          Set a different price for individual districts{' '}
+          <span className="font-normal text-muted">
+            ({on} of {DISTRICTS.length} switched on)
+          </span>
+        </summary>
+        <DistrictsTable view={view} canWrite={canWrite} fixed />
+      </details>
+    </Card>
+  );
+}
+
+/** Weight pricing: which districts are on, and the zone each one belongs to. */
+function ZoneDistrictsCard({ view, canWrite }: { view: View; canWrite: boolean }) {
+  const on = view.districts.filter((d) => d.enabled).length;
+  return (
+    <Card>
+      <h2 className="text-[15px] font-semibold">Districts and zones</h2>
+      <p className="mt-1 text-sm text-muted">
+        {on} of {DISTRICTS.length} switched on. A district that is switched off does not appear in
+        any district list, and orders to it are refused. The zone decides which weight bands the
+        district uses.
+      </p>
+      <DistrictsTable view={view} canWrite={canWrite} fixed={false} />
+    </Card>
+  );
+}
+
+/**
+ * The district rows. Fixed pricing shows On / District / Price; weight pricing shows On / District
+ * / Zone. What the other method would show is sent along unchanged, so saving never alters it.
+ */
+function DistrictsTable({
+  view,
+  canWrite,
+  fixed,
+}: {
+  view: View;
+  canWrite: boolean;
+  fixed: boolean;
+}) {
+  const byCode = new Map(view.districts.map((d) => [d.code, d]));
+  if (!canWrite) {
+    return <p className="mt-3 text-sm text-muted">You can view but not change districts.</p>;
+  }
+  return (
+    <ActionForm action={saveDistrictsAction} submitLabel="Save districts" className="mt-4">
+      <div className="overflow-x-auto rounded-xl border border-border">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-border bg-surface-muted/60 text-xs font-medium text-muted">
+            <tr>
+              <th className="px-4 py-2.5">On</th>
+              <th className="px-4 py-2.5">District</th>
+              <th className="px-4 py-2.5">{fixed ? 'Price (Rs)' : 'Zone'}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {DISTRICTS.map((d) => {
+              const row = byCode.get(d.code);
+              return (
+                <tr
+                  key={d.code}
+                  className={row?.enabled === false ? 'bg-surface-muted/40' : undefined}
+                >
+                  <td className="px-4 py-2">
+                    <input
+                      type="checkbox"
+                      id={`on-${d.code}`}
+                      name={`on-${d.code}`}
+                      defaultChecked={row?.enabled !== false}
+                      aria-label={`Deliver to ${d.name}`}
+                      className="size-4 accent-primary"
+                    />
+                  </td>
+                  <td className="px-4 py-2">
+                    <label htmlFor={`on-${d.code}`} className="font-medium">
+                      {d.name}
+                    </label>{' '}
+                    <span className="text-xs text-muted">{d.province}</span>
+                  </td>
+                  <td className="px-4 py-2">
+                    {fixed ? (
+                      <>
                         <Input
                           id={`fee-${d.code}`}
                           name={`fee-${d.code}`}
@@ -234,8 +325,14 @@ function DistrictsCard({ view, canWrite }: { view: View; canWrite: boolean }) {
                           defaultValue={rupees(row?.fixedFeeCents ?? 0)}
                           className="h-9 w-32"
                         />
-                      </td>
-                      <td className="px-4 py-2">
+                        <input
+                          type="hidden"
+                          name={`district-${d.code}`}
+                          value={row?.zoneId ?? view.zones[0]?.id ?? ''}
+                        />
+                      </>
+                    ) : (
+                      <>
                         <Select
                           id={`district-${d.code}`}
                           name={`district-${d.code}`}
@@ -249,18 +346,21 @@ function DistrictsCard({ view, canWrite }: { view: View; canWrite: boolean }) {
                             </option>
                           ))}
                         </Select>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </ActionForm>
-      ) : (
-        <p className="mt-3 text-sm text-muted">You can view but not change districts.</p>
-      )}
-    </Card>
+                        <input
+                          type="hidden"
+                          name={`fee-${d.code}`}
+                          value={rupees(row?.fixedFeeCents ?? 0)}
+                        />
+                      </>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </ActionForm>
   );
 }
 
@@ -414,23 +514,11 @@ export default async function DeliveryPage() {
         </Card>
       )}
 
-      <DistrictsCard view={view} canWrite={canWrite} />
-
-      <details
-        open={view.settings.mode === 'WEIGHT'}
-        className="group rounded-xl border border-border bg-surface p-5 shadow-sm"
-      >
-        <summary className="cursor-pointer text-[15px] font-semibold">
-          Weight bands and zones{' '}
-          <span className="text-sm font-normal text-muted">
-            (
-            {view.settings.mode === 'WEIGHT'
-              ? 'in use'
-              : 'kept for later, not used while the price is fixed'}
-            )
-          </span>
-        </summary>
-        <div className="mt-4 space-y-6">
+      {view.settings.mode === 'FIXED' ? (
+        <FixedPricesCard view={view} canWrite={canWrite} />
+      ) : (
+        <>
+          <ZoneDistrictsCard view={view} canWrite={canWrite} />
           <section aria-labelledby="zones" className="space-y-4">
             <h2 id="zones" className="text-lg font-semibold">
               Zones and weight bands
@@ -476,8 +564,8 @@ export default async function DeliveryPage() {
               </Card>
             )}
           </section>
-        </div>
-      </details>
+        </>
+      )}
 
       <Card>
         <h2 className="text-[15px] font-semibold">Try the rates</h2>
@@ -503,45 +591,47 @@ export default async function DeliveryPage() {
                 ))}
               </Select>
             </Field>
-            <Field id="pq-weight" label="Weight (g)" hint="Ignored while the price is fixed">
-              <Input id="pq-weight" name="weightG" inputMode="numeric" required />
-            </Field>
+            {view.settings.mode === 'WEIGHT' ? (
+              <Field id="pq-weight" label="Weight (g)">
+                <Input id="pq-weight" name="weightG" inputMode="numeric" required />
+              </Field>
+            ) : (
+              // Weight does not change a fixed price; the check only needs some value.
+              <input type="hidden" name="weightG" value="100" />
+            )}
             <Field id="pq-qty" label="Quantity">
               <Input id="pq-qty" name="qty" inputMode="numeric" defaultValue="1" />
             </Field>
             <Field id="pq-sub" label="Order subtotal (Rs)" optional>
               <Input id="pq-sub" name="subtotal" inputMode="decimal" defaultValue="0" />
             </Field>
-            <Field id="pq-l" label="Length (cm)" optional>
-              <Input id="pq-l" name="lengthCm" inputMode="numeric" />
-            </Field>
-            <Field id="pq-w" label="Width (cm)" optional>
-              <Input id="pq-w" name="widthCm" inputMode="numeric" />
-            </Field>
-            <Field id="pq-h" label="Height (cm)" optional>
-              <Input id="pq-h" name="heightCm" inputMode="numeric" />
-            </Field>
+            {view.settings.mode === 'WEIGHT' && (
+              <>
+                <Field id="pq-l" label="Length (cm)" optional>
+                  <Input id="pq-l" name="lengthCm" inputMode="numeric" />
+                </Field>
+                <Field id="pq-w" label="Width (cm)" optional>
+                  <Input id="pq-w" name="widthCm" inputMode="numeric" />
+                </Field>
+                <Field id="pq-h" label="Height (cm)" optional>
+                  <Input id="pq-h" name="heightCm" inputMode="numeric" />
+                </Field>
+              </>
+            )}
           </div>
         </ActionForm>
       </Card>
 
-      <Card>
-        <h2 className="text-[15px] font-semibold">Recent changes</h2>
-        {view.changes.length === 0 ? (
-          <p className="mt-2 text-sm text-muted">No changes yet.</p>
-        ) : (
-          <ul className="mt-3 divide-y divide-border text-sm">
-            {view.changes.map((c) => (
-              <li key={c.id} className="py-2">
-                <span className="text-muted">
-                  {formatDateTime(c.at)} · {c.actorName ?? 'Admin'}
-                </span>
-                <span className="block">{c.summary}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+      <p className="text-sm text-muted">
+        Who changed what, and when, is in the{' '}
+        <Link
+          href="/admin/audit?service=delivery"
+          className="font-medium text-primary hover:underline"
+        >
+          Audit log
+        </Link>
+        .
+      </p>
     </div>
   );
 }

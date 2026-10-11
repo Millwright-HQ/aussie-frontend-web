@@ -14,7 +14,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div data-theme-root="admin" data-theme={mode} className="min-h-dvh bg-bg text-text">
       {envName !== 'prod' && (
-        <p className="bg-[#F2A93B] px-4 py-1 text-center text-xs font-semibold tracking-wide text-[#1F1A17] uppercase">
+        <p className="bg-warning px-4 py-1 text-center text-xs font-semibold tracking-wide text-primary-fg uppercase">
           {envName} environment
         </p>
       )}

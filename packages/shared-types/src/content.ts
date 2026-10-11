@@ -1,28 +1,10 @@
 /**
  * Site content the owner can change without a developer (content service): store details, the
- * announcement bar, festival themes, home page sliders and policy/information pages.
+ * announcement bar, home page sliders and policy/information pages.
  */
 
-/** Festival looks. Each key has a colour set in packages/ui/src/tokens.css (`[data-festival]`). */
-export const FESTIVALS = [
-  {
-    key: 'avurudu',
-    label: 'Avurudu (Sinhala & Tamil New Year)',
-    hint: 'Warm gold and red, mid April',
-  },
-  { key: 'vesak', label: 'Vesak', hint: 'Soft yellow and lantern blue, May' },
-  { key: 'independence', label: 'Independence Day', hint: 'Maroon and gold, 4 February' },
-  { key: 'eid', label: 'Eid', hint: 'Deep teal and gold' },
-  { key: 'deepavali', label: 'Deepavali', hint: 'Saffron and plum, October or November' },
-  { key: 'christmas', label: 'Christmas', hint: 'Red and green, December' },
-  { key: 'sale', label: 'Mega sale', hint: 'Bold black and red for big discounts' },
-] as const;
-export type FestivalKey = (typeof FESTIVALS)[number]['key'];
-export const FESTIVAL_KEYS = FESTIVALS.map((f) => f.key) as [FestivalKey, ...FestivalKey[]];
-
-/** `off` never shows it, `on` shows it until switched off, `scheduled` follows the dates (Sri Lanka time). */
-export const FESTIVAL_MODES = ['off', 'on', 'scheduled'] as const;
-export type FestivalMode = (typeof FESTIVAL_MODES)[number];
+/** The store's name. Fixed: it is the brand, not a setting. */
+export const STORE_NAME = 'OZARA';
 
 /** What a first-time visitor sees (they can switch with the theme button). */
 export const THEME_MODES = ['light', 'dark'] as const;
@@ -42,10 +24,7 @@ export const PAGE_TITLES: Record<PageSlug, string> = {
 };
 
 export interface SiteSettings {
-  storeName: string;
   tagline?: string;
-  /** Path of the logo in the media bucket (`site/<id>.<ext>`). */
-  logoPath?: string;
   phone?: string;
   whatsapp?: string;
   email?: string;
@@ -59,9 +38,6 @@ export interface SiteSettings {
   announcement: { enabled: boolean; text: string; href?: string };
   theme: {
     defaultMode: ThemeMode;
-    /** The owner's brand colour (`#rrggbb`). Buttons and links use it; empty = the default black. */
-    brandColor?: string;
-    festival: { mode: FestivalMode; key: FestivalKey; startsOn?: string; endsOn?: string };
   };
   home: { showCategories: boolean; showNewIn: boolean; showTrustBar: boolean };
   updatedAt?: string;
@@ -98,21 +74,81 @@ export interface InfoPage {
 }
 
 /** What the storefront gets in one call (cached briefly). */
+/** Launch lock: while on, the public shop asks for a password (the admin panel is never locked). */
+export interface SiteLockPublic {
+  enabled: boolean;
+  message?: string;
+  /** Changes whenever the password changes, so old unlock cookies stop working. */
+  version?: string;
+}
+
+export interface SiteLockAdmin {
+  enabled: boolean;
+  message?: string;
+  hasPassword: boolean;
+  updatedAt?: string;
+}
+
+/** Someone who left their email for news and launch updates (a lead; nothing is sent yet). */
+export interface NewsletterSubscriber {
+  email: string;
+  /** Where they signed up. */
+  source: 'footer' | 'coming-soon';
+  createdAt: string;
+}
+
+/** What a customer is writing to us about (picks the label in the email and the admin inbox). */
+export const INQUIRY_TOPICS = ['ORDER', 'PRODUCT', 'WEBSITE_BUG', 'FEATURE', 'OTHER'] as const;
+export type InquiryTopic = (typeof INQUIRY_TOPICS)[number];
+
+export const INQUIRY_TOPIC_LABELS: Record<InquiryTopic, string> = {
+  ORDER: 'An order',
+  PRODUCT: 'A product',
+  WEBSITE_BUG: 'A problem with the website',
+  FEATURE: 'A suggestion or feature request',
+  OTHER: 'Something else',
+};
+
+/** Where a Contact page message stands. Staff reply by email themselves and then update this. */
+export const INQUIRY_STATUSES = ['NEW', 'IN_PROGRESS', 'ADDRESSED', 'CLOSED'] as const;
+export type InquiryStatus = (typeof INQUIRY_STATUSES)[number];
+
+export const INQUIRY_STATUS_LABELS: Record<InquiryStatus, string> = {
+  NEW: 'New',
+  IN_PROGRESS: 'In progress',
+  ADDRESSED: 'Addressed',
+  CLOSED: 'Closed',
+};
+
+/** A message from the Contact page, kept in the database and handled from the admin. */
+export interface Inquiry {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  topic: InquiryTopic;
+  orderNumber?: string;
+  subject: string;
+  message: string;
+  status: InquiryStatus;
+  /** Internal note for staff (what was done, who was told). Never shown to the customer. */
+  note?: string;
+  createdAt: string;
+  /** Last status or note change. */
+  updatedAt?: string;
+}
+
 export interface PublicSite {
   settings: SiteSettings;
   /** Banners that are active today, in order. */
   banners: Banner[];
-  /** The festival look in force right now, if any. */
-  festival: FestivalKey | null;
   pages: { slug: PageSlug; title: string }[];
 }
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
-  storeName: 'Aussie Cosmetics',
   announcement: { enabled: true, text: 'Cash on delivery · Island-wide delivery' },
   theme: {
     defaultMode: 'light',
-    festival: { mode: 'off', key: 'avurudu' },
   },
   home: { showCategories: true, showNewIn: true, showTrustBar: true },
 };

@@ -4,6 +4,7 @@ import { Banknote, ShieldCheck, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { getCategoryTree, listProducts } from '@/lib/catalog';
 import { getSite, sitePictureUrl } from '@/lib/content';
+import { STORE_NAME } from '@/lib/site';
 import { HeroSlider } from './_components/hero-slider';
 import Image from 'next/image';
 import { ProductCard } from './_components/product-card';
@@ -24,7 +25,7 @@ export default async function HomePage() {
     <>
       {slides.length > 0 ? (
         <>
-          <h1 className="sr-only">{site.settings.storeName}</h1>
+          <h1 className="sr-only">{STORE_NAME}</h1>
           <HeroSlider banners={slides} />
         </>
       ) : (
@@ -51,7 +52,7 @@ export default async function HomePage() {
       {home.showCategories && categories.length > 0 && (
         <section
           aria-labelledby="shop-by-category"
-          className="mx-auto max-w-7xl px-4 pb-16 md:px-6 lg:px-8"
+          className="mx-auto max-w-7xl px-4 pt-12 pb-12 md:px-6 md:pt-16 md:pb-16 lg:px-8"
         >
           <h2 id="shop-by-category" className="text-center text-h2">
             Featured collection
@@ -90,7 +91,10 @@ export default async function HomePage() {
       )}
 
       {home.showNewIn && newest && newest.items.length > 0 && (
-        <section aria-labelledby="new-in" className="mx-auto max-w-7xl px-4 pb-16 md:px-6 lg:px-8">
+        <section
+          aria-labelledby="new-in"
+          className="mx-auto max-w-7xl px-4 pb-12 md:px-6 md:pb-16 lg:px-8"
+        >
           <h2 id="new-in" className="text-center text-h2">
             New &amp; trending
           </h2>

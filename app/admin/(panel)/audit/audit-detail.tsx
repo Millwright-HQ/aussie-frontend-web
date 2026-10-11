@@ -15,7 +15,7 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
 
 const Json = ({ value }: { value: unknown }) =>
   value === undefined ? null : (
-    <pre className="max-h-72 overflow-auto rounded-[10px] bg-surface-muted p-3 font-mono text-xs leading-relaxed">
+    <pre className="max-h-72 overflow-auto rounded-sm bg-surface-muted p-3 font-mono text-xs leading-relaxed">
       {JSON.stringify(value, null, 2)}
     </pre>
   );
@@ -75,7 +75,7 @@ export function AuditDetail({
                 type="button"
                 aria-label="Close"
                 onClick={() => setOpen(false)}
-                className="flex size-8 shrink-0 items-center justify-center rounded-[10px] text-muted hover:bg-surface-muted"
+                className="flex size-8 shrink-0 items-center justify-center rounded-sm text-muted hover:bg-surface-muted"
               >
                 <X aria-hidden size={18} />
               </button>

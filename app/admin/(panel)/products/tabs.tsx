@@ -22,6 +22,7 @@ export function ProductTabs({
           { href: '/admin/products/categories', label: 'Categories', count: counts?.categories },
         ]
       : []),
+    ...(can(me, 'inventory:read') ? [{ href: '/admin/products/waitlist', label: 'Waitlist' }] : []),
   ];
   return <SectionTabs items={items} current={current} />;
 }

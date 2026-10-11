@@ -153,7 +153,7 @@ function Attention({
           >
             <span
               aria-hidden
-              className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-warning/18 text-warning"
+              className="flex size-9 shrink-0 items-center justify-center rounded-sm bg-warning/18 text-warning"
             >
               {i.icon}
             </span>

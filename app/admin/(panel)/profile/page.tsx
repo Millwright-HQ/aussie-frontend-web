@@ -219,7 +219,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
                 </p>
                 <Link
                   href="/admin/profile?tab=security&setup=1"
-                  className="inline-flex h-10 items-center gap-2 rounded-[10px] bg-primary px-4 text-sm font-medium text-primary-fg shadow-sm hover:bg-primary/90"
+                  className="inline-flex h-10 items-center gap-2 rounded-sm bg-primary px-4 text-sm font-medium text-primary-fg shadow-sm hover:bg-primary/90"
                 >
                   <KeyRound aria-hidden size={15} /> Set up authenticator app
                 </Link>
@@ -239,7 +239,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
                     <summary className="cursor-pointer text-muted">
                       Can&apos;t scan? Enter this key
                     </summary>
-                    <code className="mt-2 block rounded-[10px] bg-surface-muted px-3 py-2 font-mono text-xs break-all tabular">
+                    <code className="mt-2 block rounded-sm bg-surface-muted px-3 py-2 font-mono text-xs break-all tabular">
                       {grouped}
                     </code>
                   </details>

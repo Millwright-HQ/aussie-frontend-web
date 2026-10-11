@@ -5,6 +5,7 @@ import {
   bannerInputSchema,
   pageInputSchema,
   pageSlugSchema,
+  siteLockSchema,
   siteSettingsSchema,
   siteUploadRequestSchema,
 } from '@aussie/validation';
@@ -64,13 +65,29 @@ export async function requestSiteUploadAction(
   }
 }
 
+// ── Launch lock ─────────────────────────────────────────────────────────────
+
+export async function saveSiteLockAction(_prev: ActionState, form: FormData): Promise<ActionState> {
+  const parsed = siteLockSchema.safeParse({
+    enabled: flag(form, 'enabled'),
+    message: text(form, 'message'),
+    password: text(form, 'password'),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Check the form' };
+  return save(
+    () => api('admin', '/v1/content/admin/site-lock', { method: 'PUT', body: parsed.data }),
+    parsed.data.enabled
+      ? 'The shop is locked. Visitors need the password; the admin panel is not affected.'
+      : 'The shop is open to everyone.',
+    ['/admin/site/launch'],
+  );
+}
+
 // ── Store details, announcement and appearance ──────────────────────────────
 
 export async function saveSettingsAction(_prev: ActionState, form: FormData): Promise<ActionState> {
   const parsed = siteSettingsSchema.safeParse({
-    storeName: text(form, 'storeName'),
     tagline: text(form, 'tagline'),
-    logoPath: flag(form, 'removeLogo') ? '' : text(form, 'logoPath'),
     phone: text(form, 'phone'),
     whatsapp: text(form, 'whatsapp'),
     email: text(form, 'email'),
@@ -87,13 +104,6 @@ export async function saveSettingsAction(_prev: ActionState, form: FormData): Pr
     },
     theme: {
       defaultMode: text(form, 'defaultMode'),
-      brandColor: flag(form, 'useBrandColor') ? text(form, 'brandColor') : '',
-      festival: {
-        mode: text(form, 'festivalMode'),
-        key: text(form, 'festivalKey'),
-        startsOn: text(form, 'festivalStartsOn'),
-        endsOn: text(form, 'festivalEndsOn'),
-      },
     },
     home: {
       showCategories: flag(form, 'showCategories'),

@@ -110,6 +110,8 @@ export interface Order {
   customerSub?: string;
   email?: string;
   shipping: OrderShipping;
+  /** What the customer asked for at checkout (gift wrap, call first…). */
+  instructions?: string;
   lines: OrderLine[];
   subtotalCents: number;
   deliveryFeeCents: number;

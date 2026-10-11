@@ -46,6 +46,38 @@ export interface VariantAvailability {
   count?: number;
 }
 
+/** "Tell me when it is back": a shopper waiting for a sold-out variant. */
+export type WaitlistStatus = 'WAITING' | 'NOTIFIED';
+
+export interface WaitlistEntry {
+  variantId: string;
+  productId: string;
+  productName: string;
+  /** e.g. "Ruby · 30 ml" (empty for single-variant products). */
+  label: string;
+  /** Product page slug, so the "it is back" email can link to it. */
+  slug: string;
+  email: string;
+  name?: string;
+  phone?: string;
+  status: WaitlistStatus;
+  createdAt: string;
+  notifiedAt?: string;
+}
+
+/** Admin view: how many people wait for each variant, to plan the next bulk order. */
+export interface WaitlistVariantSummary {
+  variantId: string;
+  productId: string;
+  productName: string;
+  label: string;
+  sku: string;
+  onHand: number;
+  waiting: number;
+  notified: number;
+  latestAt: string;
+}
+
 export interface OrderLineQty {
   variantId: string;
   qty: number;
@@ -76,6 +108,12 @@ export interface StockChangedDetail {
   variantId: string;
   /** On hand after the change (never negative). */
   onHand: number;
+  /**
+   * The stock row's version after the change. It only ever goes up, so a consumer that mirrors the
+   * level ignores an event older than the one it already applied (EventBridge does not keep order).
+   * Absent on events sent before versions existed: those are applied as before.
+   */
+  version?: number;
 }
 
 export const EVENTS = {

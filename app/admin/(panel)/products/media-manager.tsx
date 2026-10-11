@@ -152,7 +152,7 @@ export function MediaManager({
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {images.map((img, i) => (
             <li key={img.id} className="rounded-xl border border-border bg-surface p-3">
-              <div className="relative aspect-square overflow-hidden rounded-[10px] bg-surface-muted">
+              <div className="relative aspect-square overflow-hidden rounded-sm bg-surface-muted">
                 {img.status === 'READY' ? (
                   <Image
                     src={imageUrl(img.base)}
@@ -171,7 +171,7 @@ export function MediaManager({
                   </div>
                 )}
                 {img.id === coverId && (
-                  <span className="absolute top-2 left-2 rounded-full bg-[#1F1A17]/80 px-2 py-0.5 text-xs text-white">
+                  <span className="absolute top-2 left-2 rounded-full bg-text/80 px-2 py-0.5 text-xs text-bg">
                     Cover
                   </span>
                 )}

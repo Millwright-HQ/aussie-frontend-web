@@ -246,7 +246,7 @@ export function ProductEditor({
             are offered below.
           </p>
           {err('categoryIds') && <p className="mt-2 text-sm text-danger">{err('categoryIds')}</p>}
-          <div className="mt-4 max-h-80 space-y-2 overflow-y-auto rounded-[10px] border border-border p-3">
+          <div className="mt-4 max-h-80 space-y-2 overflow-y-auto rounded-sm border border-border p-3">
             {flat.map(({ node, depth }) => (
               <div key={node.id} style={{ paddingLeft: (depth - 1) * INDENT_PX }}>
                 <Checkbox
@@ -404,7 +404,7 @@ export function ProductEditor({
                                   onChange={(ev) =>
                                     setOpt(v.key, key, { hex: ev.target.value.toUpperCase() })
                                   }
-                                  className="h-10 w-12 shrink-0 cursor-pointer rounded-[10px] border border-border bg-surface"
+                                  className="h-10 w-12 shrink-0 cursor-pointer rounded-sm border border-border bg-surface"
                                 />
                               )}
                               <Input
@@ -587,7 +587,7 @@ export function ProductEditor({
               product with no stock shows as sold out. The alert level flags a variant as low (empty
               = store default).
             </p>
-            <div className="mt-4 divide-y divide-border rounded-[10px] border border-border">
+            <div className="mt-4 divide-y divide-border rounded-sm border border-border">
               {variants.map((v, i) => {
                 const o = Object.entries(opening).find(([k]) => k === v.key)?.[1];
                 return (

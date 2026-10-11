@@ -17,7 +17,7 @@ export interface FieldSpec {
 }
 
 const adminInput =
-  'block h-10 w-full rounded-[10px] border border-border bg-surface px-3 pr-11 text-sm text-text shadow-sm aria-[invalid=true]:border-danger';
+  'block h-10 w-full rounded-sm border border-border bg-surface px-3 pr-11 text-sm text-text shadow-sm aria-[invalid=true]:border-danger';
 
 /** Shared single-step auth form: renders fields, server-side errors, and a pending state. */
 export function AuthForm({

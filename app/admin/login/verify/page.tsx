@@ -27,7 +27,7 @@ export default async function VerifyPage({
     return (
       <AuthCard
         title="Enter your code"
-        subtitle="Your authenticator app is on. Open it and enter the current 6-digit code for Aussie Admin."
+        subtitle="Your authenticator app is on. Open it and enter the current 6-digit code for OZARA Admin."
         footer={
           <form action={cancelSignIn} className="text-center">
             <button

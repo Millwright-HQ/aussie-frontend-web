@@ -210,6 +210,7 @@ export async function placeOrderAction(
       notes: text(form, 'notes'),
     },
     email: text(form, 'email'),
+    instructions: text(form, 'instructions'),
     paymentMethod: byTransfer ? 'BANK_TRANSFER' : 'COD',
     items: bag.map((l) => ({ productId: l.productId, variantId: l.variantId, qty: l.qty })),
     holdId,

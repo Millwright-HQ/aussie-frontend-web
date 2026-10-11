@@ -1,250 +1,47 @@
 /*
- * Design tokens: docs/DESIGN_GUIDELINES.md §2-4.
+ * Design tokens: docs/DESIGN_GUIDELINES.md §2-4 and the OZARA Brand Guidelines (9 Oct 2026):
+ * charcoal + one gold accent on warm paper, Montserrat, square corners, flat (no shadows).
  * Change brand colours HERE only. Components use the Tailwind names (bg-primary, text-muted...).
  * Contrast ratios are listed in the guidelines; re-check them if any value changes.
  */
 
 :root {
-  --bg: #ffffff;
+  --bg: #faf7f2; /* paper */
   --surface: #ffffff;
-  --surface-muted: #f5f5f5;
-  --border: #e3e3e3;
-  --text: #111111;
-  --text-muted: #595959;
-  --primary: #111111;
-  --primary-fg: #ffffff;
-  --secondary: #4f6b5a; /* fills/badges only */
-  --secondary-text: #3f5a4a;
-  --accent: #b08d3c; /* decorative only */
-  --accent-text: #7a5a00;
+  --surface-muted: #f3eee6; /* between paper and stone */
+  --border: #e8e2d8; /* stone */
+  --text: #232020; /* ozara-black */
+  --text-muted: #5c5754; /* ozara-grey */
+  --primary: #232020;
+  --primary-fg: #faf7f2;
+  --secondary: #5c5754; /* fills/badges only */
+  --secondary-text: #5c5754;
+  --accent: #b08b4e; /* gold: decorative and large display only (3.0:1 on paper) */
+  --accent-text: #7a5a28; /* gold-toned body text: 5.9:1 on paper */
   --success: #2e7d4f;
   --warning: #a15c00;
   --danger: #c4161c; /* also the sale colour */
-  --focus: #111111;
+  --focus: #232020;
 }
 
 /* Dark theme: set with data-theme="dark" (admin default; both sides have a toggle). */
 [data-theme='dark'] {
-  --bg: #0e0e0e;
-  --surface: #171717;
-  --surface-muted: #212121;
-  --border: #333333;
-  --text: #f5f5f5;
-  --text-muted: #b3b3b3;
-  --primary: #ffffff;
-  --primary-fg: #111111;
-  --secondary: #8fb59d;
-  --secondary-text: #8fb59d;
-  --accent: #c8a165;
-  --accent-text: #d9b97f;
+  --bg: #151313;
+  --surface: #232020;
+  --surface-muted: #2d2928;
+  --border: #3b3634;
+  --text: #faf7f2;
+  --text-muted: #b8b0a9;
+  --primary: #faf7f2;
+  --primary-fg: #232020;
+  --secondary: #b8b0a9;
+  --secondary-text: #b8b0a9;
+  --accent: #daba74; /* gold-light */
+  --accent-text: #daba74;
   --success: #6fcf97;
   --warning: #f2a93b;
   --danger: #ff6b6b;
-  --focus: #ffffff;
-}
-
-/*
- * Admin look (the shop is untouched): cooler neutrals and an indigo accent. Set on the admin
- * root only (data-theme-root="admin"). Contrast: indigo-700 on white 8.9:1 (light primary),
- * indigo-400 on #0b0c10 6.7:1 and dark text on indigo-400 6.7:1 (dark primary).
- */
-[data-theme-root='admin'] {
-  --bg: #f5f6f8;
-  --surface: #ffffff;
-  --surface-muted: #eff1f4;
-  --border: #e2e5ea;
-  --text: #15171c;
-  --text-muted: #5a6170;
-  --primary: #4338ca;
-  --primary-fg: #ffffff;
-  --secondary: #0f766e;
-  --secondary-text: #0f766e;
-  --accent: #b45309;
-  --accent-text: #92400e;
-  --success: #15803d;
-  --warning: #b45309;
-  --danger: #c81e1e;
-  --focus: #4f46e5;
-}
-[data-theme-root='admin'][data-theme='dark'] {
-  --bg: #0b0c10;
-  --surface: #12141a;
-  --surface-muted: #1a1d26;
-  --border: #272b37;
-  --text: #eceef3;
-  --text-muted: #9ba2b2;
-  --primary: #818cf8;
-  --primary-fg: #0b0c10;
-  --secondary: #5eead4;
-  --secondary-text: #5eead4;
-  --accent: #fbbf24;
-  --accent-text: #fcd34d;
-  --success: #4ade80;
-  --warning: #fbbf24;
-  --danger: #f87171;
-  --focus: #a5b4fc;
-}
-
-/*
- * The owner's brand colour (admin: Site settings > Appearance). The shop sets --brand-* on its
- * root only when one is chosen; the fallbacks are the defaults above. A festival look (below)
- * wins over the brand colour while it is on.
- */
-[data-theme-root='store']:not([data-theme='dark']) {
-  --primary: var(--brand-light, #111111);
-  --primary-fg: var(--brand-light-fg, #ffffff);
-  --focus: var(--brand-light, #111111);
-}
-[data-theme-root='store'][data-theme='dark'] {
-  --primary: var(--brand-dark, #ffffff);
-  --primary-fg: var(--brand-dark-fg, #111111);
-  --focus: var(--brand-dark, #ffffff);
-}
-
-/*
- * Festival looks (admin: Site > Appearance). A festival only recolours the brand tokens above:
- * components keep using the same Tailwind names. Contrast of every pair was checked (text on
- * background and white or dark text on the primary colour are at least 4.5:1).
- */
-[data-festival='avurudu']:not([data-theme='dark']) {
-  --bg: #fff8ec;
-  --surface-muted: #fdeccc;
-  --border: #efd6a4;
-  --primary: #9a3412;
-  --primary-fg: #ffffff;
-  --accent: #d4a017;
-  --accent-text: #7a4a00;
-  --focus: #9a3412;
-}
-[data-festival='avurudu'][data-theme='dark'] {
-  --bg: #181109;
-  --surface-muted: #2a1e10;
-  --border: #43301a;
-  --primary: #f5a05c;
-  --primary-fg: #1f1a17;
-  --accent: #d4a017;
-  --accent-text: #f0c46a;
-  --focus: #f5a05c;
-}
-[data-festival='vesak']:not([data-theme='dark']) {
-  --bg: #f6f9fd;
-  --surface-muted: #e6eefa;
-  --border: #cfdcf0;
-  --primary: #1d4e89;
-  --primary-fg: #ffffff;
-  --accent: #e8b923;
-  --accent-text: #6b5000;
-  --focus: #1d4e89;
-}
-[data-festival='vesak'][data-theme='dark'] {
-  --bg: #0e1420;
-  --surface-muted: #18233a;
-  --border: #2a3a58;
-  --primary: #86b6f2;
-  --primary-fg: #1f1a17;
-  --accent: #e8b923;
-  --accent-text: #f0cf5a;
-  --focus: #86b6f2;
-}
-[data-festival='independence']:not([data-theme='dark']) {
-  --bg: #fff9f1;
-  --surface-muted: #f6e8d0;
-  --border: #e8d5b3;
-  --primary: #7a1f2b;
-  --primary-fg: #ffffff;
-  --accent: #d9a21b;
-  --accent-text: #6e5000;
-  --focus: #7a1f2b;
-}
-[data-festival='independence'][data-theme='dark'] {
-  --bg: #180d0f;
-  --surface-muted: #2b171b;
-  --border: #46282e;
-  --primary: #ee9ba6;
-  --primary-fg: #1f1a17;
-  --accent: #d9a21b;
-  --accent-text: #e8bf5a;
-  --focus: #ee9ba6;
-}
-[data-festival='eid']:not([data-theme='dark']) {
-  --bg: #f3faf8;
-  --surface-muted: #dcefe8;
-  --border: #c2e0d6;
-  --primary: #0f6b5c;
-  --primary-fg: #ffffff;
-  --accent: #c9a227;
-  --accent-text: #6b5500;
-  --focus: #0f6b5c;
-}
-[data-festival='eid'][data-theme='dark'] {
-  --bg: #0b1714;
-  --surface-muted: #142925;
-  --border: #23423a;
-  --primary: #5fd0b9;
-  --primary-fg: #1f1a17;
-  --accent: #c9a227;
-  --accent-text: #e0c35a;
-  --focus: #5fd0b9;
-}
-[data-festival='deepavali']:not([data-theme='dark']) {
-  --bg: #fff7ee;
-  --surface-muted: #fde6cb;
-  --border: #f1d0a6;
-  --primary: #7a2e8c;
-  --primary-fg: #ffffff;
-  --accent: #f28c0f;
-  --accent-text: #8a4200;
-  --focus: #7a2e8c;
-}
-[data-festival='deepavali'][data-theme='dark'] {
-  --bg: #170f1c;
-  --surface-muted: #271a2f;
-  --border: #42304d;
-  --primary: #d9a3ec;
-  --primary-fg: #1f1a17;
-  --accent: #f28c0f;
-  --accent-text: #f6a94a;
-  --focus: #d9a3ec;
-}
-[data-festival='christmas']:not([data-theme='dark']) {
-  --bg: #f8fbf7;
-  --surface-muted: #e5f0e6;
-  --border: #cfe3d1;
-  --primary: #b3262a;
-  --primary-fg: #ffffff;
-  --accent: #2f7d4f;
-  --accent-text: #1d6a3c;
-  --focus: #b3262a;
-}
-[data-festival='christmas'][data-theme='dark'] {
-  --bg: #0d1610;
-  --surface-muted: #172619;
-  --border: #2b4330;
-  --primary: #f58a8e;
-  --primary-fg: #1f1a17;
-  --accent: #2f7d4f;
-  --accent-text: #7fd09b;
-  --focus: #f58a8e;
-}
-[data-festival='sale']:not([data-theme='dark']) {
-  --bg: #fff6f5;
-  --surface-muted: #fde3e1;
-  --border: #f5c8c4;
-  --primary: #c1121f;
-  --primary-fg: #ffffff;
-  --accent: #1f1a17;
-  --accent-text: #1f1a17;
-  --focus: #c1121f;
-}
-[data-festival='sale'][data-theme='dark'] {
-  --bg: #170d0d;
-  --surface-muted: #2a1515;
-  --border: #472626;
-  --primary: #ff7a7a;
-  --primary-fg: #1f1a17;
-  --accent: #f5efea;
-  --accent-text: #f5efea;
-  --focus: #ff7a7a;
+  --focus: #faf7f2;
 }
 
 @theme inline {
@@ -265,15 +62,27 @@
   --color-danger: var(--danger);
   --color-focus: var(--focus);
 
-  --font-display: var(--font-dm-sans), system-ui, sans-serif;
-  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-display:
+    var(--font-montserrat), 'Avenir Next', 'Helvetica Neue', Arial, system-ui, sans-serif;
+  --font-sans: var(--font-montserrat), 'Avenir Next', 'Helvetica Neue', Arial, system-ui, sans-serif;
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  /* Square by default; 2px only for small controls; avatars use rounded-full. */
+  --radius-xs: 0;
+  --radius-sm: 2px;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
 
-  --shadow-sm: 0 1px 2px rgb(31 26 23 / 0.06);
-  --shadow-md: 0 4px 16px rgb(31 26 23 / 0.08);
+  /* Flat: structure comes from 1px rules and space, never shadows. */
+  --shadow-2xs: none;
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
 
   --ease-brand: cubic-bezier(0.2, 0.8, 0.2, 1);
 
@@ -297,21 +106,24 @@
   body {
     background: var(--bg);
     line-height: 1.6;
+    letter-spacing: 0.01em;
   }
   /* Dark sections (admin) own the whole canvas, including overscroll. */
   html:has(body [data-theme='dark']),
   body:has([data-theme='dark']) {
-    background: #0e0e0e;
+    background: #151313;
   }
-  html:has(body [data-theme-root='admin'][data-theme='dark']),
-  body:has([data-theme-root='admin'][data-theme='dark']) {
-    background: #0b0c10;
-  }
+  /* Headings are capitals with wide tracking; body copy stays sentence case. */
   h1,
   h2,
   h3 {
     font-family: var(--font-display);
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  h3 {
+    letter-spacing: 0.08em;
   }
   :focus-visible {
     outline: 2px solid var(--focus);

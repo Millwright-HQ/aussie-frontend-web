@@ -188,7 +188,7 @@ export function ConfirmAction({
             {state.error && (
               <p
                 role="alert"
-                className="mt-3 rounded-[10px] bg-danger/10 px-3 py-2 text-sm text-danger"
+                className="mt-3 rounded-sm bg-danger/10 px-3 py-2 text-sm text-danger"
               >
                 {state.error}
               </p>
