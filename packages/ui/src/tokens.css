@@ -64,7 +64,8 @@
 
   --font-display:
     var(--font-montserrat), 'Avenir Next', 'Helvetica Neue', Arial, system-ui, sans-serif;
-  --font-sans: var(--font-montserrat), 'Avenir Next', 'Helvetica Neue', Arial, system-ui, sans-serif;
+  --font-sans:
+    var(--font-montserrat), 'Avenir Next', 'Helvetica Neue', Arial, system-ui, sans-serif;
 
   /* Square by default; 2px only for small controls; avatars use rounded-full. */
   --radius-xs: 0;
