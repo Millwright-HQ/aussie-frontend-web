@@ -18,6 +18,7 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 import { createHmac } from 'node:crypto';
 import { type Audience, awsRegion, cognitoEndpoint, poolConfig } from './config';
+import { usernameFromAccessToken } from './token-claims';
 
 let client: CognitoIdentityProviderClient | undefined;
 
@@ -74,7 +75,9 @@ function toStep(res: InitiateAuthCommandOutput, fallbackUsername: string): AuthS
     return {
       kind: 'tokens',
       tokens: { ...r, AccessToken: r.AccessToken, ExpiresIn: r.ExpiresIn },
-      username,
+      // A sign-in with no challenge returns no username, so `username` is only the email the person
+      // typed. Renewing the session needs the real one (see token-claims.ts).
+      username: usernameFromAccessToken(r.AccessToken) ?? username,
     };
   }
   const session = res.Session ?? '';
