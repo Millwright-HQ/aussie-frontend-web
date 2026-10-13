@@ -76,7 +76,7 @@ export function ProductCard({ p, priority }: { p: ProductSummary; priority?: boo
       </div>
       <div className="mt-3 flex flex-1 flex-col items-center space-y-1">
         {p.brandName && <p className="text-xs tracking-wide text-muted uppercase">{p.brandName}</p>}
-        <h3 className="line-clamp-2 font-sans text-sm font-medium text-text group-hover:underline sm:text-base">
+        <h3 className="line-clamp-2 font-sans text-sm font-medium tracking-normal text-text normal-case group-hover:underline sm:text-base">
           {p.name}
         </h3>
         {p.rating && <Stars value={p.rating.average} count={p.rating.count} />}

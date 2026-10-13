@@ -181,7 +181,7 @@ export function ProductView({
       {/* Buy box */}
       <div>
         {brandName && <p className="text-sm tracking-wide text-muted uppercase">{brandName}</p>}
-        <h1 className="mt-1 text-h1">{name}</h1>
+        <h1 className="mt-1 text-h2 tracking-normal normal-case">{name}</h1>
         <a
           href="#reviews"
           className="mt-1 inline-flex items-center gap-2 text-sm text-muted hover:text-primary"
