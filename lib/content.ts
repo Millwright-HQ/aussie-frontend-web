@@ -26,7 +26,15 @@ export async function getSite(): Promise<PublicSite> {
       signal: AbortSignal.timeout(8_000),
     });
     if (!res.ok) return FALLBACK_SITE;
-    return (await res.json()) as PublicSite;
+    const site = (await res.json()) as PublicSite;
+    // A response cached before a release may predate newer home settings: fill them in.
+    return {
+      ...site,
+      settings: {
+        ...site.settings,
+        home: { ...DEFAULT_SITE_SETTINGS.home, ...site.settings.home },
+      },
+    };
   } catch {
     return FALLBACK_SITE;
   }

@@ -39,8 +39,32 @@ export interface SiteSettings {
   theme: {
     defaultMode: ThemeMode;
   };
-  home: { showCategories: boolean; showNewIn: boolean; showTrustBar: boolean };
+  home: HomeSettings;
   updatedAt?: string;
+}
+
+/** A category (or sub-category) the owner chose for the home page "Featured collection". */
+export interface FeaturedTile {
+  categoryId: string;
+  /** Own tile picture; the category's picture is used when absent. */
+  imagePath?: string;
+}
+
+/** The most tiles the Featured collection can hold. */
+export const MAX_FEATURED_TILES = 12;
+
+export interface HomeSettings {
+  showCategories: boolean;
+  showNewIn: boolean;
+  showTrustBar: boolean;
+  /** The scrolling strip of brand logos. */
+  showBrands: boolean;
+  /** The short "about us" text above the footer. */
+  showAbout: boolean;
+  /** Chosen tiles, in order. Empty = every top-level category. */
+  featured: FeaturedTile[];
+  aboutHeading: string;
+  aboutBody: string;
 }
 
 export interface Banner {
@@ -150,5 +174,15 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   theme: {
     defaultMode: 'light',
   },
-  home: { showCategories: true, showNewIn: true, showTrustBar: true },
+  home: {
+    showCategories: true,
+    showNewIn: true,
+    showTrustBar: true,
+    showBrands: true,
+    showAbout: true,
+    featured: [],
+    aboutHeading: 'About OZARA',
+    aboutBody:
+      'OZARA is an online store for beauty, fashion, home, electronics and food, delivered anywhere in Sri Lanka. We source our products directly from trusted suppliers so you get the genuine thing, and you can pay on delivery or by bank transfer.',
+  },
 };

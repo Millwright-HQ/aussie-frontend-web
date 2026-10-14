@@ -25,6 +25,8 @@ export interface Brand {
   slug: string;
   description?: string;
   countryOfOrigin?: string;
+  /** Optional logo for the home page brand strip (`site/<id>.<ext>` in the media bucket). */
+  logoPath?: string;
 }
 
 // ── Category-defined attributes and variant options ───────────────────────────

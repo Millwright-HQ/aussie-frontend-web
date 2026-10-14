@@ -53,6 +53,10 @@ export const brandInputSchema = z
     slug: optionalSlug,
     description: optionalText(500),
     countryOfOrigin: optionalText(60),
+    logoPath: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      z.string().regex(SITE_IMAGE_PATH, 'Upload the logo again').optional(),
+    ),
   })
   .strict();
 export type BrandInput = z.infer<typeof brandInputSchema>;

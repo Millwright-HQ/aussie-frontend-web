@@ -1,4 +1,10 @@
-import { INQUIRY_STATUSES, INQUIRY_TOPICS, PAGE_SLUGS, THEME_MODES } from '@aussie/shared-types';
+import {
+  INQUIRY_STATUSES,
+  INQUIRY_TOPICS,
+  MAX_FEATURED_TILES,
+  PAGE_SLUGS,
+  THEME_MODES,
+} from '@aussie/shared-types';
 import { z } from 'zod';
 import { ORDER_NUMBER_PATTERN } from './orders.js';
 import { lkMobileSchema, optionalText, ulidSchema } from './schemas.js';
@@ -98,8 +104,32 @@ export const siteSettingsSchema = z
         showCategories: z.boolean(),
         showNewIn: z.boolean(),
         showTrustBar: z.boolean(),
+        showBrands: z.boolean(),
+        showAbout: z.boolean(),
+        featured: z
+          .array(
+            z
+              .object({
+                categoryId: ulidSchema,
+                imagePath: z.preprocess(
+                  empty,
+                  z.string().regex(SITE_IMAGE_PATH, 'Upload the picture again').optional(),
+                ),
+              })
+              .strict(),
+          )
+          .max(MAX_FEATURED_TILES, `Feature at most ${MAX_FEATURED_TILES} categories`)
+          .refine((l) => new Set(l.map((t) => t.categoryId)).size === l.length, {
+            message: 'A category can only be featured once',
+          }),
+        aboutHeading: z.string().trim().max(80),
+        aboutBody: z.string().trim().max(1200, 'Keep the about text under 1,200 characters'),
       })
-      .strict(),
+      .strict()
+      .refine((h) => !h.showAbout || h.aboutBody.length > 0, {
+        message: 'Write the about text, or switch it off',
+        path: ['aboutBody'],
+      }),
   })
   .strict();
 export type SiteSettingsInput = z.infer<typeof siteSettingsSchema>;

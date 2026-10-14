@@ -5,6 +5,7 @@ import { getBrands, getCategoryTree } from '@/lib/catalog';
 import { ActionForm } from '@/app/admin/(panel)/action-form';
 import { deleteTaxonomyAction, saveBrandAction } from '@/app/admin/(panel)/catalog/actions';
 import { ConfirmAction, EmptyState, Field, Input, PageHeader, Panel } from '@/app/admin/_ui';
+import { ImageUploader } from '@/app/admin/(panel)/site/image-uploader';
 import { ProductTabs } from '../tabs';
 
 export const metadata = { title: 'Brands' };
@@ -40,6 +41,12 @@ function BrandForm({ brand }: { brand?: Brand | undefined }) {
           <Input id={`bslug-${key}`} name="slug" defaultValue={brand?.slug} placeholder="auto" />
         </Field>
       </div>
+      <ImageUploader
+        name="logoPath"
+        label="Logo for the home page brand strip (optional)"
+        initialPath={brand?.logoPath}
+        previewUrlBase={process.env.NEXT_PUBLIC_CDN_URL ?? ''}
+      />
     </ActionForm>
   );
 }
