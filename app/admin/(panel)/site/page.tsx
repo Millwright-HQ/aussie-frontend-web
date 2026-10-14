@@ -206,7 +206,11 @@ export default async function SiteSettingsPage() {
               label="Trust bar (payment, delivery, genuine products)"
               checked={s.home.showTrustBar}
             />
-            <Check name="showAbout" label="About text above the footer" checked={s.home.showAbout} />
+            <Check
+              name="showAbout"
+              label="About text above the footer"
+              checked={s.home.showAbout}
+            />
           </div>
           <p className="mt-2 text-xs text-muted">The slider at the top is managed under Banners.</p>
         </Card>
