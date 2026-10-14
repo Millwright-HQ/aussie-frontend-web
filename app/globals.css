@@ -3,3 +3,27 @@
 
 /* Let Tailwind see classes used inside the shared UI package. */
 @source '../../../packages/ui/src';
+
+/* Brand logo strip: two identical halves slide left by exactly one half, so the loop has no seam. */
+@keyframes brand-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.brand-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: brand-marquee var(--marquee-duration, 40s) linear infinite;
+}
+.brand-marquee:hover .brand-marquee-track,
+.brand-marquee:focus-within .brand-marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-marquee {
+    overflow-x: auto;
+  }
+  .brand-marquee-track {
+    animation: none !important;
+  }
+}

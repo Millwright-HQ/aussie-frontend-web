@@ -1,9 +1,16 @@
-import { type Banner, type InfoPage, type SiteSettings } from '@aussie/shared-types';
-import { Card, Field, Input, PageHeader, Select } from '@/app/admin/_ui';
+import {
+  type Banner,
+  type CategoryNode,
+  type InfoPage,
+  type SiteSettings,
+} from '@aussie/shared-types';
+import { Card, Field, Input, PageHeader, Select, Textarea } from '@/app/admin/_ui';
 import { formatDateTime, requirePermission } from '@/lib/admin';
 import { api } from '@/lib/api';
+import { getCategoryTree } from '@/lib/catalog';
 import { ActionForm } from '../action-form';
 import { saveSettingsAction } from './actions';
+import { FeaturedPicker } from './featured-picker';
 import { SiteTabs } from './tabs';
 
 export const metadata = { title: 'Site settings' };
@@ -39,9 +46,23 @@ const Check = ({
   </label>
 );
 
+/** Every category with its path, so "Lipsticks" under "Beauty" reads "Beauty › Lipsticks". */
+function categoryOptions(
+  nodes: CategoryNode[],
+  trail: string[] = [],
+): { id: string; label: string }[] {
+  return nodes.flatMap((n) => [
+    { id: n.id, label: [...trail, n.name].join(' › ') },
+    ...categoryOptions(n.children, [...trail, n.name]),
+  ]);
+}
+
 export default async function SiteSettingsPage() {
   const me = await requirePermission('content:write');
-  const { settings: s } = await api<AdminSite>('admin', '/v1/content/admin/site');
+  const [{ settings: s }, tree] = await Promise.all([
+    api<AdminSite>('admin', '/v1/content/admin/site'),
+    getCategoryTree().catch(() => []),
+  ]);
 
   return (
     <div className="max-w-4xl">
@@ -168,15 +189,69 @@ export default async function SiteSettingsPage() {
         <Card>
           <h2 className="text-[15px] font-semibold">Home page sections</h2>
           <div className="mt-2 space-y-1">
-            <Check name="showCategories" label="Shop by category" checked={s.home.showCategories} />
+            <Check
+              name="showCategories"
+              label="Featured collection"
+              checked={s.home.showCategories}
+            />
             <Check name="showNewIn" label="New in (latest products)" checked={s.home.showNewIn} />
+            <Check
+              name="showBrands"
+              label="Brand logos strip"
+              hint="Brands with a logo scroll across the page. Add logos under Products, then Brands."
+              checked={s.home.showBrands}
+            />
             <Check
               name="showTrustBar"
               label="Trust bar (payment, delivery, genuine products)"
               checked={s.home.showTrustBar}
             />
+            <Check
+              name="showAbout"
+              label="About text above the footer"
+              checked={s.home.showAbout}
+            />
           </div>
           <p className="mt-2 text-xs text-muted">The slider at the top is managed under Banners.</p>
+        </Card>
+
+        <Card>
+          <h2 className="text-[15px] font-semibold">Featured collection</h2>
+          <p className="mt-1 mb-4 text-sm text-muted">
+            Choose which categories or sub-categories appear on the home page, in order.
+          </p>
+          <FeaturedPicker
+            options={categoryOptions(tree)}
+            initial={s.home.featured}
+            previewUrlBase={process.env.NEXT_PUBLIC_CDN_URL ?? ''}
+          />
+        </Card>
+
+        <Card>
+          <h2 className="text-[15px] font-semibold">About text</h2>
+          <p className="mt-1 text-sm text-muted">
+            A short paragraph just above the footer. It helps customers trust you and helps search
+            engines understand the shop.
+          </p>
+          <div className="mt-4 grid gap-4">
+            <Field id="aboutHeading" label="Heading" optional>
+              <Input
+                id="aboutHeading"
+                name="aboutHeading"
+                defaultValue={s.home.aboutHeading}
+                maxLength={80}
+              />
+            </Field>
+            <Field id="aboutBody" label="Text" hint="Up to 1,200 characters" optional>
+              <Textarea
+                id="aboutBody"
+                name="aboutBody"
+                rows={5}
+                defaultValue={s.home.aboutBody}
+                maxLength={1200}
+              />
+            </Field>
+          </div>
         </Card>
 
         {s.updatedAt && (

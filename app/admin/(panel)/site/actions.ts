@@ -24,6 +24,15 @@ const whole = (form: FormData, key: string) => {
   return v === '' ? Number.NaN : Number(v);
 };
 
+/** The chosen Featured collection tiles, sent by the picker as JSON. */
+function featuredTiles(form: FormData): unknown {
+  try {
+    return JSON.parse(text(form, 'featured') || '[]');
+  } catch {
+    return null; // fails validation instead of saving a half-read list
+  }
+}
+
 /** Runs an API call, refreshes what the shop shows, and turns failures into a message. */
 async function save(
   call: () => Promise<unknown>,
@@ -109,6 +118,11 @@ export async function saveSettingsAction(_prev: ActionState, form: FormData): Pr
       showCategories: flag(form, 'showCategories'),
       showNewIn: flag(form, 'showNewIn'),
       showTrustBar: flag(form, 'showTrustBar'),
+      showBrands: flag(form, 'showBrands'),
+      showAbout: flag(form, 'showAbout'),
+      featured: featuredTiles(form),
+      aboutHeading: text(form, 'aboutHeading'),
+      aboutBody: text(form, 'aboutBody'),
     },
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Check the form' };

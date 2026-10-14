@@ -1,23 +1,30 @@
-import type { CategoryNode, ProductPage, PublicSite } from '@aussie/shared-types';
+import type { Brand, CategoryNode, ProductPage, PublicSite } from '@aussie/shared-types';
 import { buttonVariants } from '@aussie/ui';
 import { Banknote, ShieldCheck, Truck } from 'lucide-react';
 import Link from 'next/link';
-import { getCategoryTree, listProducts } from '@/lib/catalog';
+import { getBrands, getCategoryTree, listProducts } from '@/lib/catalog';
 import { getSite, sitePictureUrl } from '@/lib/content';
 import { STORE_NAME } from '@/lib/site';
+import { BrandMarquee } from './_components/brand-marquee';
 import { HeroSlider } from './_components/hero-slider';
 import Image from 'next/image';
 import { ProductCard } from './_components/product-card';
-import { ProductRail } from './_components/product-rail';
 
 export default async function HomePage() {
-  const [categories, newest, site]: [CategoryNode[], ProductPage | null, PublicSite] =
-    await Promise.all([
-      getCategoryTree().catch(() => []),
-      listProducts({ sort: 'newest', pageSize: 8 }).catch(() => null),
-      getSite(),
-    ]);
+  const [categories, newest, site, allBrands]: [
+    CategoryNode[],
+    ProductPage | null,
+    PublicSite,
+    Brand[],
+  ] = await Promise.all([
+    getCategoryTree().catch(() => []),
+    listProducts({ sort: 'newest', pageSize: 8 }).catch(() => null),
+    getSite(),
+    getBrands().catch(() => []),
+  ]);
   const { home } = site.settings;
+  const tiles = featuredTiles(categories, home.featured);
+  const brands = allBrands.filter((b): b is Brand & { logoPath: string } => !!b.logoPath);
   const { banners } = site;
   const slides = banners.map((b) => ({ ...b, src: sitePictureUrl(b.imagePath) }));
 
@@ -49,7 +56,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      {home.showCategories && categories.length > 0 && (
+      {home.showCategories && tiles.length > 0 && (
         <section
           aria-labelledby="shop-by-category"
           className="mx-auto max-w-7xl px-4 pt-12 pb-12 md:px-6 md:pt-16 md:pb-16 lg:px-8"
@@ -57,15 +64,18 @@ export default async function HomePage() {
           <h2 id="shop-by-category" className="text-center text-h2">
             Featured collection
           </h2>
-          <ul className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {categories.map((c) => (
-              <li key={c.id}>
+          <ul className="mt-8 flex flex-wrap justify-center gap-4">
+            {tiles.map(({ category: c, imagePath }) => (
+              <li
+                key={c.id}
+                className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.7rem)] lg:w-[calc(16.666%-0.85rem)]"
+              >
                 <Link href={`/c/${c.slug}`} className="group block text-center">
                   <span className="relative block aspect-square overflow-hidden rounded-lg bg-surface-muted">
-                    {c.imagePath ? (
+                    {imagePath ? (
                       <Image
                         unoptimized
-                        src={sitePictureUrl(c.imagePath)}
+                        src={sitePictureUrl(imagePath)}
                         alt=""
                         fill
                         sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw"
@@ -99,17 +109,30 @@ export default async function HomePage() {
             New &amp; trending
           </h2>
           <div className="mt-8">
-            <ProductRail label="New and trending products">
+            <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               {newest.items.map((p, i) => (
-                <ProductCard key={p.id} p={p} priority={i < 4} />
+                <li key={p.id}>
+                  <ProductCard p={p} priority={i < 4} />
+                </li>
               ))}
-            </ProductRail>
+            </ul>
           </div>
-          <p className="mt-6 text-center">
-            <Link href="/shop" className="text-sm font-medium underline underline-offset-4">
+          <p className="mt-8 text-center">
+            <Link href="/shop" className={buttonVariants({ variant: 'outline', size: 'lg' })}>
               View all products
             </Link>
           </p>
+        </section>
+      )}
+
+      {home.showBrands && brands.length > 0 && (
+        <section aria-labelledby="our-brands" className="pb-12 md:pb-16">
+          <h2 id="our-brands" className="text-center text-h2">
+            Our brands
+          </h2>
+          <div className="mt-6">
+            <BrandMarquee brands={brands} />
+          </div>
         </section>
       )}
 
@@ -128,8 +151,48 @@ export default async function HomePage() {
           </ul>
         </section>
       )}
+
+      {home.showAbout && home.aboutBody.trim() && (
+        <section aria-labelledby="about-store" className="mx-auto max-w-3xl px-4 py-12 md:py-16">
+          {home.aboutHeading.trim() && (
+            <h2 id="about-store" className="text-center text-h2">
+              {home.aboutHeading}
+            </h2>
+          )}
+          <div className="mt-4 space-y-4 text-center text-muted">
+            {home.aboutBody
+              .split(/\n{2,}/)
+              .filter((para) => para.trim())
+              .map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+          </div>
+        </section>
+      )}
     </>
   );
+}
+
+/** The tiles for the Featured collection: the owner's chosen categories, or every top-level one. */
+function featuredTiles(
+  tree: CategoryNode[],
+  chosen: { categoryId: string; imagePath?: string | undefined }[],
+): { category: CategoryNode; imagePath: string | undefined }[] {
+  const byId = new Map<string, CategoryNode>();
+  const walk = (nodes: CategoryNode[]) => {
+    for (const n of nodes) {
+      byId.set(n.id, n);
+      walk(n.children);
+    }
+  };
+  walk(tree);
+  const picked = chosen.flatMap((t) => {
+    const category = byId.get(t.categoryId); // a deleted category simply drops out
+    return category ? [{ category, imagePath: t.imagePath ?? category.imagePath }] : [];
+  });
+  return picked.length > 0
+    ? picked
+    : tree.map((category) => ({ category, imagePath: category.imagePath }));
 }
 
 function Trust({

@@ -222,6 +222,7 @@ export async function saveBrandAction(_prev: ActionState, form: FormData): Promi
     slug: text(form, 'slug'),
     description: text(form, 'description'),
     countryOfOrigin: text(form, 'countryOfOrigin'),
+    logoPath: text(form, 'logoPath'),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Check the form' };
   const id = text(form, 'id');

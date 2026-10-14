@@ -15,14 +15,21 @@ export function ImageUploader({
   initialPath,
   label,
   previewUrlBase,
+  onChange,
 }: {
   name: string;
   initialPath?: string;
   label: string;
   /** Address the pictures are served from (the CDN). */
   previewUrlBase: string;
+  /** Called with the new path (empty when the picture is removed), for pickers that hold several. */
+  onChange?: (path: string) => void;
 }) {
-  const [path, setPath] = useState(initialPath ?? '');
+  const [path, setPathState] = useState(initialPath ?? '');
+  const setPath = (next: string) => {
+    setPathState(next);
+    onChange?.(next);
+  };
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
