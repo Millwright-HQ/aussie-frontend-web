@@ -90,7 +90,7 @@ export default async function HomePage() {
                       </span>
                     )}
                   </span>
-                  <span className="mt-3 block text-sm font-medium group-hover:underline">
+                  <span className="mt-3 block text-lg font-semibold group-hover:underline md:text-xl">
                     {c.name}
                   </span>
                 </Link>
