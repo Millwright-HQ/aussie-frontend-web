@@ -256,7 +256,7 @@ export const productInputSchema = z
     name: z.string().trim().min(2, 'Enter the product name').max(150),
     slug: optionalSlug,
     brandId: z.preprocess((v) => (v === '' ? undefined : v), ulidSchema.optional()),
-    categoryIds: z.array(ulidSchema).min(1, 'Pick at least one category').max(5),
+    categoryIds: z.array(ulidSchema).min(1, 'Pick at least one category'),
     status: z.enum(PRODUCT_STATUSES).default('DRAFT'),
     description: z.string().trim().min(10, 'Add a short description').max(5000),
     highlights: z.array(z.string().trim().min(3).max(160)).max(8).default([]),
