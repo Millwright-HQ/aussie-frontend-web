@@ -27,3 +27,168 @@
     animation: none !important;
   }
 }
+
+/* ── Motion ─────────────────────────────────────────────────────────────────────────────────────
+   Scroll reveals (components/reveal.tsx), the hero, cards, page changes and small pops. Everything
+   here is switched off for people who prefer reduced motion (tokens.css shortens all animations and
+   transitions, and Reveal shows its content at once). */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.4);
+  }
+  60% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes hero-zoom {
+  from {
+    transform: scale(1);
+  }
+}
+@keyframes pager-in {
+  from {
+    opacity: 0;
+    transform: translateX(28px) scale(0.96);
+  }
+}
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgb(37 211 102 / 0.55);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 16px rgb(37 211 102 / 0);
+  }
+}
+
+/* A whole page eases in on every route change (app/(store)/template.tsx). */
+.page-enter {
+  animation: rise 0.5s var(--ease-brand) backwards;
+}
+
+/* Scroll reveals: hidden only while scripting is on and the block has not been reached yet. */
+[data-reveal],
+[data-reveal-stagger] > * {
+  transition:
+    opacity 0.7s var(--ease-brand) var(--reveal-delay, 0ms),
+    transform 0.7s var(--ease-brand) var(--reveal-delay, 0ms);
+}
+@media (scripting: enabled) {
+  [data-reveal]:not([data-in]),
+  [data-reveal-stagger]:not([data-in]) > * {
+    opacity: 0;
+  }
+  [data-reveal='up']:not([data-in]),
+  [data-reveal-stagger='up']:not([data-in]) > * {
+    transform: translateY(32px);
+  }
+  [data-reveal='left']:not([data-in]),
+  [data-reveal-stagger='left']:not([data-in]) > * {
+    transform: translateX(-40px);
+  }
+  [data-reveal='right']:not([data-in]),
+  [data-reveal-stagger='right']:not([data-in]) > * {
+    transform: translateX(40px);
+  }
+  [data-reveal='scale']:not([data-in]),
+  [data-reveal-stagger='scale']:not([data-in]) > * {
+    transform: scale(0.92);
+  }
+}
+/* Each child of a staggered group waits a little longer than the one before. */
+[data-reveal-stagger] > * {
+  transition-delay: calc(var(--reveal-delay, 0ms) + var(--i, 0) * 80ms);
+}
+[data-reveal-stagger] > :nth-child(1) {
+  --i: 0;
+}
+[data-reveal-stagger] > :nth-child(2) {
+  --i: 1;
+}
+[data-reveal-stagger] > :nth-child(3) {
+  --i: 2;
+}
+[data-reveal-stagger] > :nth-child(4) {
+  --i: 3;
+}
+[data-reveal-stagger] > :nth-child(5) {
+  --i: 4;
+}
+[data-reveal-stagger] > :nth-child(6) {
+  --i: 5;
+}
+[data-reveal-stagger] > :nth-child(7) {
+  --i: 6;
+}
+[data-reveal-stagger] > :nth-child(8) {
+  --i: 7;
+}
+[data-reveal-stagger] > :nth-child(n + 9) {
+  --i: 8;
+}
+
+/* Section titles draw a short accent rule under themselves once revealed. */
+.title-rule::after {
+  content: '';
+  display: block;
+  height: 3px;
+  width: 0;
+  margin: 0.9rem auto 0;
+  border-radius: 9999px;
+  background: var(--accent);
+  transition: width 0.7s var(--ease-brand) 0.3s;
+}
+.title-rule[data-in]::after {
+  width: 3.5rem;
+}
+
+/* Home slider: the active picture drifts slowly closer and its words rise in one after another. */
+.hero-zoom {
+  transform: scale(1.1);
+}
+.hero-slide.is-active .hero-zoom {
+  animation: hero-zoom 9s ease-out both;
+}
+.hero-slide.is-active .hero-text > * {
+  animation: rise 0.8s var(--ease-brand) both;
+}
+.hero-slide.is-active .hero-text > :nth-child(1) {
+  animation-delay: 0.15s;
+}
+.hero-slide.is-active .hero-text > :nth-child(2) {
+  animation-delay: 0.3s;
+}
+.hero-slide.is-active .hero-text > :nth-child(3) {
+  animation-delay: 0.45s;
+}
+
+/* The next block of tiles or products slides in when an arrow is pressed. */
+.pager-in {
+  animation: pager-in 0.45s var(--ease-brand) backwards;
+}
+
+.pop {
+  animation: pop 0.45s var(--ease-brand);
+}
+.pulse-ring {
+  animation: pulse-ring 2.4s ease-out infinite;
+}
+
+/* The plain welcome block (shown when there are no banners) rises in line by line. */
+.hero-welcome > * {
+  animation: rise 0.8s var(--ease-brand) both;
+}
+.hero-welcome > :nth-child(1) { animation-delay: 0.05s; }
+.hero-welcome > :nth-child(2) { animation-delay: 0.2s; }
+.hero-welcome > :nth-child(3) { animation-delay: 0.35s; }
+.hero-welcome > :nth-child(4) { animation-delay: 0.5s; }

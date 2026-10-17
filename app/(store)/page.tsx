@@ -8,6 +8,8 @@ import { STORE_NAME } from '@/lib/site';
 import { BrandMarquee } from './_components/brand-marquee';
 import { HeroSlider } from './_components/hero-slider';
 import Image from 'next/image';
+import { Reveal } from '@/components/reveal';
+import { MobilePager } from './_components/mobile-pager';
 import { ProductCard } from './_components/product-card';
 
 export default async function HomePage() {
@@ -40,7 +42,7 @@ export default async function HomePage() {
           <HeroSlider banners={slides} />
         </>
       ) : (
-        <section className="mx-auto grid max-w-7xl gap-8 px-4 py-16 md:px-6 md:py-24 lg:px-8">
+        <section className="hero-welcome mx-auto grid max-w-7xl gap-8 px-4 py-16 md:px-6 md:py-24 lg:px-8">
           <p className="text-xs font-medium tracking-[0.04em] text-accent-text uppercase">
             Welcome
           </p>
@@ -65,42 +67,48 @@ export default async function HomePage() {
           aria-labelledby="shop-by-category"
           className="mx-auto max-w-7xl px-4 pt-12 pb-12 md:px-6 md:pt-16 md:pb-16 lg:px-8"
         >
-          <h2 id="shop-by-category" className="text-center text-h2">
-            Featured collection
-          </h2>
-          <ul className="mt-8 flex flex-wrap justify-center gap-4">
-            {tiles.map(({ category: c, imagePath }) => (
-              <li
-                key={c.id}
-                className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.7rem)] lg:w-[calc(16.666%-0.85rem)]"
-              >
-                <Link href={`/c/${c.slug}`} className="group block text-center">
-                  <span className="relative block aspect-square overflow-hidden rounded-lg bg-surface-muted">
-                    {imagePath ? (
-                      <Image
-                        unoptimized
-                        src={sitePictureUrl(imagePath)}
-                        alt=""
-                        fill
-                        sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw"
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    ) : (
-                      <span
-                        aria-hidden
-                        className="flex size-full items-center justify-center font-display text-4xl font-semibold text-muted"
-                      >
-                        {c.name.slice(0, 1)}
-                      </span>
-                    )}
-                  </span>
-                  <span className="mt-3 block text-lg font-semibold group-hover:underline md:text-xl">
-                    {c.name}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <Reveal className="title-rule">
+            <h2 id="shop-by-category" className="text-center text-h2">
+              Featured collection
+            </h2>
+          </Reveal>
+          <div className="mt-8">
+            <MobilePager
+              label="collections"
+              listClassName="flex flex-wrap justify-center gap-4"
+              items={tiles.map(({ category: c, imagePath }) => ({
+                key: c.id,
+                className:
+                  'w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.7rem)] lg:w-[calc(16.666%-0.85rem)]',
+                node: (
+                  <Link href={`/c/${c.slug}`} className="group block text-center">
+                    <span className="relative block aspect-square overflow-hidden rounded-lg bg-surface-muted">
+                      {imagePath ? (
+                        <Image
+                          unoptimized
+                          src={sitePictureUrl(imagePath)}
+                          alt=""
+                          fill
+                          sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw"
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      ) : (
+                        <span
+                          aria-hidden
+                          className="flex size-full items-center justify-center font-display text-4xl font-semibold text-muted"
+                        >
+                          {c.name.slice(0, 1)}
+                        </span>
+                      )}
+                    </span>
+                    <span className="mt-3 block text-lg font-semibold group-hover:underline md:text-xl">
+                      {c.name}
+                    </span>
+                  </Link>
+                ),
+              }))}
+            />
+          </div>
         </section>
       )}
 
@@ -109,40 +117,49 @@ export default async function HomePage() {
           aria-labelledby="new-in"
           className="mx-auto max-w-7xl px-4 pb-12 md:px-6 md:pb-16 lg:px-8"
         >
-          <h2 id="new-in" className="text-center text-h2">
-            New &amp; trending
-          </h2>
+          <Reveal className="title-rule">
+            <h2 id="new-in" className="text-center text-h2">
+              New &amp; trending
+            </h2>
+          </Reveal>
           <div className="mt-8">
-            <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              {newest.items.map((p, i) => (
-                <li key={p.id}>
-                  <ProductCard p={p} priority={i < 4} />
-                </li>
-              ))}
-            </ul>
+            <MobilePager
+              label="products"
+              listClassName="grid grid-cols-2 gap-4 lg:grid-cols-4"
+              items={newest.items.map((p, i) => ({
+                key: p.id,
+                node: <ProductCard p={p} priority={i < 4} />,
+              }))}
+            />
           </div>
-          <p className="mt-8 text-center">
+          <Reveal variant="scale" delay={150} className="mt-8 text-center">
             <Link href="/shop" className={buttonVariants({ variant: 'outline', size: 'lg' })}>
               View all products
             </Link>
-          </p>
+          </Reveal>
         </section>
       )}
 
       {home.showBrands && brands.length > 0 && (
         <section aria-labelledby="our-brands" className="pb-12 md:pb-16">
-          <h2 id="our-brands" className="text-center text-h2">
-            Our brands
-          </h2>
-          <div className="mt-6">
+          <Reveal className="title-rule">
+            <h2 id="our-brands" className="text-center text-h2">
+              Our brands
+            </h2>
+          </Reveal>
+          <Reveal variant="fade" className="mt-6">
             <BrandMarquee brands={brands} />
-          </div>
+          </Reveal>
         </section>
       )}
 
       {home.showTrustBar && (
         <section aria-label="Why shop with us" className="border-y border-border bg-surface">
-          <ul className="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:grid-cols-3 md:px-6 lg:px-8">
+          <Reveal
+            as="ul"
+            stagger
+            className="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:grid-cols-3 md:px-6 lg:px-8"
+          >
             <Trust icon={<Banknote aria-hidden strokeWidth={1.5} />} title="Pay your way">
               Cash on delivery or bank transfer.
             </Trust>
@@ -152,7 +169,7 @@ export default async function HomePage() {
             <Trust icon={<ShieldCheck aria-hidden strokeWidth={1.5} />} title="Genuine products">
               Sourced directly from trusted suppliers.
             </Trust>
-          </ul>
+          </Reveal>
         </section>
       )}
 
@@ -163,14 +180,14 @@ export default async function HomePage() {
               {home.aboutHeading}
             </h2>
           )}
-          <div className="mt-4 space-y-4 text-center text-muted">
+          <Reveal delay={100} className="mt-4 space-y-4 text-center text-muted">
             {home.aboutBody
               .split(/\n{2,}/)
               .filter((para) => para.trim())
               .map((para, i) => (
                 <p key={i}>{para}</p>
               ))}
-          </div>
+          </Reveal>
         </section>
       )}
     </>

@@ -135,8 +135,9 @@ export default async function StoreLayout({ children }: { children: React.ReactN
                 <ShoppingBag aria-hidden size={20} strokeWidth={1.5} />
                 {bagCount > 0 && (
                   <span
+                    key={bagCount}
                     aria-hidden
-                    className="absolute -top-2 -right-2 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-fg"
+                    className="pop absolute -top-2 -right-2 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-fg"
                   >
                     {bagCount}
                   </span>

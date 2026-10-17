@@ -1,7 +1,9 @@
 import type { AttributeFacet, ProductPage } from '@aussie/shared-types';
 import { parseAttributeFilter } from '@aussie/validation';
 import { Button } from '@aussie/ui';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import { Reveal } from '@/components/reveal';
 import { attrToSearchParams, type ListingParams } from '@/lib/catalog';
 import { ProductCard } from './product-card';
 
@@ -144,27 +146,60 @@ export function Listing({
             <p className="mt-1 text-sm text-muted">Try removing a filter.</p>
           </div>
         ) : (
-          <ul className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 xl:grid-cols-4">
+          <Reveal
+            as="ul"
+            stagger
+            key={`${page.page}-${page.items[0]?.id}`}
+            className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 xl:grid-cols-4"
+          >
             {page.items.map((p, i) => (
               <li key={p.id}>
                 <ProductCard p={p} priority={i < 4} />
               </li>
             ))}
-          </ul>
+          </Reveal>
         )}
         {totalPages > 1 && (
-          <nav aria-label="Pages" className="mt-10 flex items-center justify-center gap-4 text-sm">
-            {page.page > 1 && (
-              <Link href={hrefWith(basePath, params, { page: String(page.page - 1) })}>
-                ← Previous
-              </Link>
+          <nav aria-label="Pages" className="mt-10 flex items-center justify-center gap-1.5">
+            <PageArrow
+              label="Previous page"
+              href={
+                page.page > 1 ? hrefWith(basePath, params, { page: String(page.page - 1) }) : null
+              }
+            >
+              <ChevronLeft aria-hidden size={18} />
+            </PageArrow>
+            {pageWindow(page.page, totalPages).map((n, i) =>
+              n === null ? (
+                <span key={`gap-${i}`} aria-hidden className="px-1 text-muted">
+                  …
+                </span>
+              ) : (
+                <Link
+                  key={n}
+                  href={hrefWith(basePath, params, { page: String(n) })}
+                  aria-label={`Page ${n}`}
+                  aria-current={n === page.page ? 'page' : undefined}
+                  className={`flex size-9 items-center justify-center rounded-full text-sm font-medium ${
+                    n === page.page
+                      ? 'bg-primary text-primary-fg'
+                      : 'border border-border bg-surface hover:bg-surface-muted'
+                  }`}
+                >
+                  {n}
+                </Link>
+              ),
             )}
-            <span className="text-muted">
-              Page {page.page} of {totalPages}
-            </span>
-            {page.page < totalPages && (
-              <Link href={hrefWith(basePath, params, { page: String(page.page + 1) })}>Next →</Link>
-            )}
+            <PageArrow
+              label="Next page"
+              href={
+                page.page < totalPages
+                  ? hrefWith(basePath, params, { page: String(page.page + 1) })
+                  : null
+              }
+            >
+              <ChevronRight aria-hidden size={18} />
+            </PageArrow>
           </nav>
         )}
       </section>
@@ -269,5 +304,35 @@ function AttributeFilter({ facet, selected }: { facet: AttributeFacet; selected?
       options={(facet.values ?? []).map((v) => ({ slug: v.value, name: v.label, count: v.count }))}
       selected={selected?.values}
     />
+  );
+}
+
+/** Page numbers to show: first, last, and two either side of the current page; null is a gap. */
+function pageWindow(current: number, total: number): (number | null)[] {
+  const shown = new Set([1, total]);
+  for (let n = current - 2; n <= current + 2; n++) if (n >= 1 && n <= total) shown.add(n);
+  const sorted = [...shown].sort((a, b) => a - b);
+  return sorted.flatMap((n, i) => ((sorted[i - 1] ?? n - 1) < n - 1 ? [null, n] : [n]));
+}
+
+function PageArrow({
+  href,
+  label,
+  children,
+}: {
+  href: string | null;
+  label: string;
+  children: React.ReactNode;
+}) {
+  const base =
+    'flex size-9 items-center justify-center rounded-full border border-border bg-surface';
+  return href ? (
+    <Link href={href} aria-label={label} className={`${base} hover:bg-surface-muted`}>
+      {children}
+    </Link>
+  ) : (
+    <span aria-hidden className={`${base} opacity-40`}>
+      {children}
+    </span>
   );
 }
