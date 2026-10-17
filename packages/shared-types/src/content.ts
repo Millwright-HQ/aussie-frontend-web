@@ -71,6 +71,8 @@ export interface Banner {
   id: string;
   /** Path of the image in the media bucket (`site/<id>.<ext>`). */
   imagePath: string;
+  /** Optional phone picture (4:3, about 1500 × 1125) in the media bucket, same path format. */
+  mobileImagePath?: string;
   alt: string;
   title?: string;
   subtitle?: string;

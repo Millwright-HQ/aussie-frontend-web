@@ -26,7 +26,11 @@ export default async function HomePage() {
   const tiles = featuredTiles(categories, home.featured);
   const brands = allBrands.filter((b): b is Brand & { logoPath: string } => !!b.logoPath);
   const { banners } = site;
-  const slides = banners.map((b) => ({ ...b, src: sitePictureUrl(b.imagePath) }));
+  const slides = banners.map((b) => ({
+    ...b,
+    src: sitePictureUrl(b.imagePath),
+    ...(b.mobileImagePath ? { mobileSrc: sitePictureUrl(b.mobileImagePath) } : {}),
+  }));
 
   return (
     <>

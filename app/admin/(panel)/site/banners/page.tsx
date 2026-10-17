@@ -25,8 +25,21 @@ function BannerFields({ banner, idPrefix }: { banner?: Banner; idPrefix: string 
           previewUrlBase={cdn}
         />
         <p className="mt-1 text-xs text-muted">
-          Wide pictures work best (about 1600 × 700). Keep the important part in the middle, since
-          phones crop the sides.
+          Wide picture for computers and tablets: 2560 × 1120 (16:7). Keep the important part in
+          the middle.
+        </p>
+      </div>
+      <div className="sm:col-span-2">
+        <ImageUploader
+          name="mobileImagePath"
+          label="Phone picture (optional)"
+          initialPath={banner?.mobileImagePath}
+          previewUrlBase={cdn}
+        />
+        <p className="mt-1 text-xs text-muted">
+          Shown on phones instead of the wide picture: 1500 × 1125 (4:3), under 250 KB. Keep
+          text and the main subject at least 5% from the sides and inside the top 75%, since the
+          slide buttons sit along the bottom. Leave empty to use the wide picture.
         </p>
       </div>
       <Field

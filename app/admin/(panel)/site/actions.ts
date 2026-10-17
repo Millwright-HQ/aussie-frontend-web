@@ -138,6 +138,7 @@ export async function saveSettingsAction(_prev: ActionState, form: FormData): Pr
 function bannerFields(form: FormData) {
   return bannerInputSchema.safeParse({
     imagePath: text(form, 'imagePath'),
+    mobileImagePath: text(form, 'mobileImagePath'),
     alt: text(form, 'alt'),
     title: text(form, 'title'),
     subtitle: text(form, 'subtitle'),
