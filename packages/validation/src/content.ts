@@ -22,6 +22,11 @@ export const SITE_IMAGE_PATH = /^site\/[0-9A-HJKMNP-TV-Z]{26}\.(jpg|png|webp)$/;
 
 const empty = (v: unknown) => (typeof v === 'string' && v.trim() === '' ? undefined : v);
 
+const optionalImagePath = z.preprocess(
+  empty,
+  z.string().regex(SITE_IMAGE_PATH, 'Upload the picture again').optional(),
+);
+
 const dateSchema = z.preprocess(
   empty,
   z
@@ -137,6 +142,7 @@ export type SiteSettingsInput = z.infer<typeof siteSettingsSchema>;
 export const bannerInputSchema = z
   .object({
     imagePath: z.string().regex(SITE_IMAGE_PATH, 'Upload the image first'),
+    mobileImagePath: optionalImagePath,
     alt: z.string().trim().min(2, 'Describe the picture for people who cannot see it').max(160),
     title: optionalText(80),
     subtitle: optionalText(160),

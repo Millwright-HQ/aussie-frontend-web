@@ -37,7 +37,11 @@ function BannerLink({
  * for people who prefer reduced motion, and it pauses on hover, on focus, and on request.
  * `banners` already carry full picture addresses.
  */
-export function HeroSlider({ banners }: { banners: (Banner & { src: string })[] }) {
+export function HeroSlider({
+  banners,
+}: {
+  banners: (Banner & { src: string; mobileSrc?: string })[];
+}) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [hovering, setHovering] = useState(false);
@@ -85,15 +89,29 @@ export function HeroSlider({ banners }: { banners: (Banner & { src: string })[] 
                 active ? 'opacity-100' : 'pointer-events-none opacity-0'
               }`}
             >
-              <Image
-                unoptimized
-                src={b.src}
-                alt={b.alt}
-                fill
-                sizes="100vw"
-                priority={i === 0}
-                className="object-cover"
-              />
+              {b.mobileSrc ? (
+                // A <picture> downloads only the picture for this screen (next/image cannot do art direction).
+                <picture>
+                  <source media="(max-width: 639px)" srcSet={b.mobileSrc} />
+                  <img
+                    src={b.src}
+                    alt={b.alt}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    fetchPriority={i === 0 ? 'high' : 'auto'}
+                    className="absolute inset-0 size-full object-cover"
+                  />
+                </picture>
+              ) : (
+                <Image
+                  unoptimized
+                  src={b.src}
+                  alt={b.alt}
+                  fill
+                  sizes="100vw"
+                  priority={i === 0}
+                  className="object-cover"
+                />
+              )}
               {b.href && !b.buttonLabel && (
                 <BannerLink href={b.href} label={b.title ?? b.alt} className="absolute inset-0" />
               )}
