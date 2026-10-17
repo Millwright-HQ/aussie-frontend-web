@@ -50,11 +50,6 @@
     transform: scale(1);
   }
 }
-@keyframes hero-zoom {
-  from {
-    transform: scale(1);
-  }
-}
 @keyframes pager-in {
   from {
     opacity: 0;
@@ -152,13 +147,7 @@
   width: 3.5rem;
 }
 
-/* Home slider: the active picture drifts slowly closer and its words rise in one after another. */
-.hero-zoom {
-  transform: scale(1.1);
-}
-.hero-slide.is-active .hero-zoom {
-  animation: hero-zoom 9s ease-out both;
-}
+/* Home slider: the words rise in one after another. */
 .hero-slide.is-active .hero-text > * {
   animation: rise 0.8s var(--ease-brand) both;
 }

@@ -98,7 +98,7 @@ export function HeroSlider({
                     alt={b.alt}
                     loading={i === 0 ? 'eager' : 'lazy'}
                     fetchPriority={i === 0 ? 'high' : 'auto'}
-                    className="hero-zoom absolute inset-0 size-full object-cover"
+                    className="absolute inset-0 size-full object-cover"
                   />
                 </picture>
               ) : (
@@ -109,7 +109,7 @@ export function HeroSlider({
                   fill
                   sizes="100vw"
                   priority={i === 0}
-                  className="hero-zoom object-cover"
+                  className="object-cover"
                 />
               )}
               {b.href && !b.buttonLabel && (
