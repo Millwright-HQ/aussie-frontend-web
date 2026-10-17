@@ -85,8 +85,8 @@ export function HeroSlider({
               aria-roledescription="slide"
               aria-label={`${i + 1} of ${count}`}
               aria-hidden={!active}
-              className={`absolute inset-0 transition-opacity duration-500 motion-reduce:transition-none ${
-                active ? 'opacity-100' : 'pointer-events-none opacity-0'
+              className={`hero-slide absolute inset-0 transition-opacity duration-700 motion-reduce:transition-none ${
+                active ? 'is-active opacity-100' : 'pointer-events-none opacity-0'
               }`}
             >
               {b.mobileSrc ? (
@@ -98,7 +98,7 @@ export function HeroSlider({
                     alt={b.alt}
                     loading={i === 0 ? 'eager' : 'lazy'}
                     fetchPriority={i === 0 ? 'high' : 'auto'}
-                    className="absolute inset-0 size-full object-cover"
+                    className="hero-zoom absolute inset-0 size-full object-cover"
                   />
                 </picture>
               ) : (
@@ -109,7 +109,7 @@ export function HeroSlider({
                   fill
                   sizes="100vw"
                   priority={i === 0}
-                  className="object-cover"
+                  className="hero-zoom object-cover"
                 />
               )}
               {b.href && !b.buttonLabel && (
@@ -118,7 +118,7 @@ export function HeroSlider({
               {(b.title || b.subtitle || b.buttonLabel) && (
                 <div className="absolute inset-0 flex items-end bg-linear-to-t from-black/70 via-black/20 to-transparent sm:items-center sm:bg-linear-to-r sm:from-black/65 sm:via-black/25">
                   <div className="mx-auto w-full max-w-7xl px-4 pb-14 sm:pb-0 md:px-6 lg:px-8">
-                    <div className="max-w-xl space-y-3 text-white">
+                    <div className="hero-text max-w-xl space-y-3 text-white">
                       {b.title && <h2 className="text-h1 text-white">{b.title}</h2>}
                       {b.subtitle && <p className="text-base sm:text-lg">{b.subtitle}</p>}
                       {b.buttonLabel && b.href && (

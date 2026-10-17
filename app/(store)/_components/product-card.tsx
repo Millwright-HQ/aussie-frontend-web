@@ -49,7 +49,7 @@ export function ProductCard({ p, priority }: { p: ProductSummary; priority?: boo
   return (
     <Link
       href={`/p/${p.slug}`}
-      className="group flex h-full flex-col rounded-md border border-border bg-surface p-3 text-center transition-colors hover:border-text"
+      className="group flex h-full flex-col rounded-md border border-border bg-surface p-3 text-center transition-[transform,box-shadow,border-color] duration-300 ease-brand hover:-translate-y-1.5 hover:border-text hover:shadow-md"
     >
       <div className="relative aspect-square overflow-hidden rounded-sm bg-surface">
         {p.cover && (
@@ -59,7 +59,7 @@ export function ProductCard({ p, priority }: { p: ProductSummary; priority?: boo
             fill
             priority={priority}
             sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-            className={`object-contain transition-transform duration-300 ease-brand group-hover:scale-[1.03] ${p.soldOut ? 'opacity-50' : ''}`}
+            className={`object-contain transition-transform duration-500 ease-brand group-hover:scale-[1.08] ${p.soldOut ? 'opacity-50' : ''}`}
           />
         )}
         {p.soldOut ? (
