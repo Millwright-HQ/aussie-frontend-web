@@ -24,7 +24,7 @@ export function FloatingActions({ whatsapp, storeName }: { whatsapp?: string; st
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Chat with us on WhatsApp"
-          className="fixed bottom-5 left-4 z-40 inline-flex size-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-md print:hidden"
+          className="fixed bottom-5 left-4 z-40 inline-flex size-12 items-center justify-center pulse-ring rounded-full bg-[#25D366] text-white shadow-md transition-transform hover:scale-110 print:hidden"
         >
           <BrandIcon name="whatsapp" width={26} height={26} />
         </a>
@@ -34,7 +34,7 @@ export function FloatingActions({ whatsapp, storeName }: { whatsapp?: string; st
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           aria-label="Back to top"
-          className="fixed right-4 bottom-5 z-40 inline-flex size-11 items-center justify-center rounded-full border border-border bg-surface text-text shadow-md print:hidden"
+          className="fixed right-4 bottom-5 z-40 inline-flex size-11 items-center justify-center pop rounded-full border border-border bg-surface text-text shadow-md transition-transform hover:-translate-y-1 print:hidden"
         >
           <ArrowUp aria-hidden size={18} />
         </button>
