@@ -38,6 +38,12 @@ const GROUPS: { label?: string; items: ItemDef[] }[] = [
       },
       { href: '/admin/reviews', label: 'Reviews', icon: 'reviews', permission: 'review:read' },
       {
+        href: '/admin/promotions',
+        label: 'Promotions',
+        icon: 'promotions',
+        permission: 'promotion:read',
+      },
+      {
         href: '/admin/inquiries',
         label: 'Inquiries',
         icon: 'newsletter',

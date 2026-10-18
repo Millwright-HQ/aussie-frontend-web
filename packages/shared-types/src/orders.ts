@@ -1,4 +1,5 @@
 /** Order shapes and cross-service event contracts (docs/MASTER_PLAN.md §3-4). Money in cents. */
+import type { AppliedPromotion } from './promotions.js';
 
 export const ORDER_STATUSES = [
   'PENDING',
@@ -114,6 +115,8 @@ export interface Order {
   instructions?: string;
   lines: OrderLine[];
   subtotalCents: number;
+  /** The promotion code used, if any. Total = subtotal − discount + delivery fee − delivery discount + COD fee. */
+  promo?: AppliedPromotion;
   deliveryFeeCents: number;
   codFeeCents: number;
   totalCents: number;

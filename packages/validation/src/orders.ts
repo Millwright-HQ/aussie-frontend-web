@@ -1,7 +1,14 @@
 import { ORDER_STATUSES, PAYMENT_METHODS } from '@aussie/shared-types';
 import { z } from 'zod';
 import { MAX_ORDER_LINES } from './inventory.js';
-import { addressSchema, lkMobileSchema, paginationSchema, ulidSchema } from './schemas.js';
+import { promoCodeSchema } from './promotions.js';
+import {
+  addressSchema,
+  districtSchema,
+  lkMobileSchema,
+  paginationSchema,
+  ulidSchema,
+} from './schemas.js';
 
 export const MAX_QTY_PER_LINE = 20;
 export const ORDER_NUMBER_PATTERN = /^[A-Z]{2,6}-\d{2}-\d{5,}$/;
@@ -45,6 +52,11 @@ export const checkoutSchema = z
     holdId: ulidSchema.optional(),
     /** Bank transfer through a hold: the slip uploaded for that hold (from `checkout/proof-upload`). */
     proofUploadId: ulidSchema.optional(),
+    /** A promotion code the customer typed (checked again when the order is placed). */
+    promoCode: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      promoCodeSchema.optional(),
+    ),
   })
   .strict()
   .superRefine((c, ctx) => {
@@ -52,6 +64,16 @@ export const checkoutSchema = z
       ctx.addIssue({ code: 'custom', path: ['proofUploadId'], message: 'Upload the slip again' });
     }
   });
+/** "What would this code do to my bag?" (the delivery district matters for free-delivery codes). */
+export const promoPreviewSchema = z
+  .object({
+    code: promoCodeSchema,
+    items: itemsSchema,
+    district: districtSchema.optional(),
+  })
+  .strict();
+export type PromoPreviewRequest = z.infer<typeof promoPreviewSchema>;
+
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
 export type CheckoutRequest = z.input<typeof checkoutSchema>;
 

@@ -89,6 +89,12 @@ export default async function PackingSlipPage({ params }: { params: Promise<{ id
           <dt>Subtotal</dt>
           <dd className="tabular-nums">{formatLkr(order.subtotalCents)}</dd>
         </div>
+        {order.promo && order.promo.discountCents > 0 && (
+          <div className="flex justify-between">
+            <dt>Discount ({order.promo.code})</dt>
+            <dd className="tabular-nums">−{formatLkr(order.promo.discountCents)}</dd>
+          </div>
+        )}
         <div className="flex justify-between">
           <dt>Delivery</dt>
           <dd className="tabular-nums">{formatLkr(order.deliveryFeeCents)}</dd>

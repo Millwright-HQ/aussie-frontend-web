@@ -5,6 +5,7 @@ import { BrandLogo } from '@/components/brand-logo';
 import { BrandIcon, type BrandName } from '@/components/brand-icons';
 import { NewsletterForm } from '@/components/newsletter-form';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { Tracker } from '@/components/tracker';
 import { FloatingActions } from './_components/floating-actions';
 import { cartCount, getCart } from '@/lib/cart';
 import { getCategoryTree } from '@/lib/catalog';
@@ -193,6 +194,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         {children}
       </main>
       <FloatingActions whatsapp={settings.whatsapp} storeName={storeName} />
+      <Tracker />
       <footer className="border-t border-border bg-surface-muted text-sm text-muted">
         <div className="mx-auto grid max-w-7xl gap-x-8 gap-y-10 px-4 py-10 md:px-6 lg:grid-cols-[1.2fr_2.6fr_1.4fr] lg:px-8">
           <div className="space-y-4">

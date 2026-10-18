@@ -8,3 +8,5 @@ export * from './catalog-model.js';
 export * from './orders.js';
 export * from './reviews.js';
 export * from './content.js';
+export * from './promotions.js';
+export * from './analytics.js';

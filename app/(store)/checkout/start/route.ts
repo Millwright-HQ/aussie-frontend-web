@@ -2,6 +2,7 @@ import { districtSchema, ulidSchema } from '@aussie/validation';
 import { type NextRequest, NextResponse } from 'next/server';
 import { holdBag, readHoldId, writeHoldId } from '@/lib/checkout-hold';
 import { getCart } from '@/lib/cart';
+import { recordEvent } from '@/lib/track';
 
 /**
  * Where "Check out" goes: take (hold) the stock for the bag, remember the hold in a cookie, then
@@ -21,6 +22,7 @@ export async function GET(request: NextRequest) {
 
   if (outcome.ok) {
     await writeHoldId(outcome.hold.holdId);
+    await recordEvent({ type: 'checkout' });
   } else {
     // Keep what the customer already had; otherwise nothing is held and the page says why.
     await writeHoldId(outcome.hold?.holdId);

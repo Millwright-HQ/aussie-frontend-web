@@ -1,11 +1,12 @@
 'use server';
 
-import type { OrderView } from '@aussie/shared-types';
+import type { OrderView, PromoPreview } from '@aussie/shared-types';
 import {
   checkoutSchema,
   districtSchema,
   holdProofRequestSchema,
   MAX_PROOF_BYTES,
+  promoCodeSchema,
   ulidSchema,
 } from '@aussie/validation';
 import { cookies } from 'next/headers';
@@ -46,7 +47,7 @@ export type QuoteView =
     }
   | { ok: false; message: string };
 
-export async function quoteAction(district: string): Promise<QuoteView> {
+export async function quoteAction(district: string, discountCents = 0): Promise<QuoteView> {
   const code = districtSchema.safeParse(district);
   if (!code.success) return { ok: false, message: 'Choose your delivery district.' };
   const bag = await loadBag(await getCart());
@@ -54,7 +55,7 @@ export async function quoteAction(district: string): Promise<QuoteView> {
     return { ok: false, message: 'Your bag changed.' };
   const result = await getQuote({
     district: code.data,
-    subtotalCents: bagSubtotal(bag),
+    subtotalCents: Math.max(0, bagSubtotal(bag) - Math.max(0, Math.trunc(discountCents))),
     items: bag.map((l) => ({
       weightG: l.snapshot.weightG ?? 1,
       qty: l.qty,
@@ -76,6 +77,25 @@ export async function quoteAction(district: string): Promise<QuoteView> {
     freeDelivery: q.freeDelivery,
     note: describeQuote({ ...q, codFeeCents: 0 }),
   };
+}
+
+// ── Promotion code typed in the checkout ───────────────────────────────────
+
+/** What the code would do to this bag (nothing is used up until the order is placed). */
+export async function previewPromoAction(code: string, district?: string): Promise<PromoPreview> {
+  const parsed = promoCodeSchema.safeParse(code);
+  if (!parsed.success) return { valid: false, message: 'Enter a valid code.' };
+  const where = district ? districtSchema.safeParse(district) : undefined;
+  const bag = await loadBag(await getCart());
+  if (bag.length === 0 || bagHasUnavailable(bag)) {
+    return { valid: false, message: 'Your bag changed.' };
+  }
+  const res = await publicPost<PromoPreview>('/v1/orders/checkout/promo', {
+    code: parsed.data,
+    items: bag.map((l) => ({ productId: l.productId, variantId: l.variantId, qty: l.qty })),
+    ...(where?.success ? { district: where.data } : {}),
+  });
+  return res.ok ? res.data : { valid: false, message: res.message };
 }
 
 // ── Changing the bag from inside the checkout ─────────────────────────────────
@@ -211,6 +231,7 @@ export async function placeOrderAction(
     },
     email: text(form, 'email'),
     instructions: text(form, 'instructions'),
+    promoCode: text(form, 'promoCode'),
     paymentMethod: byTransfer ? 'BANK_TRANSFER' : 'COD',
     items: bag.map((l) => ({ productId: l.productId, variantId: l.variantId, qty: l.qty })),
     holdId,

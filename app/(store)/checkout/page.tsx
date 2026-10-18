@@ -10,6 +10,7 @@ import { getDistricts } from '@/lib/delivery';
 import { availableUnits, getAvailability } from '@/lib/inventory';
 import { bagHasUnavailable, bagSubtotal, getBankDetails, loadBag } from '@/lib/orders';
 import { fixShortageAction } from './actions';
+import type { AddressView } from '../account/forms';
 import { type CheckoutDefaults, CheckoutForm } from './checkout-form';
 
 export const metadata = { title: 'Checkout' };
@@ -101,7 +102,11 @@ export default async function CheckoutPage({
 
   // Signed-in customers get their details filled in.
   const defaults: CheckoutDefaults = { fullName: '', phone: '', email: '' };
+  let addresses: AddressView[] = [];
   if (await getSession('customer')) {
+    addresses = await api<{ items: AddressView[] }>('customer', '/v1/identity/me/addresses')
+      .then((r) => r.items)
+      .catch(() => []);
     const me = await api<{ name?: string; phone?: string | null; email?: string }>(
       'customer',
       '/v1/identity/me',
@@ -130,6 +135,7 @@ export default async function CheckoutPage({
         bank={bank}
         expiresAt={outcome.hold.expiresAt}
         defaults={defaults}
+        addresses={addresses}
         idempotencyKey={randomUUID()}
       />
     </div>

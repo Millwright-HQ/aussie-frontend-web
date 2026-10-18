@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { TrackProduct } from '@/components/tracker';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -88,6 +89,7 @@ export default async function ProductPage({ params }: Props) {
         </ol>
       </nav>
 
+      <TrackProduct productId={product.id} />
       <ProductView
         productId={product.id}
         name={product.name}

@@ -242,6 +242,8 @@ export interface VariantSnapshot {
   /** False when the product is not on sale any more (draft, archived, deleted) or the variant is gone. */
   available: boolean;
   productName?: string;
+  /** The product's categories (promotion codes can target them). */
+  categoryIds?: string[];
   slug?: string;
   sku?: string;
   /** "Ruby · 30 ml"; empty without options. */

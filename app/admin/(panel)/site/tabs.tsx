@@ -7,6 +7,7 @@ export function SiteTabs({ me, current }: { me: AdminMe; current: string }) {
   const items = [
     ...(can(me, 'content:write')
       ? [
+          { href: '/admin/site/analytics', label: 'Visitors' },
           { href: '/admin/site', label: 'General' },
           { href: '/admin/site/banners', label: 'Banners' },
           { href: '/admin/site/pages', label: 'Pages' },

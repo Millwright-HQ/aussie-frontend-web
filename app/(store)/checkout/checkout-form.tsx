@@ -1,16 +1,18 @@
 'use client';
 
-import type { BankDetails, PaymentMethod } from '@aussie/shared-types';
+import type { AppliedPromotion, BankDetails, PaymentMethod } from '@aussie/shared-types';
 import { Alert, Button, Field, formatLkr, Input, Select, Textarea } from '@aussie/ui';
 import { MAX_PROOF_BYTES, PROOF_CONTENT_TYPES } from '@aussie/validation';
-import { Banknote, Check, Clock, Minus, Plus, Trash2, Upload, Wallet } from 'lucide-react';
+import { Banknote, Check, Clock, Minus, Plus, Tag, Trash2, Upload, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
+import type { AddressView } from '../account/forms';
 import {
   type CheckoutState,
   changeQtyAction,
   placeOrderAction,
+  previewPromoAction,
   quoteAction,
   type QuoteView,
   requestSlipAction,
@@ -95,6 +97,7 @@ export function CheckoutForm({
   bank,
   expiresAt,
   defaults,
+  addresses = [],
   idempotencyKey,
 }: {
   lines: CheckoutLine[];
@@ -104,6 +107,8 @@ export function CheckoutForm({
   bank: Omit<BankDetails, 'updatedAt'> | null;
   expiresAt: string;
   defaults: CheckoutDefaults;
+  /** Saved delivery addresses of the signed-in customer (empty for guests). */
+  addresses?: AddressView[];
   idempotencyKey: string;
 }) {
   const router = useRouter();
@@ -111,8 +116,22 @@ export function CheckoutForm({
   const errors = new Map(Object.entries(state.fieldErrors ?? {}));
   const err = (path: string) => errors.get(`shipping.${path}`) ?? errors.get(path);
 
-  const [district, setDistrict] = useState(initialDistrict);
+  // A saved address can be used only where we deliver to.
+  const usable = (a: AddressView) => districts.some((d) => d.code === a.district);
+  const firstChoice = addresses.find((a) => a.isDefault && usable(a)) ?? addresses.find(usable);
+  const [choice, setChoice] = useState<string>(firstChoice?.id ?? 'new');
+  const saved = addresses.find((a) => a.id === choice);
+  const [district, setDistrict] = useState(firstChoice?.district ?? initialDistrict);
+  const pickAddress = (id: string) => {
+    setChoice(id);
+    const a = addresses.find((x) => x.id === id);
+    if (a) setDistrict(a.district);
+  };
   const [quote, setQuote] = useState<QuoteView>();
+  const [promoInput, setPromoInput] = useState('');
+  const [promo, setPromo] = useState<AppliedPromotion>();
+  const [promoMsg, setPromoMsg] = useState<string>();
+  const [promoBusy, setPromoBusy] = useState(false);
   const [payment, setPayment] = useState<PaymentMethod>('COD');
   const [expired, setExpired] = useState(false);
   const [bagError, setBagError] = useState<{ id: string; text: string }>();
@@ -143,6 +162,8 @@ export function CheckoutForm({
   }, []);
 
   const byTransfer = payment === 'BANK_TRANSFER';
+  const discountCents = promo?.discountCents ?? 0;
+  const deliveryDiscountCents = promo?.deliveryDiscountCents ?? 0;
 
   // The fee follows the district and the bag.
   useEffect(() => {
@@ -152,15 +173,46 @@ export function CheckoutForm({
     }
     let live = true;
     setQuote(undefined);
-    void quoteAction(district).then((q) => live && setQuote(q));
+    void quoteAction(district, discountCents).then((q) => live && setQuote(q));
     return () => {
       live = false;
     };
-  }, [district, subtotalCents]);
+  }, [district, subtotalCents, discountCents]);
+
+  // An applied code is checked again when the district or the bag changes (the discount can change).
+  const appliedCode = promo?.code;
+  useEffect(() => {
+    if (!appliedCode) return;
+    let live = true;
+    void previewPromoAction(appliedCode, district || undefined).then((r) => {
+      if (!live) return;
+      if (r.valid) setPromo(r.promo);
+      else {
+        setPromo(undefined);
+        setPromoMsg(r.message);
+      }
+    });
+    return () => {
+      live = false;
+    };
+  }, [appliedCode, district, subtotalCents]);
+
+  async function applyPromo() {
+    const code = promoInput.trim();
+    if (!code || promoBusy) return;
+    setPromoBusy(true);
+    setPromoMsg(undefined);
+    const r = await previewPromoAction(code, district || undefined);
+    setPromoBusy(false);
+    if (r.valid) {
+      setPromo(r.promo);
+      setPromoInput('');
+    } else setPromoMsg(r.message);
+  }
 
   const delivery = quote?.ok ? quote.deliveryCents : 0;
   const cod = quote?.ok && !byTransfer ? quote.codCents : 0;
-  const total = subtotalCents + delivery + cod;
+  const total = subtotalCents - discountCents + delivery - deliveryDiscountCents + cod;
   const needsSlip = byTransfer && !slip;
   const canOrder = Boolean(quote?.ok) && !expired && !needsSlip;
 
@@ -213,6 +265,7 @@ export function CheckoutForm({
         <input type="hidden" name="idem" value={idempotencyKey} />
         <input type="hidden" name="district" value={district} />
         <input type="hidden" name="paymentMethod" value={payment} />
+        <input type="hidden" name="promoCode" value={promo?.code ?? ''} />
         <input type="hidden" name="proofUploadId" value={slip?.uploadId ?? ''} />
         {state.error && (
           <Alert>
@@ -335,35 +388,117 @@ export function CheckoutForm({
           <h2 id="details" className="text-h3">
             {bank ? '2' : '1'}. Your details and delivery address
           </h2>
+          {addresses.length > 0 && (
+            <fieldset className="mt-3">
+              <legend className="mb-2 text-sm font-medium">Deliver to</legend>
+              <div className="grid gap-3 sm:grid-cols-2" role="radiogroup">
+                {addresses.map((a) => {
+                  const ok = usable(a);
+                  return (
+                    <label
+                      key={a.id}
+                      className={`flex cursor-pointer gap-3 rounded-md border p-3 text-sm ${
+                        choice === a.id ? 'border-primary bg-surface-muted' : 'border-border'
+                      } ${ok ? '' : 'cursor-not-allowed opacity-60'}`}
+                    >
+                      <input
+                        type="radio"
+                        name="address-choice"
+                        value={a.id}
+                        checked={choice === a.id}
+                        disabled={!ok}
+                        onChange={() => pickAddress(a.id)}
+                        className="mt-1 size-4 accent-primary"
+                      />
+                      <span className="min-w-0">
+                        <span className="block font-medium">
+                          {a.fullName}
+                          {a.isDefault && (
+                            <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-white">
+                              Default
+                            </span>
+                          )}
+                        </span>
+                        <span className="block text-muted">
+                          {a.line1}
+                          {a.line2 ? `, ${a.line2}` : ''}, {a.city}
+                          {districts.find((d) => d.code === a.district)
+                            ? `, ${districts.find((d) => d.code === a.district)?.name}`
+                            : ''}
+                        </span>
+                        <span className="block text-muted tabular">{a.phone}</span>
+                        {!ok && (
+                          <span className="block text-danger">
+                            We do not deliver there right now
+                          </span>
+                        )}
+                      </span>
+                    </label>
+                  );
+                })}
+                <label
+                  className={`flex cursor-pointer gap-3 rounded-md border p-3 text-sm ${
+                    choice === 'new' ? 'border-primary bg-surface-muted' : 'border-border'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="address-choice"
+                    value="new"
+                    checked={choice === 'new'}
+                    onChange={() => pickAddress('new')}
+                    className="mt-1 size-4 accent-primary"
+                  />
+                  <span className="font-medium">Enter a new address</span>
+                </label>
+              </div>
+              {saved && (err('fullName') || err('phone') || err('line1') || err('city')) && (
+                <p role="alert" className="mt-2 text-sm text-danger">
+                  This saved address needs fixing (
+                  {err('phone') ?? err('line1') ?? err('city') ?? err('fullName')}). Edit it in your
+                  account, or enter a new address.
+                </p>
+              )}
+            </fieldset>
+          )}
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
-            <Field id="fullName" label="Full name" error={err('fullName')}>
-              <Input
-                id="fullName"
-                name="fullName"
-                autoComplete="name"
-                defaultValue={defaults.fullName}
-                invalid={!!err('fullName')}
-                required
-              />
-            </Field>
-            <Field
-              id="phone"
-              label="Mobile number"
-              hint="We call this number to confirm your order"
-              error={err('phone')}
-            >
-              <Input
-                id="phone"
-                name="phone"
-                type="tel"
-                autoComplete="tel"
-                placeholder="077 123 4567"
-                defaultValue={defaults.phone}
-                invalid={!!err('phone')}
-                hasHint
-                required
-              />
-            </Field>
+            {saved ? (
+              <>
+                <input type="hidden" name="fullName" value={saved.fullName} />
+                <input type="hidden" name="phone" value={saved.phone} />
+              </>
+            ) : (
+              <>
+                <Field id="fullName" label="Full name" error={err('fullName')}>
+                  <Input
+                    id="fullName"
+                    name="fullName"
+                    autoComplete="name"
+                    defaultValue={defaults.fullName}
+                    invalid={!!err('fullName')}
+                    required
+                  />
+                </Field>
+                <Field
+                  id="phone"
+                  label="Mobile number"
+                  hint="We call this number to confirm your order"
+                  error={err('phone')}
+                >
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    autoComplete="tel"
+                    placeholder="077 123 4567"
+                    defaultValue={defaults.phone}
+                    invalid={!!err('phone')}
+                    hasHint
+                    required
+                  />
+                </Field>
+              </>
+            )}
             <Field
               id="email"
               label="Email"
@@ -382,70 +517,81 @@ export function CheckoutForm({
                 hasHint
               />
             </Field>
-            <Field id="line1" label="Address" error={err('line1')} className="sm:col-span-2">
-              <Input
-                id="line1"
-                name="line1"
-                autoComplete="address-line1"
-                invalid={!!err('line1')}
-                required
-              />
-            </Field>
-            <Field
-              id="line2"
-              label="Address line 2"
-              error={err('line2')}
-              optional
-              className="sm:col-span-2"
-            >
-              <Input id="line2" name="line2" autoComplete="address-line2" />
-            </Field>
-            <Field id="city" label="City / town" error={err('city')}>
-              <Input
-                id="city"
-                name="city"
-                autoComplete="address-level2"
-                invalid={!!err('city')}
-                required
-              />
-            </Field>
-            <Field id="postalCode" label="Postal code" error={err('postalCode')} optional>
-              <Input
-                id="postalCode"
-                name="postalCode"
-                inputMode="numeric"
-                autoComplete="postal-code"
-                invalid={!!err('postalCode')}
-              />
-            </Field>
-            <div className="sm:col-span-2">
-              <label htmlFor="district-pick" className="mb-1.5 block text-sm font-medium">
-                District
-              </label>
-              <Select
-                id="district-pick"
-                name="district-pick"
-                value={district}
-                onChange={(e) => setDistrict(e.target.value)}
-              >
-                <option value="" disabled>
-                  Choose your district…
-                </option>
-                {districts.map((d) => (
-                  <option key={d.code} value={d.code}>
-                    {d.name}
-                  </option>
-                ))}
-              </Select>
-              {district && quote && !quote.ok && (
-                <p className="mt-2 text-sm text-danger">{quote.message}</p>
-              )}
-              {!district && (
-                <p className="mt-2 text-sm text-muted">
-                  Choose your district to see the delivery fee.
-                </p>
-              )}
-            </div>
+            {saved ? (
+              <>
+                <input type="hidden" name="line1" value={saved.line1} />
+                <input type="hidden" name="line2" value={saved.line2 ?? ''} />
+                <input type="hidden" name="city" value={saved.city} />
+                <input type="hidden" name="postalCode" value={saved.postalCode ?? ''} />
+              </>
+            ) : (
+              <>
+                <Field id="line1" label="Address" error={err('line1')} className="sm:col-span-2">
+                  <Input
+                    id="line1"
+                    name="line1"
+                    autoComplete="address-line1"
+                    invalid={!!err('line1')}
+                    required
+                  />
+                </Field>
+                <Field
+                  id="line2"
+                  label="Address line 2"
+                  error={err('line2')}
+                  optional
+                  className="sm:col-span-2"
+                >
+                  <Input id="line2" name="line2" autoComplete="address-line2" />
+                </Field>
+                <Field id="city" label="City / town" error={err('city')}>
+                  <Input
+                    id="city"
+                    name="city"
+                    autoComplete="address-level2"
+                    invalid={!!err('city')}
+                    required
+                  />
+                </Field>
+                <Field id="postalCode" label="Postal code" error={err('postalCode')} optional>
+                  <Input
+                    id="postalCode"
+                    name="postalCode"
+                    inputMode="numeric"
+                    autoComplete="postal-code"
+                    invalid={!!err('postalCode')}
+                  />
+                </Field>
+                <div className="sm:col-span-2">
+                  <label htmlFor="district-pick" className="mb-1.5 block text-sm font-medium">
+                    District
+                  </label>
+                  <Select
+                    id="district-pick"
+                    name="district-pick"
+                    value={district}
+                    onChange={(e) => setDistrict(e.target.value)}
+                  >
+                    <option value="" disabled>
+                      Choose your district…
+                    </option>
+                    {districts.map((d) => (
+                      <option key={d.code} value={d.code}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </Select>
+                  {district && quote && !quote.ok && (
+                    <p className="mt-2 text-sm text-danger">{quote.message}</p>
+                  )}
+                  {!district && (
+                    <p className="mt-2 text-sm text-muted">
+                      Choose your district to see the delivery fee.
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
             <Field
               id="notes"
               label="Delivery notes"
@@ -454,7 +600,13 @@ export function CheckoutForm({
               optional
               className="sm:col-span-2"
             >
-              <Textarea id="notes" name="notes" rows={2} />
+              <Textarea
+                key={choice}
+                id="notes"
+                name="notes"
+                rows={2}
+                defaultValue={saved?.notes ?? ''}
+              />
             </Field>
             <Field
               id="instructions"
@@ -573,11 +725,77 @@ export function CheckoutForm({
               </li>
             ))}
           </ul>
+          <div className="mt-4 border-t border-border pt-4 text-sm">
+            {promo ? (
+              <p className="flex items-center justify-between gap-3 rounded-sm bg-surface-muted px-3 py-2">
+                <span className="flex items-center gap-2">
+                  <Tag aria-hidden size={14} />
+                  <span>
+                    <span className="font-medium">{promo.code}</span> applied
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPromo(undefined);
+                    setPromoMsg(undefined);
+                  }}
+                  className="text-xs text-muted underline-offset-4 hover:underline"
+                >
+                  Remove
+                </button>
+              </p>
+            ) : (
+              <div>
+                <label htmlFor="promo-code" className="text-sm font-medium">
+                  Promotion code
+                </label>
+                <div className="mt-1 flex gap-2">
+                  <Input
+                    id="promo-code"
+                    name="promo-code-input"
+                    value={promoInput}
+                    onChange={(e) => setPromoInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        void applyPromo();
+                      }
+                    }}
+                    autoComplete="off"
+                    autoCapitalize="characters"
+                    spellCheck={false}
+                    maxLength={24}
+                    placeholder="Enter code"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={promoBusy || promoInput.trim() === ''}
+                    onClick={() => void applyPromo()}
+                  >
+                    Apply
+                  </Button>
+                </div>
+              </div>
+            )}
+            {promoMsg && (
+              <p role="alert" className="mt-2 text-xs text-danger">
+                {promoMsg}
+              </p>
+            )}
+          </div>
           <dl className="mt-4 space-y-2 border-t border-border pt-4 text-sm">
             <div className="flex justify-between">
               <dt>Subtotal</dt>
               <dd className="tabular">{formatLkr(subtotalCents)}</dd>
             </div>
+            {promo && discountCents > 0 && (
+              <div className="flex justify-between">
+                <dt>Discount ({promo.code})</dt>
+                <dd className="tabular">−{formatLkr(discountCents)}</dd>
+              </div>
+            )}
             {quote?.ok && (
               <>
                 <div className="flex justify-between">
@@ -586,6 +804,12 @@ export function CheckoutForm({
                     {quote.freeDelivery ? 'Free' : formatLkr(quote.deliveryCents)}
                   </dd>
                 </div>
+                {promo && deliveryDiscountCents > 0 && (
+                  <div className="flex justify-between">
+                    <dt>Free delivery ({promo.code})</dt>
+                    <dd className="tabular">−{formatLkr(deliveryDiscountCents)}</dd>
+                  </div>
+                )}
                 {!byTransfer && quote.codCents > 0 && (
                   <div className="flex justify-between">
                     <dt>Cash on delivery fee</dt>
