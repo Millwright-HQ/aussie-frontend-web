@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { getCart, saveCart, withLine } from '@/lib/cart';
 import { availableUnits, getAvailability } from '@/lib/inventory';
 import { lookupBag } from '@/lib/orders';
+import { recordEvent } from '@/lib/track';
 
 export interface BagState {
   ok?: string;
@@ -52,6 +53,7 @@ export async function addToBagAction(_prev: BagState, form: FormData): Promise<B
   if (!next) return { error: 'Your bag is full. Please check out before adding more.' };
   await saveCart(next);
   revalidatePath('/', 'layout'); // the header badge
+  await recordEvent({ type: 'cart', productId: productId.data });
   return { ok: 'Added to your bag.' };
 }
 
