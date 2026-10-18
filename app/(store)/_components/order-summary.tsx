@@ -120,12 +120,24 @@ export function OrderSummary({ order }: { order: OrderView }) {
           <dt>Subtotal</dt>
           <dd className="tabular">{formatLkr(order.subtotalCents)}</dd>
         </div>
+        {order.promo && order.promo.discountCents > 0 && (
+          <div className="flex justify-between">
+            <dt>Discount ({order.promo.code})</dt>
+            <dd className="tabular">−{formatLkr(order.promo.discountCents)}</dd>
+          </div>
+        )}
         <div className="flex justify-between">
           <dt>Delivery</dt>
           <dd className="tabular">
             {order.deliveryFeeCents === 0 ? 'Free' : formatLkr(order.deliveryFeeCents)}
           </dd>
         </div>
+        {order.promo && order.promo.deliveryDiscountCents > 0 && (
+          <div className="flex justify-between">
+            <dt>Free delivery ({order.promo.code})</dt>
+            <dd className="tabular">−{formatLkr(order.promo.deliveryDiscountCents)}</dd>
+          </div>
+        )}
         {order.codFeeCents > 0 && (
           <div className="flex justify-between">
             <dt>Cash on delivery fee</dt>

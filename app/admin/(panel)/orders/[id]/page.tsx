@@ -360,10 +360,22 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 <dt className="text-muted">Subtotal</dt>
                 <dd className="tabular">{formatLkr(order.subtotalCents)}</dd>
               </div>
+              {order.promo && order.promo.discountCents > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-muted">Discount ({order.promo.code})</dt>
+                  <dd className="tabular">−{formatLkr(order.promo.discountCents)}</dd>
+                </div>
+              )}
               <div className="flex justify-between">
                 <dt className="text-muted">Delivery ({order.zoneName})</dt>
                 <dd className="tabular">{formatLkr(order.deliveryFeeCents)}</dd>
               </div>
+              {order.promo && order.promo.deliveryDiscountCents > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-muted">Free delivery ({order.promo.code})</dt>
+                  <dd className="tabular">−{formatLkr(order.promo.deliveryDiscountCents)}</dd>
+                </div>
+              )}
               {order.codFeeCents > 0 && (
                 <div className="flex justify-between">
                   <dt className="text-muted">COD fee</dt>

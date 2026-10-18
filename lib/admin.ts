@@ -72,6 +72,7 @@ export const PERMISSION_GROUPS: { label: string; permissions: Permission[] }[] =
   { label: 'Delivery', permissions: ['delivery:read', 'delivery:write'] },
   { label: 'Reviews', permissions: ['review:read', 'review:moderate'] },
   { label: 'Customers', permissions: ['customer:read'] },
+  { label: 'Promotions', permissions: ['promotion:read', 'promotion:write'] },
   {
     label: 'Administration',
     permissions: ['admin:manage', 'role:manage', 'settings:write', 'content:write', 'audit:read'],
@@ -98,6 +99,8 @@ const PERMISSION_LABELS: Record<Permission, string> = {
   'settings:write': 'Edit store settings',
   'content:write': 'Edit site content (banners, pages, theme)',
   'audit:read': 'View audit log',
+  'promotion:read': 'View promotions',
+  'promotion:write': 'Create & edit promotions',
 };
 
 const LABELS = new Map(Object.entries(PERMISSION_LABELS));

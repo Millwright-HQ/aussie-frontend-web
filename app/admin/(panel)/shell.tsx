@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   ShoppingBag,
   Star,
+  Tag,
   UserCog,
   Users,
   X,
@@ -34,6 +35,7 @@ const ICONS: Record<string, LucideIcon> = {
   roles: ShieldCheck,
   audit: ScrollText,
   pages: ClipboardList,
+  promotions: Tag,
 };
 
 export interface NavChild {

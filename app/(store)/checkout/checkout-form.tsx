@@ -1,9 +1,9 @@
 'use client';
 
-import type { BankDetails, PaymentMethod } from '@aussie/shared-types';
+import type { AppliedPromotion, BankDetails, PaymentMethod } from '@aussie/shared-types';
 import { Alert, Button, Field, formatLkr, Input, Select, Textarea } from '@aussie/ui';
 import { MAX_PROOF_BYTES, PROOF_CONTENT_TYPES } from '@aussie/validation';
-import { Banknote, Check, Clock, Minus, Plus, Trash2, Upload, Wallet } from 'lucide-react';
+import { Banknote, Check, Clock, Minus, Plus, Tag, Trash2, Upload, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
@@ -11,6 +11,7 @@ import {
   type CheckoutState,
   changeQtyAction,
   placeOrderAction,
+  previewPromoAction,
   quoteAction,
   type QuoteView,
   requestSlipAction,
@@ -113,6 +114,10 @@ export function CheckoutForm({
 
   const [district, setDistrict] = useState(initialDistrict);
   const [quote, setQuote] = useState<QuoteView>();
+  const [promoInput, setPromoInput] = useState('');
+  const [promo, setPromo] = useState<AppliedPromotion>();
+  const [promoMsg, setPromoMsg] = useState<string>();
+  const [promoBusy, setPromoBusy] = useState(false);
   const [payment, setPayment] = useState<PaymentMethod>('COD');
   const [expired, setExpired] = useState(false);
   const [bagError, setBagError] = useState<{ id: string; text: string }>();
@@ -143,6 +148,8 @@ export function CheckoutForm({
   }, []);
 
   const byTransfer = payment === 'BANK_TRANSFER';
+  const discountCents = promo?.discountCents ?? 0;
+  const deliveryDiscountCents = promo?.deliveryDiscountCents ?? 0;
 
   // The fee follows the district and the bag.
   useEffect(() => {
@@ -152,15 +159,46 @@ export function CheckoutForm({
     }
     let live = true;
     setQuote(undefined);
-    void quoteAction(district).then((q) => live && setQuote(q));
+    void quoteAction(district, discountCents).then((q) => live && setQuote(q));
     return () => {
       live = false;
     };
-  }, [district, subtotalCents]);
+  }, [district, subtotalCents, discountCents]);
+
+  // An applied code is checked again when the district or the bag changes (the discount can change).
+  const appliedCode = promo?.code;
+  useEffect(() => {
+    if (!appliedCode) return;
+    let live = true;
+    void previewPromoAction(appliedCode, district || undefined).then((r) => {
+      if (!live) return;
+      if (r.valid) setPromo(r.promo);
+      else {
+        setPromo(undefined);
+        setPromoMsg(r.message);
+      }
+    });
+    return () => {
+      live = false;
+    };
+  }, [appliedCode, district, subtotalCents]);
+
+  async function applyPromo() {
+    const code = promoInput.trim();
+    if (!code || promoBusy) return;
+    setPromoBusy(true);
+    setPromoMsg(undefined);
+    const r = await previewPromoAction(code, district || undefined);
+    setPromoBusy(false);
+    if (r.valid) {
+      setPromo(r.promo);
+      setPromoInput('');
+    } else setPromoMsg(r.message);
+  }
 
   const delivery = quote?.ok ? quote.deliveryCents : 0;
   const cod = quote?.ok && !byTransfer ? quote.codCents : 0;
-  const total = subtotalCents + delivery + cod;
+  const total = subtotalCents - discountCents + delivery - deliveryDiscountCents + cod;
   const needsSlip = byTransfer && !slip;
   const canOrder = Boolean(quote?.ok) && !expired && !needsSlip;
 
@@ -213,6 +251,7 @@ export function CheckoutForm({
         <input type="hidden" name="idem" value={idempotencyKey} />
         <input type="hidden" name="district" value={district} />
         <input type="hidden" name="paymentMethod" value={payment} />
+        <input type="hidden" name="promoCode" value={promo?.code ?? ''} />
         <input type="hidden" name="proofUploadId" value={slip?.uploadId ?? ''} />
         {state.error && (
           <Alert>
@@ -573,11 +612,77 @@ export function CheckoutForm({
               </li>
             ))}
           </ul>
+          <div className="mt-4 border-t border-border pt-4 text-sm">
+            {promo ? (
+              <p className="flex items-center justify-between gap-3 rounded-sm bg-surface-muted px-3 py-2">
+                <span className="flex items-center gap-2">
+                  <Tag aria-hidden size={14} />
+                  <span>
+                    <span className="font-medium">{promo.code}</span> applied
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPromo(undefined);
+                    setPromoMsg(undefined);
+                  }}
+                  className="text-xs text-muted underline-offset-4 hover:underline"
+                >
+                  Remove
+                </button>
+              </p>
+            ) : (
+              <div>
+                <label htmlFor="promo-code" className="text-sm font-medium">
+                  Promotion code
+                </label>
+                <div className="mt-1 flex gap-2">
+                  <Input
+                    id="promo-code"
+                    name="promo-code-input"
+                    value={promoInput}
+                    onChange={(e) => setPromoInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        void applyPromo();
+                      }
+                    }}
+                    autoComplete="off"
+                    autoCapitalize="characters"
+                    spellCheck={false}
+                    maxLength={24}
+                    placeholder="Enter code"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={promoBusy || promoInput.trim() === ''}
+                    onClick={() => void applyPromo()}
+                  >
+                    Apply
+                  </Button>
+                </div>
+              </div>
+            )}
+            {promoMsg && (
+              <p role="alert" className="mt-2 text-xs text-danger">
+                {promoMsg}
+              </p>
+            )}
+          </div>
           <dl className="mt-4 space-y-2 border-t border-border pt-4 text-sm">
             <div className="flex justify-between">
               <dt>Subtotal</dt>
               <dd className="tabular">{formatLkr(subtotalCents)}</dd>
             </div>
+            {promo && discountCents > 0 && (
+              <div className="flex justify-between">
+                <dt>Discount ({promo.code})</dt>
+                <dd className="tabular">−{formatLkr(discountCents)}</dd>
+              </div>
+            )}
             {quote?.ok && (
               <>
                 <div className="flex justify-between">
@@ -586,6 +691,12 @@ export function CheckoutForm({
                     {quote.freeDelivery ? 'Free' : formatLkr(quote.deliveryCents)}
                   </dd>
                 </div>
+                {promo && deliveryDiscountCents > 0 && (
+                  <div className="flex justify-between">
+                    <dt>Free delivery ({promo.code})</dt>
+                    <dd className="tabular">−{formatLkr(deliveryDiscountCents)}</dd>
+                  </div>
+                )}
                 {!byTransfer && quote.codCents > 0 && (
                   <div className="flex justify-between">
                     <dt>Cash on delivery fee</dt>
