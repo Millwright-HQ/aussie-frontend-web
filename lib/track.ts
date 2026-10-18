@@ -23,15 +23,16 @@ const colomboDay = () => new Date(Date.now() + 5.5 * 3_600_000).toISOString().sl
 /**
  * Reports a visit event to the content service. Anonymous by design: the visitor is a keyed hash of
  * address + browser + day (so it cannot be followed to the next day or turned back into an address),
- * and nothing else about the visitor is sent. Skips crawlers, people who send Do Not Track, and
- * signed-in staff browsing the shop. Never throws and never slows the page down for long.
+ * and nothing else about the visitor is sent. Skips crawlers and signed-in staff browsing the shop.
+ * Do Not Track / Global Privacy Control are deliberately not used to skip: nothing personal is stored
+ * or shared, and many browsers send them by default, which would hide most real visitors.
+ * Never throws and never slows the page down for long.
  */
 export async function recordEvent(event: SiteEvent): Promise<void> {
   try {
     const secret = process.env.ANALYTICS_SECRET ?? process.env.AUTH_SECRET ?? '';
     if (!API_URL || !secret) return;
     const h = await headers();
-    if (h.get('dnt') === '1' || h.get('sec-gpc') === '1') return;
     const ua = h.get('user-agent') ?? '';
     const agent = parseAgent(ua);
     if (agent.bot) return;

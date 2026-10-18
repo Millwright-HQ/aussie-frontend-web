@@ -121,7 +121,7 @@ export default async function AnalyticsPage({
     <div className="space-y-6">
       <PageHeader
         title="Site settings"
-        description="Who comes to the shop and what they look at. No cookies and no addresses are stored: each visitor is an anonymous code that changes every day."
+        description="Who comes to the shop and what they look at. No cookies and no addresses are stored: each visitor is an anonymous code that changes every day. Search engines and other crawlers are not counted, and neither are you while you are signed in as an admin."
         actions={
           <Pills
             current={String(days)}
